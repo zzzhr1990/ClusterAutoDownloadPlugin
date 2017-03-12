@@ -1,3 +1,3 @@
 class WorkConfig:
     disable = False
-    MGR_URL = "http://qietv.up21.v1.wcsapi.com"
+    MGR_URL = "http://qietv.mgr21.v1.wcsapi.com"
