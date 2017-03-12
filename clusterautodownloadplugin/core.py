@@ -123,7 +123,7 @@ class Core(CorePluginBase):
                             if a_size == file_detail["size"]:
                                 log.info("file %s download complete, preparing uploading...", file_path)
                                 # post to ws and change status to converting...
-                                self.upload_to_ws(file_path)
+#                                self.upload_to_ws(file_path)
                             else:
                                 log.warn("file %s size not equal %ld (need %ld)...", file_path, a_size, file_detail["size"])
                         else:
