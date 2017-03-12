@@ -1,0 +1,8 @@
+
+    [deluge.plugin.core]
+    ClusterAutoDownloadPlugin = clusterautodownloadplugin:CorePlugin
+    [deluge.plugin.gtkui]
+    ClusterAutoDownloadPlugin = clusterautodownloadplugin:GtkUIPlugin
+    [deluge.plugin.web]
+    ClusterAutoDownloadPlugin = clusterautodownloadplugin:WebUIPlugin
+    

@@ -1,0 +1,13 @@
+setup.py
+ClusterAutoDownloadPlugin.egg-info/PKG-INFO
+ClusterAutoDownloadPlugin.egg-info/SOURCES.txt
+ClusterAutoDownloadPlugin.egg-info/dependency_links.txt
+ClusterAutoDownloadPlugin.egg-info/entry_points.txt
+ClusterAutoDownloadPlugin.egg-info/top_level.txt
+clusterautodownloadplugin/__init__.py
+clusterautodownloadplugin/common.py
+clusterautodownloadplugin/core.py
+clusterautodownloadplugin/gtkui.py
+clusterautodownloadplugin/webui.py
+clusterautodownloadplugin/data/clusterautodownloadplugin.js
+clusterautodownloadplugin/data/config.glade
