@@ -129,8 +129,8 @@ class Core(CorePluginBase):
         if WorkConfig.disable:
             return
         begin = time.time()
-        #file_key = etag(file_path)
-        #log.info("Process %ld in %f s", file_size, time.time() - begin)
+        file_key = etag(file_path)
+        log.info("Process %ld in %f s", file_size, time.time() - begin)
         #access_key = "0a3836b4ef298e7dc9fc5da291252fc4ac3e0c7f"
         #secret_key = "da17a6ffaeab4ca89ce7275d9a8060206cb3de8e"
         #auth = Auth(access_key, secret_key)
