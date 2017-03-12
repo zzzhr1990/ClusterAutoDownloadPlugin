@@ -141,7 +141,10 @@ class Core(CorePluginBase):
         log.info(type(text))
         if code == 200:
             #file exists
-            result = json.loads(text)
+            if type(text) == dict:
+                result = text
+            else:
+                result = json.loads(text)
             remote_hash = result['hash']
             #remote_size = long(result['fsize'])
             if remote_hash != file_hash:
