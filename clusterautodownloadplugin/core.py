@@ -42,7 +42,6 @@ import time
 import requests
 import os
 import base64
-from wcssliceupload import WcsSliceUpload
 import traceback
 from twisted.internet.task import LoopingCall
 from deluge.error import InvalidTorrentError
