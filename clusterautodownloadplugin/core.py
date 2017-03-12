@@ -37,11 +37,25 @@
 #    statement from all source files in the program, then also delete it here.
 #
 
+import json
+import time
+import requests
+import os
+import base64
+from wcssliceupload import WcsSliceUpload
+import traceback
+from twisted.internet.task import LoopingCall
+from deluge.error import InvalidTorrentError
 from deluge.log import LOG as log
 from deluge.plugins.pluginbase import CorePluginBase
 import deluge.component as component
 import deluge.configmanager
 from deluge.core.rpcserver import export
+from wcs.commons.auth import Auth
+from wcs.services.uploadprogressrecorder import UploadProgressRecorder
+from wcs.commons.util import etag
+from workconfig import WorkConfig
+
 
 DEFAULT_PREFS = {
     "test":"NiNiNi"
@@ -50,14 +64,38 @@ DEFAULT_PREFS = {
 class Core(CorePluginBase):
     def __init__(self, plugin_name):
         self.plugin_name = plugin_name
+        self.processing = False
         super().__init__(plugin_name)
 
     def enable(self):
         log.info("plugin %s enabled.", self.plugin_name)
+        WorkConfig.disable = False
         self.config = deluge.configmanager.ConfigManager("clusterautodownloadplugin.conf", DEFAULT_PREFS)
+        self.working_loop()
+        self.update_timer = LoopingCall(self.working_loop)
+        self.update_timer.start(1)
 
     def disable(self):
+        WorkConfig.disable = True
         log.info("plugin %s disabled.", self.plugin_name)
+        try:
+            self.update_timer.stop()
+        except AssertionError:
+            log.warn("stop download plugin error")
+
+    def working_loop(self):
+        # Refresh torrents.
+        if WorkConfig.disable:
+            return
+        if self.processing:
+            return
+        self.processing = True
+        try:
+            log.info("Doing Woring Loop...")
+        except Exception as error:
+            log.warn("error , %s , traceback \r\n %s", str(error), traceback.format_exc())
+        finally:
+            self.processing = False
 
     def update(self):
         pass
