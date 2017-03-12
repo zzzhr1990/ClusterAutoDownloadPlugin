@@ -138,11 +138,11 @@ class Core(CorePluginBase):
         file_key = "raw/" + etag(file_path)
         filemanager = BucketManager(auth)
         filemanager.mgr_host = WorkConfig.MGR_HOST
-        log.info("ddddddd")
-        log.info(filemanager.mgr_host)
-        log.info("fffffff")
-        code, text = filemanager.stat(bucket, file_key)
-        log.info("file get from %s %d, %s",filemanager.mgr_host , code, text)
+#        log.info("ddddddd")
+#        log.info(filemanager.mgr_host)
+#        log.info("fffffff")
+#        code, text = filemanager.stat(bucket, file_key)
+#        log.info("file get from %s %d, %s",filemanager.mgr_host , code, text)
 
         # check file
         # confirm if this file uploaded
