@@ -129,9 +129,11 @@ class Core(CorePluginBase):
             return
         begin = time.time()
         file_key = etag(file_path)
-        log.info("Process %ld in %f s",file_size, time.time() - begin)
+        log.info("Process %ld in %f s", file_size, time.time() - begin)
         # check file
         # confirm if this file uploaded?
+        murl = wcs.commons.auth.MGR_URL
+        log.info("murl: %s",murl)
 
 
     def update(self):
