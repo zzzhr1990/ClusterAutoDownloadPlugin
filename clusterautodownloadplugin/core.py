@@ -48,11 +48,16 @@ DEFAULT_PREFS = {
 }
 
 class Core(CorePluginBase):
+    def __init__(self, plugin_name):
+        self.plugin_name = plugin_name
+        super().__init__(plugin_name)
+
     def enable(self):
+        log.info("plugin %s enabled.", self.plugin_name)
         self.config = deluge.configmanager.ConfigManager("clusterautodownloadplugin.conf", DEFAULT_PREFS)
 
     def disable(self):
-        pass
+        log.info("plugin %s disabled.", self.plugin_name)
 
     def update(self):
         pass
