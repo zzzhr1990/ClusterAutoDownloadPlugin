@@ -91,10 +91,10 @@ class Core(CorePluginBase):
             return
         self.processing = True
         try:
-            begin = datetime.datetime.now()
+            begin = time.time()
             self.process_torrents()
-            end = datetime.datetime.now()
-            log.info(begin - end)
+            end = time.time()
+            log.info(end - begin)
         except Exception as error:
             log.warn("error , %s , traceback \r\n %s", str(error), traceback.format_exc())
         finally:
@@ -121,10 +121,10 @@ class Core(CorePluginBase):
                         if os.path.exists(file_path):
                             a_size = os.path.getsize(file_path)
                             if a_size == file_detail["size"]:
-                                #log.info("file %s download complete, preparing uploading...", file_path)
+                                pass
+                                # log.info("file %s download complete, preparing uploading...", file_path)
                                 # post to ws and change status to converting...
 #                                self.upload_to_ws(file_path)
-                                pass
                             else:
                                 log.warn("file %s size not equal %ld (need %ld)...", file_path, a_size, file_detail["size"])
                         else:
