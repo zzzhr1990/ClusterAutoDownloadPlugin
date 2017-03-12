@@ -1,0 +1,3 @@
+class WorkConfig:
+    disable = False
+    
