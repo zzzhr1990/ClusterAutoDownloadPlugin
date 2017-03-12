@@ -51,11 +51,12 @@ from deluge.plugins.pluginbase import CorePluginBase
 import deluge.component as component
 import deluge.configmanager
 from deluge.core.rpcserver import export
-from wcs.commons.auth import Auth
 from wcs.services.uploadprogressrecorder import UploadProgressRecorder
 from wcs.commons.util import etag
 from workconfig import WorkConfig
 from filemanager import BucketManager
+from wcssliceupload import WcsSliceUpload
+from workconfig import get_auth
 
 
 DEFAULT_PREFS = {
@@ -131,14 +132,30 @@ class Core(CorePluginBase):
         begin = time.time()
         file_key = etag(file_path)
         log.info("Process %ld in %f s", file_size, time.time() - begin)
-        access_key = "0a3836b4ef298e7dc9fc5da291252fc4ac3e0c7f"
-        secret_key = "da17a6ffaeab4ca89ce7275d9a8060206cb3de8e"
-        auth = Auth(access_key, secret_key)
         bucket = "other-storage"
-        file_key = "raw/" + etag(file_path)
-        filemanager = BucketManager(auth, WorkConfig.MGR_URL)
+        file_hash = etag(file_path)
+        file_key = "raw/" + file_hash
+        filemanager = BucketManager(get_auth(), WorkConfig.MGR_URL)
         code, text = filemanager.stat(bucket, file_key)
         log.info("file get from %d, %s" , code, text)
+        if code == 200:
+            #file exists
+            result = json.loads(text)
+            remote_hash = result['hash']
+            #remote_size = long(result['fsize'])
+            if remote_hash != file_hash:
+                log.warn("file: %s hash mismatch: local: %s, remote: %s",file_key, file_hash, remote_hash)
+                #repost
+                self.post_file(file_path, file_key)
+            else:
+                log.info("%s exists on server, ignore...", file_path)
+            #TODO: check and report..
+        else:
+            if code == 404:
+                self.post_file(file_path, file_key)
+            else:
+                log.warn("file get message %d, %s, we have to repost file." , code, text)
+                self.post_file(file_path, file_key)
 
         #filemanager.mgr_host = WorkConfig.MGR_HOST
 #        log.info("ddddddd")
@@ -150,6 +167,17 @@ class Core(CorePluginBase):
         # check file
         # confirm if this file uploaded
 
+
+    def post_file(self, file_path, file_key):
+        auth = get_auth()
+        putpolicy = {'scope':'other-storage:' + file_key,'deadline':str(long(time.time()) * 1000 + 86400000L)}
+        token = auth.uploadtoken(putpolicy)
+        param = {'position':'local', 'message':'upload'}
+        upload_progress_recorder = UploadProgressRecorder()
+        modify_time = time.time()
+        sliceupload = WcsSliceUpload(token, file_path, file_key, param, upload_progress_recorder, modify_time, WorkConfig.PUT_URL)
+        code, hashvalue = sliceupload.slice_upload()
+        log.info("upload %d, %s",code,json.dumps(hashvalue))
 
     def update(self):
         pass
