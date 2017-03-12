@@ -43,6 +43,7 @@ import requests
 import os
 import base64
 import traceback
+import datetime
 from twisted.internet.task import LoopingCall
 from deluge.error import InvalidTorrentError
 from deluge.log import LOG as log
@@ -90,11 +91,43 @@ class Core(CorePluginBase):
             return
         self.processing = True
         try:
-            log.info("Doing Woring Loop...")
+            begin = datetime.datetime.now()
+            self.process_torrents()
+            end = datetime.datetime.now()
+            log.info("Doing Woring Loop...in %f s", begin - end)
         except Exception as error:
             log.warn("error , %s , traceback \r\n %s", str(error), traceback.format_exc())
         finally:
             self.processing = False
+
+    def process_torrents(self):
+        downloading_list = component.get("Core").get_torrents_status({}, {})
+        for key in downloading_list:
+            torrent_info = downloading_list[key]
+ #           torrent_key = key
+            is_finished = torrent_info["is_finished"]
+            torrent_hash = torrent_info["hash"]
+            dest_path = torrent_info["save_path"]
+            if torrent_info["move_completed"]:
+                dest_path = torrent_info["move_completed_path"]
+            progress = torrent_info["progress"]
+
+            for index, file_detail in enumerate(torrent_info["files"]):
+                file_progress = torrent_info["file_progress"][index]
+                file_download = torrent_info["file_priorities"][index]
+                if file_download:
+                    if file_progress == 1:
+                        file_path = (u'/'.join([dest_path, file_detail["path"]])).encode('utf8')
+                        if os.path.exists(file_path):
+                            a_size = os.path.getsize(file_path)
+                            if a_size == file_detail["size"]:
+                                log.info("file %s download complete, preparing uploading...", file_path)
+                                # post to ws and change status to converting...
+                                self.upload_to_ws(file_path)
+                            else:
+                                log.warn("file %s size not equal %ld (need %ld)...", file_path, a_size, file_detail["size"])
+                        else:
+                            log.warn("file %s download complete, but cannot be found...", file_path)
 
     def update(self):
         pass
