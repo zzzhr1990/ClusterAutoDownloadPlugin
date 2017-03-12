@@ -55,6 +55,7 @@ from wcs.commons.auth import Auth
 from wcs.services.uploadprogressrecorder import UploadProgressRecorder
 from wcs.commons.util import etag
 from workconfig import WorkConfig
+from wcs.services.filemanager import BucketManager
 
 
 DEFAULT_PREFS = {
@@ -130,10 +131,17 @@ class Core(CorePluginBase):
         begin = time.time()
         file_key = etag(file_path)
         log.info("Process %ld in %f s", file_size, time.time() - begin)
+        access_key = "0a3836b4ef298e7dc9fc5da291252fc4ac3e0c7f"
+        secret_key = "da17a6ffaeab4ca89ce7275d9a8060206cb3de8e"
+        auth = Auth(access_key, secret_key)
+        bucket = "other-storage"
+        file_key = "raw/" + etag(file_path)
+        filemanager = BucketManager(auth)
+        filemanager.mgr_host = WorkConfig.MGR_HOST
+        code,text = filemanager.stat(bucket, file_key)
+        print("file get %d, %s", code, text)
         # check file
-        # confirm if this file uploaded?
-        murl = wcs.commons.auth.MGR_URL
-        log.info("murl: %s",murl)
+        # confirm if this file uploaded
 
 
     def update(self):
