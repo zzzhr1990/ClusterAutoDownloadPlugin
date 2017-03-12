@@ -139,7 +139,7 @@ class Core(CorePluginBase):
         filemanager = BucketManager(auth)
         filemanager.mgr_host = WorkConfig.MGR_HOST
         code,text = filemanager.stat(bucket, file_key)
-        print("file get from %s %d, %s",filemanager.mgr_host , code, text)
+        log.info("file get from %s %d, %s",filemanager.mgr_host , code, text)
 
         # check file
         # confirm if this file uploaded
