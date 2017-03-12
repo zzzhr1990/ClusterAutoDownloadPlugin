@@ -138,6 +138,7 @@ class Core(CorePluginBase):
         filemanager = BucketManager(get_auth(), WorkConfig.MGR_URL)
         code, text = filemanager.stat(bucket, file_key)
         log.info("file get from %d, %s" , code, text)
+        log.info(type(text))
         if code == 200:
             #file exists
             result = json.loads(text)
