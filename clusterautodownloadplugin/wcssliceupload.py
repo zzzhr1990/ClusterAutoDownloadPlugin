@@ -193,7 +193,7 @@ class WcsSliceUpload(object):
         url = self.mlkblock_url(offset)
         headers = self.block_headers(self.uploadBatch)
         blkretry = mkblk_retries
-        log.info("posting ....%ld",offset)
+        log.info("posting ....%ld - %d", offset, WorkConfig.disable)
         blkcode, blktext = _post(url=url, headers=headers, data=bput)
         log.info("result %d",blkcode)
         while blkretry and self.need_retry(blkcode):
