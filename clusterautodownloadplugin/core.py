@@ -94,7 +94,7 @@ class Core(CorePluginBase):
             begin = time.time()
             self.process_torrents()
             end = time.time()
-            log.info(end - begin)
+            log.info("Process in %f s", end - begin)
         except Exception as error:
             log.warn("error , %s , traceback \r\n %s", str(error), traceback.format_exc())
         finally:
