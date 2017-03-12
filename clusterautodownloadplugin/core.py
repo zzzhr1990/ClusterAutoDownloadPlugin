@@ -55,7 +55,7 @@ from wcs.commons.auth import Auth
 from wcs.services.uploadprogressrecorder import UploadProgressRecorder
 from wcs.commons.util import etag
 from workconfig import WorkConfig
-from wcs.services.filemanager import BucketManager
+from filemanager import BucketManager
 
 
 DEFAULT_PREFS = {
@@ -131,12 +131,15 @@ class Core(CorePluginBase):
         begin = time.time()
         file_key = etag(file_path)
         log.info("Process %ld in %f s", file_size, time.time() - begin)
-        #access_key = "0a3836b4ef298e7dc9fc5da291252fc4ac3e0c7f"
-        #secret_key = "da17a6ffaeab4ca89ce7275d9a8060206cb3de8e"
-        #auth = Auth(access_key, secret_key)
-        #bucket = "other-storage"
-        #file_key = "raw/" + etag(file_path)
-        #filemanager = BucketManager(auth)
+        access_key = "0a3836b4ef298e7dc9fc5da291252fc4ac3e0c7f"
+        secret_key = "da17a6ffaeab4ca89ce7275d9a8060206cb3de8e"
+        auth = Auth(access_key, secret_key)
+        bucket = "other-storage"
+        file_key = "raw/" + etag(file_path)
+        filemanager = BucketManager(auth, WorkConfig.MGR_URL)
+        code, text = filemanager.stat(bucket, file_key)
+        log.info("file get from %d, %s" , code, text)
+
         #filemanager.mgr_host = WorkConfig.MGR_HOST
 #        log.info("ddddddd")
 #        log.info(filemanager.mgr_host)
