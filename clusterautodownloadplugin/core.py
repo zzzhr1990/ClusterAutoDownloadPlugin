@@ -64,7 +64,7 @@ class Core(CorePluginBase):
     def __init__(self, plugin_name):
         self.plugin_name = plugin_name
         self.processing = False
-        super().__init__(plugin_name)
+        super(Core, self).__init__(plugin_name)
 
     def enable(self):
         log.info("plugin %s enabled.", self.plugin_name)
