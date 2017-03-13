@@ -44,6 +44,7 @@ class TorrentProcesser(object):
             self.pool.close()
             self.pool.terminate()
         except Exception as identifier:
+            log.warn("stop download plugin error")
             pass
     def process_single_torrent(self, torrent_info):
  #           torrent_key = key
