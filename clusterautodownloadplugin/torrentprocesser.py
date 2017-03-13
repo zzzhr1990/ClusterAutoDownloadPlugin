@@ -42,7 +42,7 @@ class TorrentProcesser(object):
         if self.disable:
             return
         try:
-            self.pool.close()
+            #self.pool.close()
             self.pool.terminate()
             self.disable = True
         except Exception as identifier:
@@ -91,6 +91,7 @@ class TorrentProcesser(object):
         self.processing_file[file_path] = {}
         log.info("proc file %s", file_path)
         self.pool.apply_async(self.upload_to_ws, (file_path),self.update_processing)
+        self.pool.close()
     
     def update_processing(self,file_path):
         log.info("CALLBACK %s", file_path)
