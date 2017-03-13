@@ -95,6 +95,7 @@ class TorrentProcesser(object):
         if(len(self.processing_file) == self.max_process):
             log.info("closing pool %d", len(self.processing_file))
             self.pool.close()
+            self.pool.join()
     
     def update_processing(self,file_path):
         log.info("CALLBACK %s", file_path)
