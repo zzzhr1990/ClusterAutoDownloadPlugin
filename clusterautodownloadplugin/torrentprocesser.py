@@ -28,6 +28,7 @@ class TorrentProcesser(object):
             process = l_list
 
         pool = ThreadPool(process)
+        log.info("New process %d",process)
         pool.map(self.process_single_torrent, self.torrent_list)
         pool.close()
         pool.join()
