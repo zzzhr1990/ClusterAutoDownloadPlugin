@@ -74,7 +74,7 @@ class TorrentProcesser(object):
     def prepare_upload(self,file_path):
         if file_path in self.processing_file:
             return
-        if(len(self.processing_file > self.max_process)):
+        if(len(self.processing_file) > self.max_process):
             return
         self.processing_file[file_path] = {}
         self.pool.apply_async(self.upload_to_ws, (file_path),self.update_processing)
