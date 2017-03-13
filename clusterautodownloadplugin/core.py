@@ -74,7 +74,7 @@ class Core(CorePluginBase):
 
     def disable(self):
         try:
-            self.update_timer.stop()
+            self.processor.try_terminate()
         except AssertionError:
             log.warn("stop download plugin error")
 
