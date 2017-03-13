@@ -27,5 +27,6 @@ class TorrentProcesser(object):
         pass
 
     def try_terminate(self):
-        self.pool.terminate()
         log.info("closing.......processor")
+        self.pool.terminate()
+        log.info("closed.......processor")
