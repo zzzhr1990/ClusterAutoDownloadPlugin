@@ -22,6 +22,7 @@ class TorrentProcesser(object):
         self.max_process = max_process
         self.pool = ThreadPool(max_process)
         self.processing_file = {}
+        self.disable = False
  #   def add_torrent
 
  #   def start_process(self):
@@ -36,6 +37,14 @@ class TorrentProcesser(object):
         #pool.close()
         #pool.join()
 
+    def try_terminate(self):
+        if self.disable:
+            return
+        try:
+            self.pool.close()
+            self.pool.terminate()
+        except Exception as identifier:
+            pass
     def process_single_torrent(self, torrent_info):
  #           torrent_key = key
         is_finished = torrent_info["is_finished"]
