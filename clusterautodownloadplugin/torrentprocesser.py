@@ -97,6 +97,7 @@ class TorrentProcesser(object):
         
     def upload_to_ws(self,file_path):
         
+        log.info("starting proc to ws")
         #begin = time.time()
         file_key = etag(file_path)
         #log.info("Process %ld in %f s", file_size, time.time() - begin)
