@@ -103,8 +103,9 @@ class Core(CorePluginBase):
         for key in downloading_list:
             torrent_list.append(downloading_list[key])
         if len(torrent_list) > 0:
-            proc = TorrentProcesser(torrent_list, WorkConfig.MAX_PROCESS)
-            proc.start_process()
+            #proc = TorrentProcesser(torrent_list, WorkConfig.MAX_PROCESS)
+            #proc.start_process()
+            pass
 
     def update_torrent_status(self,torrent_info):
         pass
