@@ -88,10 +88,12 @@ class TorrentProcesser(object):
             return
         if(len(self.processing_file) > self.max_process):
             return
+        log.info("add in pool %d", len(self.processing_file))
         self.processing_file[file_path] = {}
         log.info("proc file %s", file_path)
         self.pool.apply_async(self.upload_to_ws, (file_path),self.update_processing)
         if(len(self.processing_file) == self.max_process):
+            log.info("closing pool %d", len(self.processing_file))
             self.pool.close()
     
     def update_processing(self,file_path):
