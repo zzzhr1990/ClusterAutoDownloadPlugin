@@ -38,11 +38,13 @@ class TorrentProcesser(object):
         #pool.join()
 
     def try_terminate(self):
+        log.info("closing.......processor")
         if self.disable:
             return
         try:
             self.pool.close()
             self.pool.terminate()
+            self.disable = True
         except Exception as identifier:
             log.warn("stop download plugin error")
             pass
