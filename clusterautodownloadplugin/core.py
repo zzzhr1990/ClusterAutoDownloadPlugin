@@ -57,6 +57,7 @@ from multiprocessing.dummy import Pool as ThreadPool
 from torrentprocesser import TorrentProcesser
 
 
+
 DEFAULT_PREFS = {
     "test":"NiNiNi"
 }
@@ -65,6 +66,7 @@ class Core(CorePluginBase):
     def __init__(self, plugin_name):
         self.plugin_name = plugin_name
         self.processing = False
+        self.processor = TorrentProcesser(WorkConfig.MAX_PROCESS)
         super(Core, self).__init__(plugin_name)
 
     def enable(self):
@@ -101,11 +103,12 @@ class Core(CorePluginBase):
         downloading_list = component.get("Core").get_torrents_status({}, {})
         torrent_list = []
         for key in downloading_list:
-            torrent_list.append(downloading_list[key])
-        if len(torrent_list) > 0:
-            #proc = TorrentProcesser(torrent_list, WorkConfig.MAX_PROCESS)
-            #proc.start_process()
-            pass
+            self.processor.process_single_torrent(downloading_list[key])
+#            torrent_list.append(downloading_list[key])
+#        if len(torrent_list) > 0:
+#            
+#            proc.start_process()
+#            pass
 
     def update_torrent_status(self,torrent_info):
         pass

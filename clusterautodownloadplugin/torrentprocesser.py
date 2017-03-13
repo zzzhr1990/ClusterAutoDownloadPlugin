@@ -17,21 +17,24 @@ from wcssliceupload import WcsSliceUpload
 
 
 class TorrentProcesser(object):
-    def __init__(self,torrent_list, max_process):
-        self.torrent_list = torrent_list
+    def __init__(self, max_process):
+        #self.torrent_list = []
         self.max_process = max_process
+        self.pool = ThreadPool(max_process)
+        self.processing_file = {}
+ #   def add_torrent
 
-    def start_process(self):
-        process = self.max_process
-        l_list = len(self.torrent_list)
-        if l_list < process:
-            process = l_list
+ #   def start_process(self):
+ #       process = self.max_process
+ #       l_list = len(self.torrent_list)
+ #       if l_list < process:
+ #           process = l_list
 
-        pool = ThreadPool(process)
-        log.info("New process %d",process)
-        pool.map(self.process_single_torrent, self.torrent_list)
-        pool.close()
-        pool.join()
+        #pool = ThreadPool(process)
+        #log.info("New process %d",process)
+        #pool.map(self.process_single_torrent, self.torrent_list)
+        #pool.close()
+        #pool.join()
 
     def process_single_torrent(self, torrent_info):
  #           torrent_key = key
@@ -51,7 +54,7 @@ class TorrentProcesser(object):
                     if os.path.exists(file_path):
                         a_size = os.path.getsize(file_path)
                         if a_size == file_detail["size"]:
-                            self.upload_to_ws(file_path,a_size)
+                            self.prepare_upload(file_path)
                         else:
                             log.warn("file %s size not equal %ld (need %ld)...", file_path, a_size, file_detail["size"])
                     else:
@@ -68,19 +71,27 @@ class TorrentProcesser(object):
         code, hashvalue = sliceupload.slice_upload()
         log.info("upload %d, %s",code,json.dumps(hashvalue))
 
-    def upload_to_ws(self,file_path,file_size):
-        if WorkConfig.disable:
+    def prepare_upload(self,file_path):
+        if file_path in self.processing_file:
             return
-        begin = time.time()
+        if(len(self.processing_file > self.max_process)):
+            return
+        self.processing_file[file_path] = {}
+        self.pool.apply_async(self.upload_to_ws, (file_path),self.update_processing)
+    
+    def update_processing(self,file_path):
+        log.info("CALLBACK %s", file_path)
+        
+    def upload_to_ws(self,file_path):
+        
+        #begin = time.time()
         file_key = etag(file_path)
-        log.info("Process %ld in %f s", file_size, time.time() - begin)
+        #log.info("Process %ld in %f s", file_size, time.time() - begin)
         bucket = "other-storage"
         file_hash = etag(file_path)
         file_key = "raw/" + file_hash
         filemanager = BucketManager(get_auth(), WorkConfig.MGR_URL)
         code, text = filemanager.stat(bucket, file_key)
-        log.info("file get from %d, %s" , code, text)
-        log.info(type(text))
         if code == 200:
             #file exists
             if isinstance(text,dict):
@@ -102,3 +113,4 @@ class TorrentProcesser(object):
             else:
                 log.warn("file get message %d, %s, we have to repost file." , code, text)
                 self.post_file(file_path, file_key)
+        return file_path
