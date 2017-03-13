@@ -51,12 +51,10 @@ from deluge.plugins.pluginbase import CorePluginBase
 import deluge.component as component
 import deluge.configmanager
 from deluge.core.rpcserver import export
-from wcs.services.uploadprogressrecorder import UploadProgressRecorder
-from wcs.commons.util import etag
 from workconfig import WorkConfig
-from filemanager import BucketManager
-from wcssliceupload import WcsSliceUpload
 from workconfig import get_auth
+from multiprocessing.dummy import Pool as ThreadPool
+from torrentprocesser import TorrentProcesser
 
 
 DEFAULT_PREFS = {
@@ -101,65 +99,16 @@ class Core(CorePluginBase):
 
     def process_torrents(self):
         downloading_list = component.get("Core").get_torrents_status({}, {})
+        torrent_list = []
         for key in downloading_list:
-            torrent_info = downloading_list[key]
- #           torrent_key = key
-            is_finished = torrent_info["is_finished"]
-            torrent_hash = torrent_info["hash"]
-            dest_path = torrent_info["save_path"]
-            if torrent_info["move_completed"]:
-                dest_path = torrent_info["move_completed_path"]
-            progress = torrent_info["progress"]
+            torrent_list.append(downloading_list[key])
+        if len(torrent_list) > 0:
+            proc = TorrentProcesser(torrent_list)
+            proc.start_process()
 
-            for index, file_detail in enumerate(torrent_info["files"]):
-                file_progress = torrent_info["file_progress"][index]
-                file_download = torrent_info["file_priorities"][index]
-                if file_download:
-                    if file_progress == 1:
-                        file_path = (u'/'.join([dest_path, file_detail["path"]])).encode('utf8')
-                        if os.path.exists(file_path):
-                            a_size = os.path.getsize(file_path)
-                            if a_size == file_detail["size"]:
-                                self.upload_to_ws(file_path,a_size)
-                            else:
-                                log.warn("file %s size not equal %ld (need %ld)...", file_path, a_size, file_detail["size"])
-                        else:
-                            log.warn("file %s download complete, but cannot be found...", file_path)
-
-    def upload_to_ws(self,file_path,file_size):
-        if WorkConfig.disable:
-            return
-        begin = time.time()
-        file_key = etag(file_path)
-        log.info("Process %ld in %f s", file_size, time.time() - begin)
-        bucket = "other-storage"
-        file_hash = etag(file_path)
-        file_key = "raw/" + file_hash
-        filemanager = BucketManager(get_auth(), WorkConfig.MGR_URL)
-        code, text = filemanager.stat(bucket, file_key)
-        log.info("file get from %d, %s" , code, text)
-        log.info(type(text))
-        if code == 200:
-            #file exists
-            if type(text) == dict:
-                result = text
-            else:
-                result = json.loads(text)
-            remote_hash = result['hash']
-            #remote_size = long(result['fsize'])
-            if remote_hash != file_hash:
-                log.warn("file: %s hash mismatch: local: %s, remote: %s",file_key, file_hash, remote_hash)
-                #repost
-                self.post_file(file_path, file_key)
-            else:
-                log.info("%s exists on server, ignore...", file_path)
-            #TODO: check and report..
-        else:
-            if code == 404:
-                self.post_file(file_path, file_key)
-            else:
-                log.warn("file get message %d, %s, we have to repost file." , code, text)
-                self.post_file(file_path, file_key)
+    def update_torrent_status(self,torrent_info):
+        pass
+    
 
         #filemanager.mgr_host = WorkConfig.MGR_HOST
 #        log.info("ddddddd")
@@ -171,17 +120,6 @@ class Core(CorePluginBase):
         # check file
         # confirm if this file uploaded
 
-
-    def post_file(self, file_path, file_key):
-        auth = get_auth()
-        putpolicy = {'scope':'other-storage:' + file_key,'deadline':str(int(time.time()) * 1000 + 86400000)}
-        token = auth.uploadtoken(putpolicy)
-        param = {'position':'local', 'message':'upload'}
-        upload_progress_recorder = UploadProgressRecorder()
-        modify_time = time.time()
-        sliceupload = WcsSliceUpload(token, file_path, file_key, param, upload_progress_recorder, modify_time, WorkConfig.PUT_URL)
-        code, hashvalue = sliceupload.slice_upload()
-        log.info("upload %d, %s",code,json.dumps(hashvalue))
 
     def update(self):
         pass
