@@ -5,7 +5,7 @@ import os
 import base64
 import traceback
 import datetime
-from multiprocessing.dummy import Pool as ThreadPool
+from multiprocessing import Pool as ThreadPool
 from filemanager import BucketManager
 from workconfig import WorkConfig
 from wcs.services.uploadprogressrecorder import UploadProgressRecorder
