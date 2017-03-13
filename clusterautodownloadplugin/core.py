@@ -66,65 +66,17 @@ class Core(CorePluginBase):
     def __init__(self, plugin_name):
         self.plugin_name = plugin_name
         self.processing = False
-        self.processor = TorrentProcesser(WorkConfig.MAX_PROCESS)
         super(Core, self).__init__(plugin_name)
+        self.processor = TorrentProcesser(WorkConfig.MAX_PROCESS)
 
     def enable(self):
         log.info("plugin %s enabled.", self.plugin_name)
-        WorkConfig.disable = False
-        self.config = deluge.configmanager.ConfigManager("clusterautodownloadplugin.conf", DEFAULT_PREFS)
-        self.working_loop()
-        self.update_timer = LoopingCall(self.working_loop)
-        self.update_timer.start(1)
 
     def disable(self):
-        WorkConfig.disable = True
-        log.info("plugin %s closing....", self.plugin_name)
-        self.processor.try_terminate()
         try:
             self.update_timer.stop()
         except AssertionError:
             log.warn("stop download plugin error")
-
-    def working_loop(self):
-        # Refresh torrents.
-        if WorkConfig.disable:
-            return
-        if self.processing:
-            return
-        self.processing = True
-        try:
-            self.process_torrents()
-        except Exception as error:
-            log.warn("error , %s , traceback \r\n %s", str(error), traceback.format_exc())
-        finally:
-            self.processing = False
-
-    def process_torrents(self):
-        downloading_list = component.get("Core").get_torrents_status({}, {})
-        torrent_list = []
-        for key in downloading_list:
-            self.processor.process_single_torrent(downloading_list[key])
-#            torrent_list.append(downloading_list[key])
-#        if len(torrent_list) > 0:
-#            
-#            proc.start_process()
-#            pass
-
-    def update_torrent_status(self,torrent_info):
-        pass
-    
-
-        #filemanager.mgr_host = WorkConfig.MGR_HOST
-#        log.info("ddddddd")
-#        log.info(filemanager.mgr_host)
-#        log.info("fffffff")
-#        code, text = filemanager.stat(bucket, file_key)
-#        log.info("file get from %s %d, %s",filemanager.mgr_host , code, text)
-
-        # check file
-        # confirm if this file uploaded
-
 
     def update(self):
         pass
