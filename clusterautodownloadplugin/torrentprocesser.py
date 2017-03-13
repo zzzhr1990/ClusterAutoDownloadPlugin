@@ -5,7 +5,7 @@ import os
 import base64
 import traceback
 import datetime
-from multiprocessing import Pool as ThreadPool
+import multiprocessing
 from filemanager import BucketManager
 from workconfig import WorkConfig
 from wcs.services.uploadprogressrecorder import UploadProgressRecorder
@@ -18,7 +18,7 @@ from wcssliceupload import WcsSliceUpload
 
 class TorrentProcesser(object):
     def __init__(self, max_process):
-        self.pool = ThreadPool(max_process)
+        self.pool = multiprocessing.Pool(max_process)
         self.max_process = max_process
         log.info("TorrentProcesser inited")
 
@@ -27,5 +27,5 @@ class TorrentProcesser(object):
         pass
 
     def try_terminate(self):
-        self.pool.treminate()
+        self.pool.terminate()
         log.info("closing.......processor")
