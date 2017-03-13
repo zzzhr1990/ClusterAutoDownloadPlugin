@@ -58,7 +58,7 @@ class TorrentProcesser(object):
 
     def post_file(self, file_path, file_key):
         auth = get_auth()
-        putpolicy = {'scope':'other-storage:' + file_key,'deadline':str(int(time.time()) * 1000 + 86400000)}
+        putpolicy = {'scope':'other-storage:' + file_key,'deadline':str(int(time.time()) * 1000 + 86400000),'overwrite':1}
         token = auth.uploadtoken(putpolicy)
         param = {'position':'local', 'message':'upload'}
         upload_progress_recorder = UploadProgressRecorder()
