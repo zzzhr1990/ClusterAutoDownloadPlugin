@@ -18,10 +18,14 @@ from wcssliceupload import WcsSliceUpload
 
 class TorrentProcesser(object):
     def __init__(self, max_process):
+        self.pool = ThreadPool(max_process)
+        self.max_process = max_process
         log.info("TorrentProcesser inited")
 
     def process_single_torrent(self, torrent_info):
+        
         pass
 
     def try_terminate(self):
+        self.pool.treminate()
         log.info("closing.......processor")

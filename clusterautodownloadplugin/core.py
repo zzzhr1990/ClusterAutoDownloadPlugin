@@ -79,7 +79,7 @@ class Core(CorePluginBase):
 
     def disable(self):
         WorkConfig.disable = True
-        log.info("plugin %s disabled.", self.plugin_name)
+        log.info("plugin %s closing....", self.plugin_name)
         self.processor.try_terminate()
         try:
             self.update_timer.stop()
