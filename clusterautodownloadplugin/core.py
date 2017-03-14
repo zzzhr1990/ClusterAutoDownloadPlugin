@@ -44,7 +44,7 @@ import os
 import base64
 import traceback
 import datetime
-import multiprocessing
+import threading
 from deluge.error import InvalidTorrentError
 from deluge.log import LOG as log
 from deluge.plugins.pluginbase import CorePluginBase
@@ -64,25 +64,33 @@ class Core(CorePluginBase):
     def __init__(self, plugin_name):
         self.plugin_name = plugin_name
         self.processing = False
-        self.pool = multiprocessing.Pool(WorkConfig.MAX_PROCESS)
         super(Core, self).__init__(plugin_name)
+        self.looping_thread = threading.Thread(target=self._loop)
+        self.looping_thread.daemon = True
+        WorkConfig.disable = True
         log.info("Cluster downloader init, poolsize %d", WorkConfig.MAX_PROCESS)
 
     def enable(self):
         """Call when plugin enabled."""
-        log.info("plugin %s enabled.", self.plugin_name)
-        try:
-            self.pool.terminate()
-        except AssertionError:
-            log.warn("stop download plugin error")
-        log.info("hhh")
-
+        WorkConfig.disable = False
+        self.looping_thread.start()
+        log.info("Plugin %s enabled.", self.plugin_name)
 
     def disable(self):
         """Call when plugin disabled."""
-        log.warn("trying to shutdown download plugin")
-        if hasattr(self, 'update'):
-            log.info("have update indo")
+        WorkConfig.disable = True
+        log.warn("Trying to shutdown download plugin")
+
+
+    def _loop(self):
+        while not WorkConfig.disable:
+            time.sleep(2)
+            pass
+    
+    def _checking_tasks(self):
+        log.info("trying to fecting tasks...")
+        
+
  #       try:
  #           self.pool.terminate()
  #       except AssertionError:
