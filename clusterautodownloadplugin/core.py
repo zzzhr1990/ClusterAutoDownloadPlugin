@@ -76,7 +76,8 @@ class Core(CorePluginBase):
         """Call when plugin disabled."""
         log.info("shutting down multiprocessing pool...")
         try:
-            self.pool.terminate()
+            #self.pool.terminate()
+            working_pool.terminate()
         except AssertionError:
             log.warn("stop download plugin error")
         log.info("multiprocessing pool shutdown.")
@@ -96,3 +97,6 @@ class Core(CorePluginBase):
     def get_config(self):
         """Returns the config dictionary"""
         return self.config.config
+
+'''global functions'''
+working_pool = multiprocessing.Pool(WorkConfig.MAX_PROCESS)
