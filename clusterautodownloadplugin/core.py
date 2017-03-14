@@ -64,7 +64,7 @@ class Core(CorePluginBase):
     def __init__(self, plugin_name):
         self.plugin_name = plugin_name
         self.processing = False
-        self.pool = multiprocessing.Pool(WorkConfig.MAX_PROCESS)
+        #self.pool = multiprocessing.Pool(WorkConfig.MAX_PROCESS)
         super(Core, self).__init__(plugin_name)
         log.info("Cluster downloader init, poolsize %d", WorkConfig.MAX_PROCESS)
 
@@ -72,13 +72,16 @@ class Core(CorePluginBase):
         """Call when plugin enabled."""
         log.info("plugin %s enabled.", self.plugin_name)
 
+
     def disable(self):
         """Call when plugin disabled."""
-        log.warn("trying to shutdown download plugin")
-        try:
-            self.pool.terminate()
-        except AssertionError:
-            log.warn("stop download plugin error")
+        log.info("trying to shutdown download plugin")
+        if hasattr(self, 'update'):
+            log.info("have update indo")
+ #       try:
+ #           self.pool.terminate()
+ #       except AssertionError:
+ #           log.warn("stop download plugin error")
 
 # We don't need this update
   #  def update(self):
