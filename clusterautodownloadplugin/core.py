@@ -44,7 +44,7 @@ import os
 import base64
 import traceback
 import datetime
-from twisted.internet.task import LoopingCall
+import multiprocessing
 from deluge.error import InvalidTorrentError
 from deluge.log import LOG as log
 from deluge.plugins.pluginbase import CorePluginBase
@@ -52,9 +52,6 @@ import deluge.component as component
 import deluge.configmanager
 from deluge.core.rpcserver import export
 from workconfig import WorkConfig
-from workconfig import get_auth
-from multiprocessing.dummy import Pool as ThreadPool
-from torrentprocesser import TorrentProcesser
 
 
 
@@ -63,22 +60,29 @@ DEFAULT_PREFS = {
 }
 
 class Core(CorePluginBase):
+    '''Init Function'''
     def __init__(self, plugin_name):
         self.plugin_name = plugin_name
         self.processing = False
+        self.pool = multiprocessing.Pool(WorkConfig.MAX_PROCESS)
         super(Core, self).__init__(plugin_name)
-        self.processor = TorrentProcesser(WorkConfig.MAX_PROCESS)
+        log.info("Cluster downloader init, poolsize %d", WorkConfig.MAX_PROCESS)
 
     def enable(self):
+        """Call when plugin enabled."""
         log.info("plugin %s enabled.", self.plugin_name)
 
     def disable(self):
+        """Call when plugin disabled."""
+        log.info("shutting down multiprocessing pool...")
         try:
-            self.processor.try_terminate()
+            self.pool.terminate()
         except AssertionError:
             log.warn("stop download plugin error")
+        log.info("multiprocessing pool shutdown.")
 
     def update(self):
+        """Call when plugin update."""
         pass
 
     @export

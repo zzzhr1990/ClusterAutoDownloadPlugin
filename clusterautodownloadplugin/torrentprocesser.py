@@ -18,7 +18,7 @@ from wcssliceupload import WcsSliceUpload
 
 class TorrentProcesser(object):
     def __init__(self, max_process):
-        self.pool = multiprocessing.Pool(max_process)
+        self.pool = multiprocessing.Pool(1)
         self.max_process = max_process
         log.info("TorrentProcesser inited")
 
