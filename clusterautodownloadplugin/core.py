@@ -85,10 +85,10 @@ class Core(CorePluginBase):
     def _loop(self):
         while not WorkConfig.disable:
             time.sleep(2)
-            pass
+            log.info("Trying to fetching tasks...")
     
     def _checking_tasks(self):
-        log.info("trying to fecting tasks...")
+        log.info("Trying to fecting tasks...")
         
 
  #       try:
