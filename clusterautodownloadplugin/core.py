@@ -74,6 +74,7 @@ class Core(CorePluginBase):
 
     def disable(self):
         """Call when plugin disabled."""
+        log.warn("trying to shutdown download plugin")
         try:
             self.pool.terminate()
         except AssertionError:
