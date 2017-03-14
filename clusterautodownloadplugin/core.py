@@ -64,10 +64,13 @@ class Core(CorePluginBase):
     def __init__(self, plugin_name):
         self.plugin_name = plugin_name
         self.processing = False
+        self.config = deluge.configmanager\
+        .ConfigManager("clusterautodownloadplugin.conf", DEFAULT_PREFS)
         super(Core, self).__init__(plugin_name)
         self.looping_thread = threading.Thread(target=self._loop)
         self.looping_thread.daemon = True
         WorkConfig.disable = True
+        self.busy = False
         log.info("Cluster downloader init, poolsize %d", WorkConfig.MAX_PROCESS)
 
     def enable(self):
@@ -84,12 +87,21 @@ class Core(CorePluginBase):
 
     def _loop(self):
         while not WorkConfig.disable:
+            if self.busy:
+                log.warn("Slow query found.")
+                return
+            try:
+                pass
+            except Exception as e:
+                log.error()
+            finally:
+                self.busy = False
             time.sleep(2)
             log.info("Trying to fetching tasks...")
-    
+
     def _checking_tasks(self):
         log.info("Trying to fecting tasks...")
-        
+
 
  #       try:
  #           self.pool.terminate()
