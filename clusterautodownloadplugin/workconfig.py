@@ -6,6 +6,7 @@ class WorkConfig:
     PUT_URL = "http://qietv.up21.v1.wcsapi.com"
     ACCESS_KEY = "0a3836b4ef298e7dc9fc5da291252fc4ac3e0c7f"
     SECRET_KEY = "da17a6ffaeab4ca89ce7275d9a8060206cb3de8e"
+    SERVER_URL = "http://ks.killheaven.com"
     MAX_PROCESS = 16
 
 def get_auth():

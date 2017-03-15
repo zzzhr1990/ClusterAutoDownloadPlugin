@@ -52,6 +52,7 @@ import deluge.component as component
 import deluge.configmanager
 from deluge.core.rpcserver import export
 from workconfig import WorkConfig
+from taskprocess import TaskProcess
 
 
 
@@ -69,14 +70,19 @@ class Core(CorePluginBase):
         super(Core, self).__init__(plugin_name)
         self.looping_thread = threading.Thread(target=self._loop)
         self.looping_thread.daemon = True
+        self.task_looping_thread = threading.Thread(target=self._task_loop)
+        self.task_looping_thread.daemon = True
         WorkConfig.disable = True
         self.busy = False
+        self.fetching_task = False
+        self.processor = TaskProcess(SERVER_URL)
         log.info("Cluster downloader init, poolsize %d", WorkConfig.MAX_PROCESS)
 
     def enable(self):
         """Call when plugin enabled."""
         WorkConfig.disable = False
         self.looping_thread.start()
+        self.task_looping_thread.start()
         log.info("Plugin %s enabled.", self.plugin_name)
 
     def disable(self):
@@ -85,24 +91,46 @@ class Core(CorePluginBase):
         log.warn("Trying to shutdown download plugin")
 
 
+    def _task_loop(self):
+        while not WorkConfig.disable:
+            if self.fetching_task:
+                log.warn("Slow fetching task.")
+                return
+            self.fetching_task = True
+            try:
+                self.processor.check_tasks()
+            except Exception as e:
+                log.error("Exception occored in task loop.")
+            finally:
+                self.fetching_task = False
+            self._sleep_and_wait(5)
+
     def _loop(self):
         while not WorkConfig.disable:
             if self.busy:
                 log.warn("Slow query found.")
                 return
+            self.busy = True
             try:
                 pass
             except Exception as e:
-                log.error()
+                log.error("Exception occored in status loop.")
             finally:
                 self.busy = False
-            time.sleep(2)
+            if not WorkConfig.disable:
+                self._sleep_and_wait(2)
             log.info("Trying to fetching tasks...")
 
     def _checking_tasks(self):
         log.info("Trying to fecting tasks...")
 
-
+    def _sleep_and_wait(self, time):
+        if not WorkConfig.disable:
+            if time < 1:
+                time = 1
+            for i in range(0,time):
+                if not WorkConfig.disable:
+                    sleep(1)
  #       try:
  #           self.pool.terminate()
  #       except AssertionError:
