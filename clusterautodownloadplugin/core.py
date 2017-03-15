@@ -93,6 +93,7 @@ class Core(CorePluginBase):
 
     def _task_loop(self):
         while not WorkConfig.disable:
+            log.info("fetching task")
             if self.fetching_task:
                 log.warn("Slow fetching task.")
                 return

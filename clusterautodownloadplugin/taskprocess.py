@@ -13,6 +13,7 @@ class TaskProcess(object):
 
     def check_tasks(self):
         """Check tasks on server."""
+        log.info("requesting server...")
         req = requests.get(self._base_url + '/v1/task', \
         headers={"X-Task-Token", "1024tasktoken"}, timeout=5)
         if req.status_code == 200:
