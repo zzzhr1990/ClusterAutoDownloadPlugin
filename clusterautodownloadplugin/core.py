@@ -119,7 +119,7 @@ class Core(CorePluginBase):
                 self.busy = False
             if not WorkConfig.disable:
                 self._sleep_and_wait(2)
-            log.info("Trying to fetching tasks...")
+            #log.info("Trying to fetching tasks...")
 
     def _checking_tasks(self):
         pass
