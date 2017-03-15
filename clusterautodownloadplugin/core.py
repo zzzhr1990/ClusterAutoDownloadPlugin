@@ -75,7 +75,7 @@ class Core(CorePluginBase):
         WorkConfig.disable = True
         self.busy = False
         self.fetching_task = False
-        self.processor = TaskProcess(SERVER_URL)
+        self.processor = TaskProcess(WorkConfig.SERVER_URL)
         log.info("Cluster downloader init, poolsize %d", WorkConfig.MAX_PROCESS)
 
     def enable(self):
