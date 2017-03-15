@@ -100,7 +100,7 @@ class Core(CorePluginBase):
             try:
                 self.processor.check_tasks()
             except Exception as e:
-                log.error("Exception occored in task loop. %s dd\r\n", e, traceback.format_exc())
+                log.error("Exception occored in task loop. %s dd\r\n%s", e, traceback.format_exc())
             finally:
                 self.fetching_task = False
             self._sleep_and_wait(5)
