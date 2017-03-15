@@ -13,7 +13,6 @@ class TaskProcess(object):
 
     def check_tasks(self):
         """Check tasks on server."""
-        log.info("Start request..")
         req = requests.get(self._base_url + '/v1/task'\
         , headers={"X-Task-Token" : "1024tasktoken"}, timeout=5)
         if req.status_code == 200:
@@ -27,7 +26,7 @@ class TaskProcess(object):
                         for single_data in data_arr:
                             self.fetch_single_task(single_data)
                     else:
-                        log.warn("No data object found in response JSON['data'].")
+                        log.warn("No data object found in response JSON['data'].\r\n%s", data)
                 else:
                     log.warn("No data object found in response JSON.")
             else:
