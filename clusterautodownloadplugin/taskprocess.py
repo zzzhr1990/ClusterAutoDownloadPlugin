@@ -40,7 +40,7 @@ class TaskProcess(object):
         log.info("Task id %s", single_task["tid"])
         if task_type == "torrent":
             req = requests.get(single_task["url"], \
-            headers={"X-Task-Token", "1024tasktoken"}, timeout=5)
+            headers={"X-Task-Token" : "1024tasktoken"}, timeout=5)
             if req.status_code == 200:
                 raw_data = BytesIO(req.content)
                 try:
