@@ -18,7 +18,6 @@ class TaskProcess(object):
         if req.status_code == 200:
             json_request = req.json()
             if json_request["errno"] == 0:
-                log.info("json_OK")
                 if hasattr(json_request, 'data'):
                     data = json_request["data"]
                     if hasattr(data, 'data'):
