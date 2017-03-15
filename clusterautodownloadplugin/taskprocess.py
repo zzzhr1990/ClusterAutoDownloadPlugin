@@ -46,7 +46,7 @@ class TaskProcess(object):
                 try:
                     core = component.get("Core")
                     torrent_id = core.add_torrent_file(single_task["tid"],\
-                    base64.encodebytes(raw_data), {})
+                    base64.encodestring(raw_data), {})
                     if torrent_id != None:
                         log.info("Successfly add torrent, tid: %s", single_task["tid"])
                 except Exception as ex:
