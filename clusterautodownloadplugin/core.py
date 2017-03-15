@@ -122,7 +122,7 @@ class Core(CorePluginBase):
             log.info("Trying to fetching tasks...")
 
     def _checking_tasks(self):
-        log.info("Trying to fecting tasks...")
+        pass
 
     def _sleep_and_wait(self, stime):
         if not WorkConfig.disable:
