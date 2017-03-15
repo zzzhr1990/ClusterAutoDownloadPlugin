@@ -101,7 +101,7 @@ class Core(CorePluginBase):
             try:
                 self.processor.check_tasks()
             except Exception as e:
-                log.error("Exception occored in task loop.")
+                log.error("Exception occored in task loop. %s",e)
             finally:
                 self.fetching_task = False
             self._sleep_and_wait(5)
@@ -125,13 +125,13 @@ class Core(CorePluginBase):
     def _checking_tasks(self):
         log.info("Trying to fecting tasks...")
 
-    def _sleep_and_wait(self, time):
+    def _sleep_and_wait(self, stime):
         if not WorkConfig.disable:
-            if time < 1:
-                time = 1
-            for i in range(0,time):
+            if stime < 1:
+                stime = 1
+            for i in range(0, stime):
                 if not WorkConfig.disable:
-                    sleep(1)
+                    time.sleep(1)
  #       try:
  #           self.pool.terminate()
  #       except AssertionError:
