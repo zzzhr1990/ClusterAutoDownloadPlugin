@@ -14,10 +14,8 @@ class TaskProcess(object):
     def check_tasks(self):
         """Check tasks on server."""
         log.info("Start request..")
-        req = requests.get(self._base_url + '/v1/task', headers={"X-Task-Token", "1024tasktoken"}, timeout=5)
-        log.info("GEZF")
-        log.info(req.content)
-        log.info("status %s", req.json())
+        req = requests.get(self._base_url + '/v1/task'\
+        , headers={"X-Task-Token" : "1024tasktoken"}, timeout=5)
         if req.status_code == 200:
             json_request = req.json()
             if json_request["errno"] == 0:
