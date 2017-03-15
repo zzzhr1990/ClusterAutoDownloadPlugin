@@ -45,7 +45,7 @@ class TaskProcess(object):
                 raw_data = BytesIO(req.content)
                 try:
                     core = component.get("Core")
-                    torrent_id = core.get("Core").add_torrent_file(single_task["tid"],\
+                    torrent_id = core.add_torrent_file(single_task["tid"],\
                     base64.encodebytes(raw_data), {})
                     if torrent_id != None:
                         log.info("Successfly add torrent, tid: %s", single_task["tid"])
