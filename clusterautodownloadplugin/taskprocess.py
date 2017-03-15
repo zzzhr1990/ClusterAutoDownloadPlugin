@@ -38,6 +38,7 @@ class TaskProcess(object):
     def fetch_single_task(self, single_task):
         """Check single task."""
         task_type = single_task["type"]
+        log.info("Task id %s", single_task["tid"])
         if task_type == "torrent":
             req = requests.get(single_task["url"], \
             headers={"X-Task-Token", "1024tasktoken"}, timeout=5)
