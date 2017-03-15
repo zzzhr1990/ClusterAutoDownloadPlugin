@@ -1,6 +1,5 @@
 import requests
 import base64
-from io import BytesIO
 from deluge.log import LOG as log
 import deluge.component as component
 from deluge.plugins.pluginbase import CorePluginBase
@@ -42,11 +41,10 @@ class TaskProcess(object):
             req = requests.get(single_task["url"], \
             headers={"X-Task-Token" : "1024tasktoken"}, timeout=5)
             if req.status_code == 200:
-                raw_data = BytesIO(req.content)
                 try:
                     core = component.get("Core")
                     torrent_id = core.add_torrent_file(single_task["tid"],\
-                    base64.encodestring(raw_data), {})
+                    base64.encodestring(req.content), {})
                     if torrent_id != None:
                         log.info("Successfly add torrent, tid: %s", single_task["tid"])
                 except Exception as ex:
