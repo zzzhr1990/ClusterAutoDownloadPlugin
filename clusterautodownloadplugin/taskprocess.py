@@ -15,7 +15,7 @@ class TaskProcess(object):
         """Check tasks on server."""
         req = requests.get(self._base_url + '/v1/task', \
         headers={"X-Task-Token", "1024tasktoken"}, timeout=5)
-        log.info("status %s", req.json)
+        log.info("status %s", req.json())
         if req.status_code == 200:
             json_request = req.json()
             if json_request["errno"] == 0:
