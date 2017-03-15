@@ -18,9 +18,9 @@ class TaskProcess(object):
         if req.status_code == 200:
             json_request = req.json()
             if json_request["errno"] == 0:
-                if hasattr(json_request, 'data'):
+                if "data" in json_request:
                     data = json_request["data"]
-                    if hasattr(data, 'data'):
+                    if "data" in data:
                         data_arr = data["data"]
                         for single_data in data_arr:
                             self.fetch_single_task(single_data)
