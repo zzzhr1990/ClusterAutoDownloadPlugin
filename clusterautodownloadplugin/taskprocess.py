@@ -57,6 +57,8 @@ class TaskProcess(object):
             self.change_torrent_status(single_task["tid"]\
                 , {"status" : 5, "infohash" : single_task["infohash"]})
             return
+        else:
+            log.info("Adding %s", single_task["url"])
                 # Report to task server?
                 #self.change_torrent_status(single_task["tid"]\
                 #    , {"status" : 5, "infohash" : single_task["infohash"]})
@@ -85,6 +87,7 @@ class TaskProcess(object):
         if task_type == "magnet":
             log.info("NODATA,NEW DATA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             try:
+                log.info("Add_magnet")
                 torrent_id = core.add_torrent_magnet(single_task["url"], {})
                 if torrent_id != None:
                     log.info("Successfly add magnet, tid: %s", single_task["tid"])
