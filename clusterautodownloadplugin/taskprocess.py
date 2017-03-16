@@ -52,8 +52,8 @@ class TaskProcess(object):
                 if task_type != "magnet":
                     log.warn("Task info has no info, maybe it has been removed? %s"\
                         , single_task["tid"])
-            log.info("Torrent %s[%s] already in download list."\
-                , single_task["tid"], single_task["infohash"])
+            log.info("Torrent %s[%s] already in download list. %s"\
+                , single_task["tid"], single_task["infohash"], json.dumps(task_info))
             self.change_torrent_status(single_task["tid"]\
                 , {"status" : 5, "infohash" : single_task["infohash"]})
             return
