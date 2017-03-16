@@ -59,7 +59,18 @@ class TaskProcess(object):
                         base64.encodestring(req.content), {})
                         if torrent_id != None:
                             log.info("Successfly add torrent, tid: %s", single_task["tid"])
+                        self.change_torrent_status(single_task["tid"]\
+                        , {"status" : 5, "infohash" : torrent_id})
                 except Exception as ex:
                     log.error("Unable to add torrent file!: %s", ex)
                     return
+
+    def change_torrent_status(self, tid, torrent_info):
+        """Change the torrent status on server."""
+        req = requests.put(self._base_url + '/v1/task/' + tid\
+        , headers={"X-Task-Token" : "1024tasktoken"}, timeout=5, json=torrent_info)
+        if req.status_code == 200:
+            log.info("Received from server %s", req.json())
+        else:
+            log.info("Received HTTP error %d.", req.status_code)
 
