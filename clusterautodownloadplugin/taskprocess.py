@@ -49,8 +49,6 @@ class TaskProcess(object):
         """Check single task."""
         task_type = single_task["type"]
         core = component.get("Core")
-        log.info(self._task_in_process(single_task["infohash"], core))
-        return
         if self._task_in_process(single_task["infohash"], core):
             log.info("Torrent %s[%s] already in download list."\
                 , single_task["tid"], single_task["infohash"])
