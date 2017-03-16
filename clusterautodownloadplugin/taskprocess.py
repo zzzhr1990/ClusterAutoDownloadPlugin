@@ -67,8 +67,8 @@ class TaskProcess(object):
  #           self.change_torrent_status(single_task["tid"]\
  #               , {"status" : 5, "infohash" : single_task["infohash"]})
  #          return
-        else:
-            log.info("Adding %s", single_task["source"])
+ #       else:
+ #           log.info("Adding %s", single_task["source"])
                 # Report to task server?
                 #self.change_torrent_status(single_task["tid"]\
                 #    , {"status" : 5, "infohash" : single_task["infohash"]})
