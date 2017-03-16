@@ -17,8 +17,6 @@ class TaskProcess(object):
             if json_request["errno"] == 0:
                 if "data" in json_request:
                     return json_request["data"]
-                    else:
-                        log.warn("No data object found in response JSON['data'].\r\n%s", data)
                 else:
                     log.warn("No data object found in response JSON. data %s", json_request)
             else:
