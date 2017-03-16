@@ -1,5 +1,6 @@
 import requests
 import base64
+import json
 from deluge.log import LOG as log
 import deluge.component as component
 from deluge.plugins.pluginbase import CorePluginBase
@@ -91,8 +92,10 @@ class TaskProcess(object):
                         , {"status" : 5, "infohash" : torrent_id})
                 else:
                     log.warn(\
-                        "Torrent %s[%s] already in download list but not figured before."\
+                        "Magnet %s[%s] already in download list but not figured before."\
                         , single_task["tid"], single_task["infohash"])
+                    log.info(json.dumps(core.get_torrent_status({},{})))
+                
             except Exception as ex:
                 log.error("Unable to add torrent file!: %s", ex)
         else:
