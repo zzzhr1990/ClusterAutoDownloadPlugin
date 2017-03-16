@@ -129,6 +129,7 @@ class Core(CorePluginBase):
     def _checking_tasks(self):
         for key in self.processing_pool:
             if self.processing_pool[key].finished():
+                log.info("%s shutting down", key)
                 self.processing_pool.pop(key)
 
         avail = WorkConfig.MAX_PROCESS - len(self.processing_pool)
