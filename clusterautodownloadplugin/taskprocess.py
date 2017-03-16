@@ -51,10 +51,13 @@ class TaskProcess(object):
                             , single_task["tid"])
                             # Report to task server?
                         else:
-                            log.info("Adding torrent %s[%s] to download list."\
+                            log.info("Torrent %s[%s] already in download list."\
                             , single_task["tid"], single_task["infohash"])
-                    torrent_id = core.add_torrent_file(single_task["tid"],\
-                    base64.encodestring(req.content), {})
+                    else:
+                        log.info("Adding torrent %s[%s] to download list."\
+                        , single_task["tid"], single_task["infohash"])
+                        torrent_id = core.add_torrent_file(single_task["tid"],\
+                        base64.encodestring(req.content), {})
                     if torrent_id != None:
                         log.info("Successfly add torrent, tid: %s", single_task["tid"])
                 except Exception as ex:
