@@ -52,6 +52,8 @@ class TaskProcess(object):
                         else:
                             log.info("Torrent %s[%s] already in download list."\
                             , single_task["tid"], single_task["infohash"])
+                            self.change_torrent_status(single_task["tid"]\
+                            , {"status" : 5, "infohash" : torrent_id})
                     else:
                         log.info("Adding torrent %s[%s] to download list."\
                         , single_task["tid"], single_task["infohash"])
@@ -59,8 +61,12 @@ class TaskProcess(object):
                         base64.encodestring(req.content), {})
                         if torrent_id != None:
                             log.info("Successfly add torrent, tid: %s", single_task["tid"])
-                        self.change_torrent_status(single_task["tid"]\
-                        , {"status" : 5, "infohash" : torrent_id})
+                            self.change_torrent_status(single_task["tid"]\
+                            , {"status" : 5, "infohash" : torrent_id})
+                        else:
+                            log.info(\
+                            "Torrent %s[%s] already in download list but not figured before."\
+                            , single_task["tid"], single_task["infohash"])
                 except Exception as ex:
                     log.error("Unable to add torrent file!: %s", ex)
                     return
