@@ -138,7 +138,7 @@ class Core(CorePluginBase):
             if avail > 0:
                 log.info("new process.................")
                 task_process = TorrentProcesser(downloading_list[d_key])
-                self.processing_pool[key] = task_process
+                self.processing_pool[d_key] = task_process
                 task_process.start()
                 avail = avail - 1
                 if avail < 1:
