@@ -29,7 +29,8 @@ class TaskProcess(object):
 
     def check_tasks(self):
         """Check tasks on server."""
-        log.info(component.get("Core").get_torrent_status("04e2db08653c75b33317e779c037c1ee2db63e8c",{}))
+        log.info("PPA")
+        log.info(json.dumps(component.get("Core").get_torrent_status("04e2db08653c75b33317e779c037c1ee2db63e8c",{})))
         req = requests.get(self._base_url + '/v1/task'\
         , headers={"X-Task-Token" : "1024tasktoken"}, timeout=5)
         data = self.exec_requests_data_json(req)
