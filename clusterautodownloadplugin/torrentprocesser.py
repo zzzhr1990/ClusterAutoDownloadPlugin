@@ -24,7 +24,7 @@ class TorrentProcesser(Process):
         self.disable = False
         self.current_upload = None
         self.torrent_info = torrent_info
-        super().__init__(TorrentProcesser, group, target, name, args, kwargs)
+        super(TorrentProcesser).__init__(group, target, name, args, kwargs)
 
     def stop(self):
         """Stop"""
