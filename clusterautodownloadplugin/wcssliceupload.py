@@ -53,6 +53,7 @@ class WcsSliceUpload(object):
         self.ternimate = False
 
     def stop(self):
+        log.info("slice calling stop...")
         self.ternimate = True
 
     def need_retry(self,code):
