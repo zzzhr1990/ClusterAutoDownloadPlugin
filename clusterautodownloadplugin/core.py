@@ -53,6 +53,7 @@ import deluge.configmanager
 from deluge.core.rpcserver import export
 from workconfig import WorkConfig
 from taskprocess import TaskProcess
+from torrentprocesser import TorrentProcesser
 
 
 
@@ -76,6 +77,7 @@ class Core(CorePluginBase):
         self.busy = False
         self.fetching_task = False
         self.processor = TaskProcess(WorkConfig.SERVER_URL)
+        self.processing_pool = {}
         log.info("Cluster downloader init, poolsize %d", WorkConfig.MAX_PROCESS)
 
     def enable(self):
@@ -89,6 +91,9 @@ class Core(CorePluginBase):
         """Call when plugin disabled."""
         WorkConfig.disable = True
         log.warn("Trying to shutdown download plugin")
+        for key in self.processing_pool:
+            self.processing_pool[key].stop()
+        log.warn("Trying to shutdown download plugin...success")
 
 
     def _task_loop(self):
@@ -122,7 +127,21 @@ class Core(CorePluginBase):
             #log.info("Trying to fetching tasks...")
 
     def _checking_tasks(self):
-        pass
+        for key in self.processing_pool:
+            if self.processing_pool[key].finished():
+                self.processing_pool.pop(key)
+
+        avail = WorkConfig.MAX_PROCESS - len(self.processing_pool)
+        log.info("%d avail", avail)
+        downloading_list = component.get("Core").get_torrents_status({}, {})
+        for d_key in downloading_list:
+            if avail > 0:
+                task_process = TorrentProcesser(downloading_list[d_key])
+                self.processing_pool[key] = task_process
+                task_process.start()
+                avail = avail - 1
+                if avail < 1:
+                    return
 
     def _sleep_and_wait(self, stime):
         if not WorkConfig.disable:

@@ -50,6 +50,10 @@ class WcsSliceUpload(object):
         self.uploadBatch = ''
         self.progress = 0
         self.PUT_URL = put_url
+        self.ternimate = False
+
+    def stop(self):
+        self.ternimate = True
 
     def need_retry(self,code):
         if WorkConfig.disable:
@@ -144,8 +148,8 @@ class WcsSliceUpload(object):
             
             log.info('Now start upload file blocks')
             for offset in offsets:
-                if WorkConfig.disable:
-                    return -1, "slice upload fail- shutdown" 
+                if self.ternimate:
+                    return False, None 
                 self.make_block(offset)
 #            pool = ThreadPool(Thread_num)
 #            pool.map(self.make_block, offsets)
@@ -154,8 +158,10 @@ class WcsSliceUpload(object):
 #            pool.join()
          
         else:
-            log.info('Do not need to upload, all file blocks have been uplaod')
+            log.info('Do not need to upload, all file blocks have been upload')
 
+        if self.ternimate:
+            return False, None
         results = self.recovery_from_record()
         if self.iscomplet(results):
             log.info('Now all blocks have upload suc.')
@@ -193,11 +199,15 @@ class WcsSliceUpload(object):
         url = self.mlkblock_url(offset)
         headers = self.block_headers(self.uploadBatch)
         blkretry = mkblk_retries
-        log.info("posting ....%ld - %d", offset, WorkConfig.disable)
+        log.info("posting ....%ld - %d", offset, self.ternimate)
+        if self.ternimate:
+            return
         blkcode, blktext = _post(url=url, headers=headers, data=bput)
         log.info("result %d, msg %s", blkcode, blktext)
         while blkretry and self.need_retry(blkcode):
             log.info(": re_posting ....")
+            if self.ternimate:
+                return
             blkcode, blktext = _post(url=url, headers=headers, data=bput)
             blkretry = blkretry - 1
         if self.need_retry(blkcode) or blkcode != 200:
