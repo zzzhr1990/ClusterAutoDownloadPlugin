@@ -59,7 +59,7 @@ class TaskProcess(object):
                 , single_task["tid"], single_task["infohash"])
             self.change_torrent_status(single_task["tid"]\
                 , {"status" : 5, "infohash" : single_task["infohash"]})
-                return
+            return
         if task_type == "torrent":
             req = requests.get(single_task["url"], \
             headers={"X-Task-Token" : "1024tasktoken"}, timeout=5)
