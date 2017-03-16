@@ -53,11 +53,12 @@ class TaskProcess(object):
                 if task_type != "magnet":
                     log.warn("Task info has no info, maybe it has been removed? %s"\
                         , single_task["tid"])
+                    return
                 # Report to task server?
                 #self.change_torrent_status(single_task["tid"]\
                 #    , {"status" : 5, "infohash" : single_task["infohash"]})
-                return
         else:
+            log.info("NODATA,NEW DATA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             log.info("Torrent %s[%s] already in download list."\
                 , single_task["tid"], single_task["infohash"])
             self.change_torrent_status(single_task["tid"]\
@@ -81,7 +82,7 @@ class TaskProcess(object):
                             "Torrent %s[%s] already in download list but not figured before."\
                             , single_task["tid"], single_task["infohash"])
                 except Exception as ex:
-                    log.error("Unable to add torrent file!: %s", ex)
+                    log.error("Unable to add torrent file!: %s.", ex)
                     return
             else:
                 log.info("Add torrent file error.")
