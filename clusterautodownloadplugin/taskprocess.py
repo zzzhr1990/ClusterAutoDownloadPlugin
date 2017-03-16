@@ -29,6 +29,7 @@ class TaskProcess(object):
 
     def _task_in_process(self, torrent_id, core):
         log.info("%s === id", torrent_id)
+        log.info(core.torrentmanager == None)
         return torrent_id in core.torrentmanager
 
     def check_tasks(self):
