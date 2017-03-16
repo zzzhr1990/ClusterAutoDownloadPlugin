@@ -53,7 +53,7 @@ class TaskProcess(object):
                             log.info("Torrent %s[%s] already in download list."\
                             , single_task["tid"], single_task["infohash"])
                             self.change_torrent_status(single_task["tid"]\
-                            , {"status" : 5, "infohash" : torrent_id})
+                            , {"status" : 5, "infohash" : single_task["infohash"]})
                     else:
                         log.info("Adding torrent %s[%s] to download list."\
                         , single_task["tid"], single_task["infohash"])
