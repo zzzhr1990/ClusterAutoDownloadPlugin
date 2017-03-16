@@ -58,8 +58,8 @@ class TaskProcess(object):
                         , single_task["tid"], single_task["infohash"])
                         torrent_id = core.add_torrent_file(single_task["tid"],\
                         base64.encodestring(req.content), {})
-                    if torrent_id != None:
-                        log.info("Successfly add torrent, tid: %s", single_task["tid"])
+                        if torrent_id != None:
+                            log.info("Successfly add torrent, tid: %s", single_task["tid"])
                 except Exception as ex:
                     log.error("Unable to add torrent file!: %s", ex)
                     return
