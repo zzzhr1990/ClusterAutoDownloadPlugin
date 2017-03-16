@@ -68,7 +68,7 @@ class TaskProcess(object):
  #               , {"status" : 5, "infohash" : single_task["infohash"]})
  #          return
         else:
-            log.info("Adding %s", single_task["url"])
+            log.info("Adding %s", single_task["source"])
                 # Report to task server?
                 #self.change_torrent_status(single_task["tid"]\
                 #    , {"status" : 5, "infohash" : single_task["infohash"]})
@@ -98,7 +98,7 @@ class TaskProcess(object):
             log.info("NODATA,NEW DATA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             try:
                 log.info("Add_magnet")
-                torrent_id = core.add_torrent_magnet(single_task["url"], {})
+                torrent_id = core.add_torrent_magnet(single_task["source"], {})
                 if torrent_id != None:
                     log.info("Successfly add magnet, tid: %s", single_task["tid"])
                     self.change_torrent_status(single_task["tid"]\
@@ -107,7 +107,6 @@ class TaskProcess(object):
                     log.warn(\
                         "Magnet %s[%s] already in download list but not figured before."\
                         , single_task["tid"], single_task["infohash"])
-                    log.info("CCX %s", core.get_torrent_status({}, {}))
             except Exception as ex:
                 log.error("Unable to add torrent file!: %s", ex)
         else:
