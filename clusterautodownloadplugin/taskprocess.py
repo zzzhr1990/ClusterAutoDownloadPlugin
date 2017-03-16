@@ -27,6 +27,9 @@ class TaskProcess(object):
             log.warn("Data recv error, code:%d", req.status_code)
         return None
 
+    def _task_in_process(self, torrent_id, core):
+        return torrent_id in core.torrentmanager
+
     def check_tasks(self):
         """Check tasks on server."""
         req = requests.get(self._base_url + '/v1/task'\
@@ -46,17 +49,24 @@ class TaskProcess(object):
         """Check single task."""
         task_type = single_task["type"]
         core = component.get("Core")
-        task_info = core.get_torrent_status(single_task["infohash"], {})
-        if task_info != None:
-            if len(task_info) == 0:
-                if task_type != "magnet":
-                    log.warn("Task info has no info, maybe it has been removed? %s"\
-                        , single_task["tid"])
-            log.info("Torrent %s[%s] already in download list. %s"\
-                , single_task["tid"], single_task["infohash"], json.dumps(task_info))
+        if self._task_in_process(single_task["infohash"], core):
+            log.info("Torrent %s[%s] already in download list."\
+                , single_task["tid"], single_task["infohash"])
             self.change_torrent_status(single_task["tid"]\
                 , {"status" : 5, "infohash" : single_task["infohash"]})
             return
+
+ #       task_info = core.get_torrent_status(single_task["infohash"], {})
+ #       if task_info != None:
+ #           if len(task_info) == 0:
+ #               if task_type != "magnet":
+ #                   log.warn("Task info has no info, maybe it has been removed? %s"\
+ #                       , single_task["tid"])
+ #           log.info("Torrent %s[%s] already in download list. %s"\
+ #               , single_task["tid"], single_task["infohash"], json.dumps(task_info))
+ #           self.change_torrent_status(single_task["tid"]\
+ #               , {"status" : 5, "infohash" : single_task["infohash"]})
+ #          return
         else:
             log.info("Adding %s", single_task["url"])
                 # Report to task server?
