@@ -136,11 +136,14 @@ class Core(CorePluginBase):
         downloading_list = component.get("Core").get_torrents_status({}, {})
         for d_key in downloading_list:
             if avail > 0:
-                log.info("new process.................")
+                if d_key in self.processing_pool:
+                    continue
+                log.info("new process.................%d, %s", avail,d_key)
                 task_process = TorrentProcesser(downloading_list[d_key])
                 self.processing_pool[d_key] = task_process
                 task_process.start()
                 avail = avail - 1
+                log.info("After - %d avail", avail)
                 if avail < 1:
                     return
 
