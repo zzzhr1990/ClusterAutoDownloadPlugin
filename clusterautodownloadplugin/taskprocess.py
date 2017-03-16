@@ -47,6 +47,7 @@ class TaskProcess(object):
         task_type = single_task["type"]
         core = component.get("Core")
         task_info = core.get_torrent_status(single_task["infohash"], {})
+        log.info("HAVE_TASK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         if task_info != None:
             if len(task_info) == 0:
                 if task_type != "magnet":
