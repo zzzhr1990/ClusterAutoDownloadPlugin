@@ -47,23 +47,19 @@ class TaskProcess(object):
         task_type = single_task["type"]
         core = component.get("Core")
         task_info = core.get_torrent_status(single_task["infohash"], {})
-        log.info("HAVE_TASK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         if task_info != None:
             if len(task_info) == 0:
                 if task_type != "magnet":
                     log.warn("Task info has no info, maybe it has been removed? %s"\
                         , single_task["tid"])
-                    return
-                # Report to task server?
-                #self.change_torrent_status(single_task["tid"]\
-                #    , {"status" : 5, "infohash" : single_task["infohash"]})
-        else:
-            log.info("NODATA,NEW DATA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             log.info("Torrent %s[%s] already in download list."\
                 , single_task["tid"], single_task["infohash"])
             self.change_torrent_status(single_task["tid"]\
                 , {"status" : 5, "infohash" : single_task["infohash"]})
             return
+                # Report to task server?
+                #self.change_torrent_status(single_task["tid"]\
+                #    , {"status" : 5, "infohash" : single_task["infohash"]})
         if task_type == "torrent":
             req = requests.get(single_task["url"], \
             headers={"X-Task-Token" : "1024tasktoken"}, timeout=5)
@@ -87,6 +83,7 @@ class TaskProcess(object):
             else:
                 log.info("Add torrent file error.")
         if task_type == "magnet":
+            log.info("NODATA,NEW DATA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             try:
                 torrent_id = core.add_torrent_magnet(single_task["url"], {})
                 if torrent_id != None:
