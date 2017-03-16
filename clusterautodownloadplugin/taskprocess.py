@@ -43,6 +43,16 @@ class TaskProcess(object):
             if req.status_code == 200:
                 try:
                     core = component.get("Core")
+                    #find if the task exists
+                    task_info = core.get_torrent_status(single_task["infohash"], {})
+                    if task_info != None:
+                        if len(task_info) == 0:
+                            log.warn("Task info has no info, maybe it has been removed? %s"\
+                            , single_task["tid"])
+                            # Report to task server?
+                        else:
+                            log.info("Adding torrent %s[%s] to download list."\
+                            , single_task["tid"], single_task["infohash"])
                     torrent_id = core.add_torrent_file(single_task["tid"],\
                     base64.encodestring(req.content), {})
                     if torrent_id != None:
