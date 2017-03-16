@@ -105,7 +105,7 @@ class Core(CorePluginBase):
             try:
                 self.processor.check_tasks()
             except Exception as e:
-                log.error("Exception occored in task loop. %s dd\r\n%s", e, traceback.format_exc())
+                log.error("Exception occored in task loop. %s -- \r\n%s", e, traceback.format_exc())
             finally:
                 self.fetching_task = False
             self._sleep_and_wait(5)
@@ -119,7 +119,7 @@ class Core(CorePluginBase):
             try:
                 self._checking_tasks()
             except Exception as e:
-                log.error("Exception occored in status loop.")
+                log.error("Exception occored in status loop. %s -- \r\n%s", e, traceback.format_exc())
             finally:
                 self.busy = False
             if not WorkConfig.disable:
