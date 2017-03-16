@@ -37,7 +37,7 @@ class TorrentProcesser(Process):
         try:
             self.process_single_torrent()
         except Exception as e:
-            log.error("Exception occored in torrent processs.")
+            log.error("Exception occored in torrent process. %s -- \r\n%s", e, traceback.format_exc())
         finally:
             self.disable = True
     def finished(self):
