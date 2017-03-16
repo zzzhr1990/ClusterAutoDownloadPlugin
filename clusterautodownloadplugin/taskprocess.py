@@ -94,7 +94,7 @@ class TaskProcess(object):
                     log.warn(\
                         "Magnet %s[%s] already in download list but not figured before."\
                         , single_task["tid"], single_task["infohash"])
-                    log.info(json.dumps(core.get_torrent_status({}, {})))
+                    log.info("CCX %s", core.get_torrent_status({}, {}))
             except Exception as ex:
                 log.error("Unable to add torrent file!: %s", ex)
         else:
