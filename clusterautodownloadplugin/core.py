@@ -45,6 +45,7 @@ import base64
 import traceback
 import datetime
 import threading
+import multiprocessing
 from deluge.error import InvalidTorrentError
 from deluge.log import LOG as log
 from deluge.plugins.pluginbase import CorePluginBase
@@ -54,6 +55,7 @@ from deluge.core.rpcserver import export
 from workconfig import WorkConfig
 from taskprocess import TaskProcess
 from torrentprocesser import TorrentProcesser
+
 
 
 
@@ -78,6 +80,7 @@ class Core(CorePluginBase):
         self.fetching_task = False
         self.processor = TaskProcess(WorkConfig.SERVER_URL)
         self.processing_pool = {}
+        self.signal_pool = {}
         log.info("Cluster downloader init, poolsize %d", WorkConfig.MAX_PROCESS)
 
     def enable(self):
@@ -91,8 +94,8 @@ class Core(CorePluginBase):
         """Call when plugin disabled."""
         WorkConfig.disable = True
         log.warn("Trying to shutdown download plugin")
-        for key in self.processing_pool:
-            self.processing_pool[key].stop()
+        for key in self.signal_pool:
+            self.signal_pool[key][0].put(True,block = False)
         log.warn("Trying to shutdown download plugin...success")
 
 
@@ -140,7 +143,10 @@ class Core(CorePluginBase):
                 if d_key in self.processing_pool:
                     continue
                 log.info("new process.................%d, %s", avail,d_key)
-                task_process = TorrentProcesser(downloading_list[d_key])
+                in_queue = multiprocessing.Queue()
+                out_queue = multiprocessing.Queue()
+                self.signal_pool[d_key] = [in_queue, out_queue]
+                task_process = TorrentProcesser(d_key, in_queue, out_queue, downloading_list[d_key])
                 self.processing_pool[d_key] = task_process
                 task_process.start()
                 avail = avail - 1

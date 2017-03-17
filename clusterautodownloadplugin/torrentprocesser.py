@@ -5,6 +5,7 @@ import os
 import base64
 import traceback
 import datetime
+import threading
 from multiprocessing import Process
 from filemanager import BucketManager
 from workconfig import WorkConfig
@@ -18,11 +19,40 @@ from wcssliceupload import WcsSliceUpload
 
 class TorrentProcesser(Process):
     """Process Torrent"""
-    def __init__(self, torrent_info):
+    def __init__(self, torrent_id, in_queue, out_queue, torrent_info):
         self.disable = False
         self.current_upload = None
         self.torrent_info = torrent_info
+        self.torrent_id = torrent_id
+        self.in_queue = in_queue
+        self.out_queue = out_queue
+        self.busy = False
+        self.looping_thread = threading.Thread(target=self._loop)
         super(TorrentProcesser, self).__init__()
+
+    def _loop(self):
+        while not self._terminated():
+            if self.busy:
+                log.warn("Slow query found.")
+                return
+            self.busy = True
+            try:
+                self._terminated()
+            except Exception as e:
+                log.error("Exception occored in status loop. %s -- \r\n%s"\
+                , e, traceback.format_exc())
+            finally:
+                self.busy = False
+            if not self.disable:
+                self._sleep_and_wait(2)
+
+    def _sleep_and_wait(self, stime):
+        if not self.disable:
+            if stime < 1:
+                stime = 1
+            for i in range(0, stime):
+                if not self.disable:
+                    time.sleep(1)
 
     def stop(self):
         """Stop"""
@@ -32,6 +62,12 @@ class TorrentProcesser(Process):
         if self.current_upload != None:
             self.current_upload.stop()
 
+    def _terminated(self):
+        t_empty = not self.in_queue.empty()
+        if t_empty:
+            self.stop()
+        return t_empty
+    
     def run(self):
         try:
             #self.process_single_torrent()
@@ -61,6 +97,8 @@ class TorrentProcesser(Process):
             if self.disable:
                 if self.current_upload != None:
                     self.current_upload.stop()
+                    return
+                    #TODO CHECK THIS
             file_progress = torrent_info["file_progress"][index]
             file_download = torrent_info["file_priorities"][index]
             if file_download:
