@@ -131,8 +131,7 @@ class Core(CorePluginBase):
             #log.info("Trying to fetching tasks...")
 
     def _checking_tasks(self):
-        if self.disable:
-            return
+
         need_pop = []
         for key in self.signal_pool:
             out_queue = self.signal_pool[key][1]
