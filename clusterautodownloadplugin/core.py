@@ -94,6 +94,7 @@ class Core(CorePluginBase):
         """Call when plugin disabled."""
         WorkConfig.disable = True
         log.warn("Trying to shutdown download plugin")
+        time.sleep(2)
         for key in self.signal_pool:
             self.signal_pool[key][0].put(True,block = False)
         log.warn("Trying to shutdown download plugin...success")
@@ -130,7 +131,8 @@ class Core(CorePluginBase):
             #log.info("Trying to fetching tasks...")
 
     def _checking_tasks(self):
-
+        if self.disable:
+            return
         need_pop = []
         for key in self.signal_pool:
             out_queue = self.signal_pool[key][1]
@@ -145,7 +147,8 @@ class Core(CorePluginBase):
 #            if self.processing_pool[key].finished():
 #                log.info("%s shutting down", key)
 #                self.processing_pool.pop(key)
-
+        if WorkConfig.disable:
+            return
         avail = WorkConfig.MAX_PROCESS - len(self.processing_pool)
         log.info("%d avail", avail)
         downloading_list = component.get("Core").get_torrents_status({}, {})
