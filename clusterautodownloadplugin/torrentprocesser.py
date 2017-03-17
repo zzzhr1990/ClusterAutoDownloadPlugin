@@ -139,9 +139,9 @@ class TorrentProcesser(Process):
             , upload_progress_recorder, modify_time, WorkConfig.PUT_URL)
         self.current_upload = sliceupload
         if self.disable:
-            return
+            return 0, None
         code, hashvalue = sliceupload.slice_upload()
-        log.info("upload %d, %s", code, json.dumps(hashvalue))
+        log.info("upload code %d, %s", code, json.dumps(hashvalue))
 
     def _upload_to_ws(self, file_path):
         log.info("starting proc to ws")

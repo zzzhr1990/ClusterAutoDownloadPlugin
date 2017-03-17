@@ -137,10 +137,13 @@ class Core(CorePluginBase):
             out_queue = self.signal_pool[key][1]
             if not out_queue.empty():
                 log.info("%s has finished!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", key)
+                self.signal_pool[key][0].close()
+                self.signal_pool[key][1].close()
                 need_pop.append(key)
         for wait_down in need_pop:
             self.signal_pool.pop(wait_down)
             self.processing_pool.pop(wait_down)
+            
 #
 #        for key in self.processing_pool:
 #            if self.processing_pool[key].finished():
