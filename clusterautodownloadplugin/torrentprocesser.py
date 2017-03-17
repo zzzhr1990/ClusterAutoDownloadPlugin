@@ -40,7 +40,9 @@ class TorrentProcesser(Process):
                 return
             self.busy = True
             try:
-                self._terminated()
+                terminated = self._terminated()
+                if terminated:
+                    log.info("!!!!!!!!!!!!!!!!====================!!!!!!!!!!!!!!!!!!!!!!")
             except Exception as e:
                 log.error("Exception occored in status loop. %s -- \r\n%s"\
                 , e, traceback.format_exc())
