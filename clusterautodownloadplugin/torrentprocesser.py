@@ -64,13 +64,11 @@ class TorrentProcesser(Process):
         if self.disable:
             return
         self.disable = True
-        log.info("Trying to stop upload process...............")
         if self.current_upload != None:
             self.current_upload.stop()
 
     def _terminated(self):
         t_empty = not self.in_queue.empty()
-        log.info("Checking.... %d", t_empty)
         if t_empty:
             self.stop()
         return t_empty
@@ -78,9 +76,8 @@ class TorrentProcesser(Process):
     def run(self):
         try:
             self.looping_thread.start()
-            #self.process_single_torrent()
-            log.info("Process %s for 5s........", self.torrent_id)
-            time.sleep(5)
+            self.process_single_torrent()
+            #log.info("Process %s", json.dumps(self.torrent_info))
             self.out_queue.put(self.torrent_id, block = False)
         except Exception as e:
             log.error("Exception occored in torrent process. %s -- \r\n%s", e, traceback.format_exc())
@@ -140,8 +137,10 @@ class TorrentProcesser(Process):
         modify_time = time.time()
         sliceupload = WcsSliceUpload(token, file_path, file_key, param\
             , upload_progress_recorder, modify_time, WorkConfig.PUT_URL)
-        code, hashvalue = sliceupload.slice_upload()
         self.current_upload = sliceupload
+        if self.disable:
+            return
+        code, hashvalue = sliceupload.slice_upload()
         log.info("upload %d, %s", code, json.dumps(hashvalue))
 
     def _upload_to_ws(self, file_path):
