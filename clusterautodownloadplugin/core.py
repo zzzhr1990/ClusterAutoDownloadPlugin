@@ -155,6 +155,8 @@ class Core(CorePluginBase):
             if avail > 0:
                 if d_key in self.processing_pool:
                     continue
+                 if WorkConfig.disable:
+                    return
                 log.info("new process.................%d, %s", avail,d_key)
                 in_queue = multiprocessing.Queue()
                 out_queue = multiprocessing.Queue()
