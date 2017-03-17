@@ -17,10 +17,8 @@ from wcssliceupload import WcsSliceUpload
 
 
 class TorrentProcesser(Process):
-    
     """Process Torrent"""
-        
-    def __init__(self, torrent_info, group=None, target=None, name=None, args=(), kwargs={}):
+    def __init__(self, torrent_info):
         self.disable = False
         self.current_upload = None
         self.torrent_info = torrent_info
@@ -33,13 +31,16 @@ class TorrentProcesser(Process):
         self.disable = True
         if self.current_upload != None:
             self.current_upload.stop()
+
     def run(self):
         try:
-            self.process_single_torrent()
+            #self.process_single_torrent()
+            log.info("Process %s", json.dumps(self.torrent_info))
         except Exception as e:
             log.error("Exception occored in torrent process. %s -- \r\n%s", e, traceback.format_exc())
         finally:
             self.disable = True
+
     def finished(self):
         """determin"""
         return self.disable
@@ -96,7 +97,6 @@ class TorrentProcesser(Process):
         log.info("upload %d, %s", code, json.dumps(hashvalue))
 
     def _upload_to_ws(self, file_path):
-
         log.info("starting proc to ws")
         #begin = time.time()
         file_key = etag(file_path)

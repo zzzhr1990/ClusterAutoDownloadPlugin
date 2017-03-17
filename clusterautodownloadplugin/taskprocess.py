@@ -95,7 +95,6 @@ class TaskProcess(object):
             else:
                 log.info("Add torrent file error.")
         if task_type == "magnet":
-            log.info("NODATA,NEW DATA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             try:
                 log.info("Add_magnet")
                 torrent_id = core.add_torrent_magnet(single_task["source"], {})
