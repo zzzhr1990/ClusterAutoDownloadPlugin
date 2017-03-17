@@ -76,8 +76,9 @@ class TorrentProcesser(Process):
     def run(self):
         try:
             self.looping_thread.start()
-            self.process_single_torrent()
-            #log.info("Process %s", json.dumps(self.torrent_info))
+            #self.process_single_torrent()
+            log.info("Process %s for 5s........", self.torrent_id)
+            time.sleep(5)
             self.out_queue.put(self.torrent_id, block = False)
         except Exception as e:
             log.error("Exception occored in torrent process. %s -- \r\n%s", e, traceback.format_exc())
