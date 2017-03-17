@@ -28,6 +28,7 @@ class TorrentProcesser(Process):
         self.out_queue = out_queue
         self.busy = False
         self.looping_thread = threading.Thread(target=self._loop)
+        self.looping_thread.daemon = True
         super(TorrentProcesser, self).__init__()
 
     def _loop(self):
@@ -72,6 +73,7 @@ class TorrentProcesser(Process):
     
     def run(self):
         try:
+            self.looping_thread.start()
             self.process_single_torrent()
             #log.info("Process %s", json.dumps(self.torrent_info))
             self.out_queue.put(self.torrent_id, block = False)
