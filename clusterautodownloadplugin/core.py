@@ -130,10 +130,18 @@ class Core(CorePluginBase):
             #log.info("Trying to fetching tasks...")
 
     def _checking_tasks(self):
-        for key in self.processing_pool:
-            if self.processing_pool[key].finished():
-                log.info("%s shutting down", key)
+
+        for key in self.signal_pool:
+            out_queue = self.signal_pool[key][1]
+            if not out_queue.empty():
+                log.info("%s has finished!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", key)
+                self.signal_pool.pop(key)
                 self.processing_pool.pop(key)
+#
+#        for key in self.processing_pool:
+#            if self.processing_pool[key].finished():
+#                log.info("%s shutting down", key)
+#                self.processing_pool.pop(key)
 
         avail = WorkConfig.MAX_PROCESS - len(self.processing_pool)
         log.info("%d avail", avail)

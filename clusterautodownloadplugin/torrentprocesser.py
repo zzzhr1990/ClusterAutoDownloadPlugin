@@ -32,6 +32,8 @@ class TorrentProcesser(Process):
 
     def _loop(self):
         while not self._terminated():
+            if self.disable:
+                return
             if self.busy:
                 log.warn("Slow query found.")
                 return
@@ -70,8 +72,9 @@ class TorrentProcesser(Process):
     
     def run(self):
         try:
-            #self.process_single_torrent()
-            log.info("Process %s", json.dumps(self.torrent_info))
+            self.process_single_torrent()
+            #log.info("Process %s", json.dumps(self.torrent_info))
+            self.out_queue.put(self.torrent_id, block = False)
         except Exception as e:
             log.error("Exception occored in torrent process. %s -- \r\n%s", e, traceback.format_exc())
         finally:
