@@ -64,6 +64,7 @@ class TorrentProcesser(Process):
         if self.disable:
             return
         self.disable = True
+        log.info("Trying to stop upload process...............")
         if self.current_upload != None:
             self.current_upload.stop()
 
