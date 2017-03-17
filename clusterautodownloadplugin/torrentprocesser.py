@@ -69,6 +69,7 @@ class TorrentProcesser(Process):
 
     def _terminated(self):
         t_empty = not self.in_queue.empty()
+        log.info("Checking.... %d", t_empty)
         if t_empty:
             self.stop()
         return t_empty
