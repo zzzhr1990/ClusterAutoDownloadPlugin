@@ -153,12 +153,11 @@ class Core(CorePluginBase):
             finally:
                 self.busy = False
                 self.record_lock.release()
-            
             self._sleep_and_wait(2)
         
-            #log.info("Trying to fetching tasks...")
 
     def _checking_tasks(self):
+        log.info("Checking tasks...")
         downloading_list = component.get("Core").get_torrents_status({}, {})
         for d_key in downloading_list:
             self.waiting_dict[d_key] = downloading_list[d_key]
