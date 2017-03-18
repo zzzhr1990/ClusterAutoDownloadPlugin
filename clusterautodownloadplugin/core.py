@@ -133,7 +133,8 @@ class Core(CorePluginBase):
                 return
             self.busy = True
             try:
-                self._checking_tasks()
+                pass
+                #self._checking_tasks()
             except Exception as e:
                 log.error("Exception occored in status loop. %s -- \r\n%s", e, traceback.format_exc())
             finally:
