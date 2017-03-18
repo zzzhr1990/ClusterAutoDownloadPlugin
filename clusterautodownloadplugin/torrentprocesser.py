@@ -109,6 +109,7 @@ class TorrentProcesser(Process):
                     all_success_download = False
 
     def _post_file(self, file_path, file_key):
+        log.info("CHZK:%s", file_path)
         auth = get_auth()
         putpolicy = {'scope':'other-storage:' + file_key\
             , 'deadline':str(int(time.time()) * 1000 + 86400000), \
@@ -127,7 +128,6 @@ class TorrentProcesser(Process):
         log.info("upload code %d, %s", code, json.dumps(hashvalue))
 
     def _upload_to_ws(self, file_path):
-        log.info("CHZK:%s", file_path)
         #begin = time.time()
         file_key = etag(file_path)
         #log.info("Process %ld in %f s", file_size, time.time() - begin)
