@@ -36,8 +36,8 @@ class TorrentProcesser(Process):
                 log.info("Torrent process %d terminated.", self.process_id)
                 self.terminated = True
                 self.terminate()
-                time.sleep(1)
                 return
+            time.sleep(1)
 
     def _sleep_and_wait(self, stime):
         if not self.terminated:
