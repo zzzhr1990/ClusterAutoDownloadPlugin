@@ -16,6 +16,9 @@ from deluge.log import LOG as log
 from workconfig import get_auth
 from taskprocess import TaskProcess
 from wcssliceupload import WcsSliceUpload
+import os.path
+import hashlib
+
 
 
 
@@ -95,7 +98,7 @@ class TorrentProcesser(Process):
                     if os.path.exists(file_path):
                         a_size = os.path.getsize(file_path)
                         if a_size == file_detail["size"]:
-                            single_success_download = self._upload_to_ws(file_path)
+                            single_success_download = self._upload_to_ws(file_path, torrent_info)
                             if not single_success_download:
                                 all_success_download = False
                         else:
@@ -108,7 +111,7 @@ class TorrentProcesser(Process):
                 else:
                     all_success_download = False
 
-    def _post_file(self, file_path, file_key):
+    def _post_file(self, file_path, file_key, torrent_info):
         auth = get_auth()
         putpolicy = {'scope':'other-storage:' + file_key\
             , 'deadline':str(int(time.time()) * 1000 + 86400000), \
@@ -124,9 +127,19 @@ class TorrentProcesser(Process):
         if self.terminated:
             return 0, None
         code, hashvalue = sliceupload.slice_upload()
+        if code == 200:
+            file_name = os.path.basename(file_path)
+            file_data = {"size":hashvalue["fsize"], "name":file_name, "key":hashvalue["key"]}
+            post_data = {"tid":self._md5(torrent_info["hash"]),\
+             "name":file_name, "fid":self._md5(hashvalue["hash"]), "file":file_data, "path":file_path.split('/')}
+            self.task.upload_file_info(post_data)
         log.info("upload code %d, %s", code, json.dumps(hashvalue))
 
-    def _upload_to_ws(self, file_path):
+    def _md5(self, str_s):
+        m_uu = hashlib.md5()
+        m_uu.update(str_s)
+        return m_uu.hexdigest()
+    def _upload_to_ws(self, file_path, torrent_info):
         #begin = time.time()
         file_key = etag(file_path)
         #log.info("Process %ld in %f s", file_size, time.time() - begin)
@@ -147,16 +160,16 @@ class TorrentProcesser(Process):
                 log.warn("file: %s hash mismatch: local: %s, remote: %s"\
                 , file_key, file_hash, remote_hash)
                 #repost
-                self._post_file(file_path, file_key)
+                self._post_file(file_path, file_key, torrent_info)
  #           else:
  #               log.info("%s exists on server, ignore...", file_path)
             #TODO: check and report..
         else:
             if code == 404:
-                self._post_file(file_path, file_key)
+                self._post_file(file_path, file_key, torrent_info)
             else:
                 log.warn("file get message %d, %s, we have to repost file.", code, text)
-                self._post_file(file_path, file_key)
+                self._post_file(file_path, file_key, torrent_info)
         return file_path
 
 
