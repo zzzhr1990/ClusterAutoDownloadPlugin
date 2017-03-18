@@ -30,6 +30,7 @@ class TorrentProcesser(Process):
 
     def _loop(self):
         while True:
+            log.info("CHECKING...%d - %d", self.process_id, self.command_queue.empty())
             if not self.command_queue.empty():
                 log.info("Torrent process %d terminated.", self.process_id)
                 self.terminated = True
@@ -48,8 +49,7 @@ class TorrentProcesser(Process):
     def _fetch_and_process(self):
         torrent_info = self.in_queue.get(block=True)
         log.info("Assuming processing torrent %d.", self.process_id)
-        log.info("%s", json.dumps(torrent_info))
-        time.sleep(15)
+        time.sleep(60)
 
     def run(self):
         """Main process"""
