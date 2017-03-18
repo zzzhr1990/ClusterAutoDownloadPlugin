@@ -19,9 +19,10 @@ from wcssliceupload import WcsSliceUpload
 
 class TorrentProcesser(Process):
     """Process Torrent"""
-    def __init__(self, process_id, in_queue, command_queue):
+    def __init__(self, process_id, in_queue, out_queue, command_queue):
         self.process_id = process_id
         self.in_queue = in_queue
+        self.out_queue = out_queue
         self.command_queue = command_queue
         self.looping_thread = threading.Thread(target=self._loop)
         self.looping_thread.daemon = True
@@ -29,46 +30,40 @@ class TorrentProcesser(Process):
         super(TorrentProcesser, self).__init__()
 
     def _loop(self):
+        while True:
+            if not self.in_queue.empty():
+                log.info("Torrent process %d terminated.", self.process_id)
+                self.terminated = True
+                self.terminate()
+                return
+            self._sleep_and_wait(2)
+
+    def _sleep_and_wait(self, stime):
+        if not self.terminated:
+            if stime < 1:
+                stime = 1
+            for i in range(0, stime):
+                if not self.terminated:
+                    time.sleep(1)
+
+    def _fetch_and_process(self):
+        try:
+            data = self.in_queue.get(True, 2)
+            log.info("%d processing torrents", 20)
+        except Exception as e:
+            log.error("EE_______GET_________. %s -- \r\n%s",\
+            e, traceback.format_exc())
+
+    def run(self):
+        """Main process"""
+        self.looping_thread.start()
         try:
             while not self.terminated:
                 self._fetch_and_process()
         except Exception as e:
             log.error("Exception occored in torrent process. %s -- \r\n%s",\
             e, traceback.format_exc())
-        
-
-    def _sleep_and_wait(self, stime):
-        if True:
-            if stime < 1:
-                stime = 1
-            for i in range(0, stime):
-                if True:
-                    log.info("sleep %d", i)
-                    time.sleep(1)
-
-    def _fetch_and_process(self):
-        torrent_info = self.in_queue.get(block=True)
-        log.info("Assuming processing torrent %d.", self.process_id)
-        self._sleep_and_wait(60)
-
-    def run(self):
-        while True:
-            log.info("I'm living %d", self.process_id)
-        """Main process"""
-        """
-        self.looping_thread.start()
-        while True:
-            log.info("CHECKING...%d - %d", self.process_id, self.command_queue.empty())
-            if not self.command_queue.empty():
-                log.info("______T")
-                log.info("Torrent process %d terminated.", self.process_id)
-                self.terminated = True
-                self.terminate()
-                return
-            self._sleep_and_wait(2)
-        #finally:
-            #self.terminated()
-            """
-
+        finally:
+            self.terminated()
 
 
