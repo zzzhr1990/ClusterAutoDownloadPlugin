@@ -60,7 +60,7 @@ class TorrentProcesser(Process):
         except Exception as e:
             log.error("Exception occored in torrent process. %s -- \r\n%s",\
             e, traceback.format_exc())
-        finally:
-            self.terminated()
+        #finally:
+            #self.terminated()
 
 
