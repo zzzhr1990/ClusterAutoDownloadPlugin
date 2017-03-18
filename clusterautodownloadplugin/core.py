@@ -164,6 +164,8 @@ class Core(CorePluginBase):
         for d_key in downloading_list:
             self.waiting_dict[d_key] = downloading_list[d_key]
         push_len = WorkConfig.MAX_PROCESS - self.waiting_queue.qsize()
+        log.info("Final...")
+        return
         if push_len > 0:
             f_pop = []
             for dd_key in self.waiting_dict:
@@ -171,7 +173,7 @@ class Core(CorePluginBase):
                 self.waiting_queue.put(self.waiting_dict[dd_key], False)
             for a_delete in f_pop:
                 self.waiting_dict.pop(a_delete)
-        log.info("Final...")
+        
  
     def _sleep_and_wait(self, stime):
         self.record_lock.acquire()
