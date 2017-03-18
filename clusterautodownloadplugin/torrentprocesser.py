@@ -24,7 +24,7 @@ class TorrentProcesser(Process):
         self.in_queue = in_queue
         self.command_queue = command_queue
         self.looping_thread = threading.Thread(target=self._loop)
-        self.looping_thread.daemon = True
+        #self.looping_thread.daemon = True
         self.terminated = False
         super(TorrentProcesser, self).__init__()
 
@@ -50,7 +50,7 @@ class TorrentProcesser(Process):
     def _fetch_and_process(self):
         torrent_info = self.in_queue.get(block=True)
         log.info("Assuming processing torrent %d.", self.process_id)
-        #time.sleep(60)
+        time.sleep(60)
 
     def run(self):
         """Main process"""
