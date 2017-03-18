@@ -32,8 +32,9 @@ class TorrentProcesser(Process):
         while True:
             log.info("CHECKING...%d - %d", self.process_id, self.command_queue.empty())
             if not self.command_queue.empty():
+                log.info("______T")
                 log.info("Torrent process %d terminated.", self.process_id)
-                self.terminated = True
+                #self.terminated = True
                 #self.terminate()
                 #return
             self._sleep_and_wait(2)
