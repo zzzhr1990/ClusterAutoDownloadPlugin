@@ -51,10 +51,11 @@ class TorrentProcesser(Process):
         try:
             data = self.in_queue.get(True, 2)
             log.info("%d processing torrents %s", self.process_id, data["hash"])
+            log.info("PBBBBB")
             time.sleep(20)
         except Empty:
+            log.info("PAAAAA")
             pass
-        log.info("PAAAAA")
 
     def run(self):
         """Main process"""
