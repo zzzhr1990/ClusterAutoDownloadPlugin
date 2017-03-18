@@ -79,13 +79,22 @@ class Core(CorePluginBase):
         self.busy = False
         self.fetching_task = False
         self.processor = TaskProcess(WorkConfig.SERVER_URL)
-        self.processing_pool = {}
-        self.signal_pool = {}
+        self.processing_pool = []
+        self.command_queues = []
+        self.waiting_dict = {}
+        self.waiting_queue = multiprocessing.Queue()
         log.info("Cluster downloader init, poolsize %d", WorkConfig.MAX_PROCESS)
 
     def enable(self):
         """Call when plugin enabled."""
         WorkConfig.disable = False
+        for i in range(0, WorkConfig.MAX_PROCESS):
+            command_queue = multiprocessing.Queue()
+            proccess = TorrentProcesser(i, self.waiting_queue, command_queue)
+            self.command_queues.append(command_queue)
+            self.processing_pool.append(proccess)
+            proccess.start()
+
         self.looping_thread.start()
         self.task_looping_thread.start()
         log.info("Plugin %s enabled.", self.plugin_name)
@@ -94,9 +103,9 @@ class Core(CorePluginBase):
         """Call when plugin disabled."""
         WorkConfig.disable = True
         log.warn("Trying to shutdown download plugin")
-        time.sleep(2)
-        for key in self.signal_pool:
-            self.signal_pool[key][0].put(True,block = False)
+        #time.sleep(2)
+        for queue in self.command_queues:
+            queue.put(True,block = False)
         log.warn("Trying to shutdown download plugin...success")
 
 
@@ -131,47 +140,18 @@ class Core(CorePluginBase):
             #log.info("Trying to fetching tasks...")
 
     def _checking_tasks(self):
-
-        need_pop = []
-        for key in self.signal_pool:
-            out_queue = self.signal_pool[key][1]
-            if not out_queue.empty():
-                log.info("%s has finished!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", key)
-                self.signal_pool[key][0].close()
-                self.signal_pool[key][1].close()
-                need_pop.append(key)
-        for wait_down in need_pop:
-            self.signal_pool.pop(wait_down)
-            self.processing_pool.pop(wait_down)
-            
-#
-#        for key in self.processing_pool:
-#            if self.processing_pool[key].finished():
-#                log.info("%s shutting down", key)
-#                self.processing_pool.pop(key)
-        if WorkConfig.disable:
-            return
-        avail = WorkConfig.MAX_PROCESS - len(self.processing_pool)
-        log.info("%d avail", avail)
         downloading_list = component.get("Core").get_torrents_status({}, {})
         for d_key in downloading_list:
-            if avail > 0:
-                if d_key in self.processing_pool:
-                    continue
-                if WorkConfig.disable:
-                    return
-                log.info("new process.................%d, %s", avail,d_key)
-                in_queue = multiprocessing.Queue()
-                out_queue = multiprocessing.Queue()
-                self.signal_pool[d_key] = [in_queue, out_queue]
-                task_process = TorrentProcesser(d_key, in_queue, out_queue, downloading_list[d_key])
-                self.processing_pool[d_key] = task_process
-                task_process.start()
-                avail = avail - 1
-                log.info("After - %d avail", avail)
-                if avail < 1:
-                    return
-
+            self.waiting_dict[d_key] = downloading_list[d_key]
+        push_len = WorkConfig.MAX_PROCESS - len(self.waiting_queue)
+        if push_len > 0:
+            f_pop = []
+            for dd_key in self.waiting_dict:
+                f_pop.append(dd_key)
+                self.waiting_queue.put(self.waiting_dict[dd_key], False)
+            for a_delete in f_pop:
+                self.waiting_dict.pop(a_delete)
+ 
     def _sleep_and_wait(self, stime):
         if not WorkConfig.disable:
             if stime < 1:
@@ -179,15 +159,6 @@ class Core(CorePluginBase):
             for i in range(0, stime):
                 if not WorkConfig.disable:
                     time.sleep(1)
- #       try:
- #           self.pool.terminate()
- #       except AssertionError:
- #           log.warn("stop download plugin error")
-
-# We don't need this update
-  #  def update(self):
-  #      """Call when plugin update."""
-  #      pass
 
     @export
     def set_config(self, config):
