@@ -103,9 +103,10 @@ class Core(CorePluginBase):
         """Call when plugin disabled."""
         WorkConfig.disable = True
         log.warn("Trying to shutdown download plugin")
-        #time.sleep(2)
+        #
         for queue in self.command_queues:
-            queue.put(True,block = False)
+            queue.put(True, block=False)
+        time.sleep(2)
         log.warn("Trying to shutdown download plugin...success")
 
 
