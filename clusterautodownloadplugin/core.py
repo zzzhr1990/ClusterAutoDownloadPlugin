@@ -120,6 +120,7 @@ class Core(CorePluginBase):
             self.record_lock.acquire()
             if WorkConfig.disable:
                 self.record_lock.release()
+                log.info("Ternimate task loop...")
                 return
             if self.fetching_task:
                 log.warn("Slow fetching task.")
@@ -140,6 +141,7 @@ class Core(CorePluginBase):
             self.record_lock.acquire()
             if WorkConfig.disable:
                 self.record_lock.release()
+                log.info("Ternimate check loop...")
                 return
             if self.busy:
                 log.warn("Slow query found.")
