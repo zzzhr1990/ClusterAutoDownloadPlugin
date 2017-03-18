@@ -144,8 +144,8 @@ class TorrentProcesser(Process):
                 , file_key, file_hash, remote_hash)
                 #repost
                 self._post_file(file_path, file_key)
-            else:
-                log.info("%s exists on server, ignore...", file_path)
+ #           else:
+ #               log.info("%s exists on server, ignore...", file_path)
             #TODO: check and report..
         else:
             if code == 404:
