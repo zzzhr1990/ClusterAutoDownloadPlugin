@@ -96,7 +96,7 @@ class Core(CorePluginBase):
             proccess.daemon = True
             proccess.start()
 
-        #self.looping_thread.start()
+        self.looping_thread.start()
         self.task_looping_thread.start()
         log.info("Plugin %s enabled.", self.plugin_name)
 
