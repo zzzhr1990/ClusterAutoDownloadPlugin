@@ -37,7 +37,6 @@ class TorrentProcesser(Process):
                 self.terminated = True
                 self.terminate()
                 return
-            self._sleep_and_wait(2)
 
     def _sleep_and_wait(self, stime):
         if not self.terminated:
@@ -63,6 +62,7 @@ class TorrentProcesser(Process):
         try:
             while not self.terminated:
                 log.info("????????????")
+                time.sleep(2)
                 #self._fetch_and_process()
         except Exception as e:
             log.error("Exception occored in torrent process. %s -- \r\n%s",\
