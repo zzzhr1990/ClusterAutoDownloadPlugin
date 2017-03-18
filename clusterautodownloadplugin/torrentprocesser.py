@@ -29,15 +29,13 @@ class TorrentProcesser(Process):
         super(TorrentProcesser, self).__init__()
 
     def _loop(self):
-        while True:
-            log.info("CHECKING...%d - %d", self.process_id, self.command_queue.empty())
-            if not self.command_queue.empty():
-                log.info("______T")
-                log.info("Torrent process %d terminated.", self.process_id)
-                #self.terminated = True
-                #self.terminate()
-                #return
-            self._sleep_and_wait(2)
+        try:
+            while not self.terminated:
+                self._fetch_and_process()
+        except Exception as e:
+            log.error("Exception occored in torrent process. %s -- \r\n%s",\
+            e, traceback.format_exc())
+        
 
     def _sleep_and_wait(self, stime):
         if True:
@@ -55,12 +53,15 @@ class TorrentProcesser(Process):
     def run(self):
         """Main process"""
         self.looping_thread.start()
-        try:
-            while not self.terminated:
-                self._fetch_and_process()
-        except Exception as e:
-            log.error("Exception occored in torrent process. %s -- \r\n%s",\
-            e, traceback.format_exc())
+        while True:
+            log.info("CHECKING...%d - %d", self.process_id, self.command_queue.empty())
+            if not self.command_queue.empty():
+                log.info("______T")
+                log.info("Torrent process %d terminated.", self.process_id)
+                self.terminated = True
+                self.terminate()
+                return
+            self._sleep_and_wait(2)
         #finally:
             #self.terminated()
 

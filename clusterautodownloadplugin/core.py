@@ -104,8 +104,8 @@ class Core(CorePluginBase):
         WorkConfig.disable = True
         log.warn("Trying to shutdown download plugin")
         #time.sleep(2)
-        #for queue in self.command_queues:
-        #    queue.put(True,block = False)
+        for queue in self.command_queues:
+            queue.put(True,block = False)
         log.warn("Trying to shutdown download plugin...success")
 
 
