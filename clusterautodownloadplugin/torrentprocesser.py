@@ -34,16 +34,16 @@ class TorrentProcesser(Process):
             if not self.command_queue.empty():
                 log.info("Torrent process %d terminated.", self.process_id)
                 self.terminated = True
-                self.terminate()
-                return
+                #self.terminate()
+                #return
             self._sleep_and_wait(2)
 
     def _sleep_and_wait(self, stime):
-        if not self.terminated:
+        if True:
             if stime < 1:
                 stime = 1
             for i in range(0, stime):
-                if not self.terminated:
+                if True:
                     time.sleep(1)
 
     def _fetch_and_process(self):
