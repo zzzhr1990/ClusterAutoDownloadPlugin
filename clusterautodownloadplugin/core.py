@@ -83,18 +83,13 @@ class Core(CorePluginBase):
         self.command_queues = []
         self.waiting_dict = {}
         self.waiting_queue = multiprocessing.Queue()
+        self.inited = False
         log.info("Cluster downloader init, poolsize %d", WorkConfig.MAX_PROCESS)
 
     def enable(self):
         """Call when plugin enabled."""
         WorkConfig.disable = False
-        for i in range(0, WorkConfig.MAX_PROCESS):
-            command_queue = multiprocessing.Queue()
-            proccess = TorrentProcesser(i, self.waiting_queue, command_queue)
-            self.command_queues.append(command_queue)
-            self.processing_pool.append(proccess)
-            proccess.daemon = False
-            proccess.start()
+        
 
         self.looping_thread.start()
         self.task_looping_thread.start()
@@ -128,6 +123,15 @@ class Core(CorePluginBase):
             self._sleep_and_wait(5)
 
     def _loop(self):
+        if not self.inited:
+            for i in range(0, WorkConfig.MAX_PROCESS):
+                command_queue = multiprocessing.Queue()
+                proccess = TorrentProcesser(i, self.waiting_queue, command_queue)
+                self.command_queues.append(command_queue)
+                self.processing_pool.append(proccess)
+                proccess.daemon = True
+                proccess.start()
+                self.inited = True
         while not WorkConfig.disable:
             if self.busy:
                 log.warn("Slow query found.")
