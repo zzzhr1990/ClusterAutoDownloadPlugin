@@ -160,7 +160,7 @@ class Core(CorePluginBase):
 
     def _checking_tasks(self):
         downloading_list = component.get("Core").get_torrents_status({}, {})
-        return
+        log.info("Start...")
         for d_key in downloading_list:
             self.waiting_dict[d_key] = downloading_list[d_key]
         push_len = WorkConfig.MAX_PROCESS - self.waiting_queue.qsize()
@@ -171,6 +171,7 @@ class Core(CorePluginBase):
                 self.waiting_queue.put(self.waiting_dict[dd_key], False)
             for a_delete in f_pop:
                 self.waiting_dict.pop(a_delete)
+        log.info("Final...")
  
     def _sleep_and_wait(self, stime):
         self.record_lock.acquire()
