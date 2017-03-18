@@ -143,7 +143,7 @@ class Core(CorePluginBase):
         downloading_list = component.get("Core").get_torrents_status({}, {})
         for d_key in downloading_list:
             self.waiting_dict[d_key] = downloading_list[d_key]
-        push_len = WorkConfig.MAX_PROCESS - len(self.waiting_queue)
+        push_len = WorkConfig.MAX_PROCESS - self.waiting_queue.qsize()
         if push_len > 0:
             f_pop = []
             for dd_key in self.waiting_dict:
