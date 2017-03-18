@@ -105,6 +105,7 @@ class Core(CorePluginBase):
         """Call when plugin disabled."""
         self.record_lock.acquire()
         WorkConfig.disable = True
+        self.waiting_queue.close()
         log.warn("Trying to shutdown download plugin")
         #
         for queue in self.command_queues:
@@ -112,6 +113,9 @@ class Core(CorePluginBase):
             queue.put(True, block=False)
             log.info("Send")
         self.record_lock.release()
+        time.sleep(5)
+        for queue in self.command_queues:
+            queue.close()
         log.warn("Trying to shutdown download plugin...success")
 
 
@@ -168,7 +172,7 @@ class Core(CorePluginBase):
             f_pop = []
             for dd_key in self.waiting_dict:
                 f_pop.append(dd_key)
-                #self.waiting_queue.put(self.waiting_dict[dd_key], False)
+                self.waiting_queue.put(self.waiting_dict[dd_key], False)
             for a_delete in f_pop:
                 self.waiting_dict.pop(a_delete)
         
