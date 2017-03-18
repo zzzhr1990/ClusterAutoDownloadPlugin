@@ -122,10 +122,12 @@ class Core(CorePluginBase):
             log.info("AQS")
             if self.disable:
                 self.record_lock.release()
+                log.info("DISR")
                 return
             if self.fetching_task:
                 log.warn("Slow fetching task.")
                 self.record_lock.release()
+                log.info("WRKR")
                 return
             self.fetching_task = True
             try:
