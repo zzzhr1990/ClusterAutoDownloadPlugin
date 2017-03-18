@@ -125,7 +125,6 @@ class Core(CorePluginBase):
             finally:
                 self.fetching_task = False
             self._sleep_and_wait(5)
-            log.info("__TASK_LOP_CHK_%d", WorkConfig.disable)
 
     def _loop(self):
         while not WorkConfig.disable:
@@ -140,7 +139,11 @@ class Core(CorePluginBase):
             finally:
                 self.busy = False
             if not WorkConfig.disable:
+                log.info("__TASK_LOP_CHK_%d", WorkConfig.disable)
                 self._sleep_and_wait(2)
+            else:
+                log.info("__TASK_LOP_CHK_FF_%d", WorkConfig.disable)
+
             #log.info("Trying to fetching tasks...")
 
     def _checking_tasks(self):
