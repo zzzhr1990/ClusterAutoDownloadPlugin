@@ -159,8 +159,8 @@ class Core(CorePluginBase):
         
 
     def _checking_tasks(self):
-        return
         downloading_list = component.get("Core").get_torrents_status({}, {})
+        return
         for d_key in downloading_list:
             self.waiting_dict[d_key] = downloading_list[d_key]
         push_len = WorkConfig.MAX_PROCESS - self.waiting_queue.qsize()
