@@ -80,10 +80,10 @@ class TorrentProcesser(Process):
         all_success_download = True
         #Assign download succ
         for index, file_detail in enumerate(torrent_info["files"]):
-            if self.terminate:
-                if self.current_upload != None:
-                    self.current_upload.stop()
-                    return
+ #           if self.terminate:
+ #               if self.current_upload != None:
+ #                   self.current_upload.stop()
+ #                   return
                     #TODO CHECK THIS
             file_progress = torrent_info["file_progress"][index]
             file_download = torrent_info["file_priorities"][index]
@@ -116,7 +116,7 @@ class TorrentProcesser(Process):
         modify_time = time.time()
         sliceupload = WcsSliceUpload(token, file_path, file_key, param\
             , upload_progress_recorder, modify_time, WorkConfig.PUT_URL)
-        self.current_upload = sliceupload
+        #self.current_upload = sliceupload
         if self.terminate:
             return 0, None
         code, hashvalue = sliceupload.slice_upload()
