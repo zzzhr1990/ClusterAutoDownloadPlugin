@@ -120,7 +120,7 @@ class Core(CorePluginBase):
             log.info("TTL")
             self.record_lock.acquire()
             log.info("AQS")
-            if self.disable:
+            if WorkConfig.disable:
                 self.record_lock.release()
                 log.info("DISR")
                 return
@@ -142,7 +142,7 @@ class Core(CorePluginBase):
     def _loop(self):
         while True:
             self.record_lock.acquire()
-            if self.disable:
+            if WorkConfig.disable:
                 self.record_lock.release()
                 return
             if self.busy:
@@ -175,12 +175,21 @@ class Core(CorePluginBase):
                 self.waiting_dict.pop(a_delete)
  
     def _sleep_and_wait(self, stime):
+        self.record_lock.acquire()
         if not WorkConfig.disable:
+            self.record_lock.release()
             if stime < 1:
                 stime = 1
             for i in range(0, stime):
+                self.record_lock.acquire()
                 if not WorkConfig.disable:
+                    self.record_lock.release()
                     time.sleep(1)
+                else:
+                    self.record_lock.release()
+                    return
+        else:
+            self.record_lock.release()
 
     @export
     def set_config(self, config):
