@@ -31,7 +31,6 @@ class TorrentProcesser(Process):
 
     def _loop(self):
         while True:
-            log.info("CHECKING____%d", self.command_queue.empty())
             if not self.command_queue.empty():
                 log.info("Torrent process %d terminated.", self.process_id)
                 self.terminated = True
