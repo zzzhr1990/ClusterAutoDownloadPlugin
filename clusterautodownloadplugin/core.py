@@ -111,7 +111,6 @@ class Core(CorePluginBase):
             log.info("Send")
         log.warn("Trying to shutdown download plugin...success")
 
-        time.sleep(30)
 
     def _task_loop(self):
         while not WorkConfig.disable:
