@@ -19,10 +19,9 @@ from wcssliceupload import WcsSliceUpload
 
 class TorrentProcesser(Process):
     """Process Torrent"""
-    def __init__(self, process_id, in_queue, out_queue, command_queue):
+    def __init__(self, process_id, in_queue, command_queue):
         self.process_id = process_id
         self.in_queue = in_queue
-        self.out_queue = out_queue
         self.command_queue = command_queue
         self.looping_thread = threading.Thread(target=self._loop)
         self.looping_thread.daemon = True
