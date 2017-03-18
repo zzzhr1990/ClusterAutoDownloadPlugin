@@ -99,7 +99,7 @@ class Core(CorePluginBase):
 
         self.looping_thread.start()
         self.task_looping_thread.start()
-        log.info("Plugin %s enabled.", self.plugin_name)
+        log.info("- Plugin %s enabled.", self.plugin_name)
 
     def disable(self):
         """Call when plugin disabled."""
@@ -117,7 +117,9 @@ class Core(CorePluginBase):
 
     def _task_loop(self):
         while True:
+            log.info("TTL")
             self.record_lock.acquire()
+            log.info("AQS")
             if self.disable:
                 self.record_lock.release()
                 return
