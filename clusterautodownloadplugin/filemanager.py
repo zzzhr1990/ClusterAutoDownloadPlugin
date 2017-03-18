@@ -38,9 +38,9 @@ class BucketManager(object):
 
     def stat(self, bucket, key):
         url = self.make_filestat_url(bucket, key)
-        log.info('Start to get the stat of %s:%s', bucket, key)
+#        log.info('Start to get the stat of %s:%s', bucket, key)
         code, text = _get(url=url, headers=self.gernerate_headers(url))
-        log.info('The return code : %d and text : %s', code, text)
+#        log.info('The return code : %d and text : %s', code, text)
         return code, text
  
     def make_list_url(self, param):
