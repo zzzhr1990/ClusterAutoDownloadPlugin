@@ -127,6 +127,7 @@ class TorrentProcesser(Process):
         log.info("upload code %d, %s", code, json.dumps(hashvalue))
 
     def _upload_to_ws(self, file_path):
+        log.info("CHZK:%s", file_path)
         #begin = time.time()
         file_key = etag(file_path)
         #log.info("Process %ld in %f s", file_size, time.time() - begin)
