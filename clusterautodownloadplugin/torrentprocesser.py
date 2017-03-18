@@ -54,6 +54,7 @@ class TorrentProcesser(Process):
             time.sleep(20)
         except Empty:
             pass
+        log.info("PAAAAA")
 
     def run(self):
         """Main process"""
