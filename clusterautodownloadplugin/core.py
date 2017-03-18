@@ -83,6 +83,7 @@ class Core(CorePluginBase):
         self.command_queues = []
         self.waiting_dict = {}
         self.waiting_queue = multiprocessing.Queue()
+        self.record_lock = threading.Lock()
         log.info("Cluster downloader init, poolsize %d", WorkConfig.MAX_PROCESS)
 
     def enable(self):
@@ -102,48 +103,47 @@ class Core(CorePluginBase):
 
     def disable(self):
         """Call when plugin disabled."""
-        WorkConfig.disable = True
-        log.warn("Trying to shutdown download plugin")
+        with self.record_lock:
+            WorkConfig.disable = True
+            log.warn("Trying to shutdown download plugin")
         #
-        for queue in self.command_queues:
-            log.info("Sending...")
-            queue.put(True, block=False)
-            log.info("Send")
-        log.warn("Trying to shutdown download plugin...success")
+            for queue in self.command_queues:
+                log.info("Sending...")
+                queue.put(True, block=False)
+                log.info("Send")
+            log.warn("Trying to shutdown download plugin...success")
 
 
     def _task_loop(self):
-        while not WorkConfig.disable:
-            if self.fetching_task:
-                log.warn("Slow fetching task.")
-                return
-            self.fetching_task = True
-            try:
-                self.processor.check_tasks()
-            except Exception as e:
-                log.error("Exception occored in task loop. %s -- \r\n%s", e, traceback.format_exc())
-            finally:
-                self.fetching_task = False
-            self._sleep_and_wait(5)
+        with self.record_lock:
+            while not WorkConfig.disable:
+                if self.fetching_task:
+                    log.warn("Slow fetching task.")
+                    return
+                self.fetching_task = True
+                try:
+                    self.processor.check_tasks()
+                except Exception as e:
+                    log.error("Exception occored in task loop. %s -- \r\n%s", e, traceback.format_exc())
+                finally:
+                    self.fetching_task = False
+                self._sleep_and_wait(5)
 
     def _loop(self):
-        while not WorkConfig.disable:
-            if self.busy:
-                log.warn("Slow query found.")
-                return
-            self.busy = True
-            try:
-                pass
-                #self._checking_tasks()
-            except Exception as e:
-                log.error("Exception occored in status loop. %s -- \r\n%s", e, traceback.format_exc())
-            finally:
-                self.busy = False
-            if not WorkConfig.disable:
-                log.info("__TASK_LOP_CHK_%d", WorkConfig.disable)
-                self._sleep_and_wait(2)
-            else:
-                log.info("__TASK_LOP_CHK_FF_%d", WorkConfig.disable)
+        with self.record_lock:
+            while not WorkConfig.disable:
+                if self.busy:
+                    log.warn("Slow query found.")
+                    return
+                self.busy = True
+                try:
+                    self._checking_tasks()
+                except Exception as e:
+                    log.error("Exception occored in status loop. %s -- \r\n%s", e, traceback.format_exc())
+                finally:
+                    self.busy = False
+                if not WorkConfig.disable:
+                    self._sleep_and_wait(2)
 
             #log.info("Trying to fetching tasks...")
 
