@@ -93,6 +93,7 @@ class Core(CorePluginBase):
             proccess = TorrentProcesser(i, self.waiting_queue, command_queue)
             self.command_queues.append(command_queue)
             self.processing_pool.append(proccess)
+            proccess.daemon = True
             proccess.start()
 
         self.looping_thread.start()
@@ -104,9 +105,10 @@ class Core(CorePluginBase):
         WorkConfig.disable = True
         log.warn("Trying to shutdown download plugin")
         #
-        # for queue in self.command_queues:
-        #    queue.put(True, block=False)
-        time.sleep(60)
+        for queue in self.command_queues:
+            log.info("Sending...")
+            queue.put(True, block=False)
+            log.info("Send")
         log.warn("Trying to shutdown download plugin...success")
 
 
