@@ -52,7 +52,10 @@ class TorrentProcesser(Process):
         self._sleep_and_wait(60)
 
     def run(self):
+        while True:
+            log.info("I'm living %d", self.process_id)
         """Main process"""
+        """
         self.looping_thread.start()
         while True:
             log.info("CHECKING...%d - %d", self.process_id, self.command_queue.empty())
@@ -65,5 +68,7 @@ class TorrentProcesser(Process):
             self._sleep_and_wait(2)
         #finally:
             #self.terminated()
+            """
+
 
 
