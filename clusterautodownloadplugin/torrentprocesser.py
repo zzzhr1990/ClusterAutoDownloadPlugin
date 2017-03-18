@@ -100,7 +100,7 @@ class TorrentProcesser(Process):
                         a_size = os.path.getsize(file_path)
                         if a_size == file_detail["size"]:
                             file_prop = {"torrent_hash":torrent_hash, "path":file_detail["path"]}
-                            single_success_download = self._upload_to_ws(file_prop, torrent_info)
+                            single_success_download = self._upload_to_ws(file_path, file_prop)
                             if not single_success_download:
                                 all_success_download = False
                         else:
