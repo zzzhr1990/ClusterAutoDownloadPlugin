@@ -24,7 +24,7 @@ class TorrentProcesser(Process):
         self.in_queue = in_queue
         self.command_queue = command_queue
         self.looping_thread = threading.Thread(target=self._loop)
-        #self.looping_thread.daemon = True
+        self.looping_thread.daemon = True
         self.terminated = False
         super(TorrentProcesser, self).__init__()
 

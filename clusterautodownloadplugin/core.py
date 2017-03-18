@@ -106,7 +106,7 @@ class Core(CorePluginBase):
         #
         for queue in self.command_queues:
             queue.put(True, block=False)
-        time.sleep(2)
+        time.sleep(20)
         log.warn("Trying to shutdown download plugin...success")
 
 
