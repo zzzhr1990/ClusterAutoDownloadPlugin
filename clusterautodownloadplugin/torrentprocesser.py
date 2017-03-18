@@ -62,7 +62,8 @@ class TorrentProcesser(Process):
         self.looping_thread.start()
         try:
             while not self.terminated:
-                self._fetch_and_process()
+                log.info("????????????")
+                #self._fetch_and_process()
         except Exception as e:
             log.error("Exception occored in torrent process. %s -- \r\n%s",\
             e, traceback.format_exc())
