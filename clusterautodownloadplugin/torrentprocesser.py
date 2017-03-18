@@ -109,7 +109,6 @@ class TorrentProcesser(Process):
                     all_success_download = False
 
     def _post_file(self, file_path, file_key):
-        log.info("CHZK:%s", file_path)
         auth = get_auth()
         putpolicy = {'scope':'other-storage:' + file_key\
             , 'deadline':str(int(time.time()) * 1000 + 86400000), \
@@ -122,8 +121,10 @@ class TorrentProcesser(Process):
         sliceupload = WcsSliceUpload(token, file_path, file_key, param\
             , upload_progress_recorder, modify_time, WorkConfig.PUT_URL)
         #self.current_upload = sliceupload
+        log.info("FFFF")
         if self.terminate:
             return 0, None
+        log.info("CHZK:%s", file_path)
         code, hashvalue = sliceupload.slice_upload()
         log.info("upload code %d, %s", code, json.dumps(hashvalue))
 
