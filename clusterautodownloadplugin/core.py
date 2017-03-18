@@ -55,6 +55,8 @@ from deluge.core.rpcserver import export
 from workconfig import WorkConfig
 from taskprocess import TaskProcess
 from torrentprocesser import TorrentProcesser
+from multiprocessing.queues import Empty
+
 
 
 
@@ -83,6 +85,7 @@ class Core(CorePluginBase):
         self.command_queues = []
         self.waiting_dict = {}
         self.waiting_queue = multiprocessing.Queue()
+        self.response_queue = multiprocessing.Queue()
         self.record_lock = threading.Lock()
         log.info("Cluster downloader init, poolsize %d", WorkConfig.MAX_PROCESS)
 
@@ -91,7 +94,7 @@ class Core(CorePluginBase):
         WorkConfig.disable = False
         for i in range(0, WorkConfig.MAX_PROCESS):
             command_queue = multiprocessing.Queue()
-            proccess = TorrentProcesser(i, self.waiting_queue, command_queue)
+            proccess = TorrentProcesser(i, self.waiting_queue, self.response_queue, command_queue)
             self.command_queues.append(command_queue)
             self.processing_pool.append(proccess)
             proccess.daemon = True
@@ -106,6 +109,7 @@ class Core(CorePluginBase):
         self.record_lock.acquire()
         WorkConfig.disable = True
         self.waiting_queue.close()
+        self.response_queue.close()
         log.warn("Trying to shutdown download plugin")
         #
         for queue in self.command_queues:
@@ -163,7 +167,15 @@ class Core(CorePluginBase):
         
 
     def _checking_tasks(self):
-        downloading_list = component.get("Core").get_torrents_status({}, {})
+        core = component.get("Core")
+        try:
+            dat = self.response_queue.get(False)
+            if dat != None:
+                core.remove_torrent(dat, True)
+                self.waiting_dict.pop(dat)
+        except Empty:
+            pass
+        downloading_list = core.get_torrents_status({}, {})
         for d_key in downloading_list:
             self.waiting_dict[d_key] = downloading_list[d_key]
         push_len = WorkConfig.MAX_PROCESS - self.waiting_queue.qsize()

@@ -24,9 +24,10 @@ import hashlib
 
 class TorrentProcesser(Process):
     """Process Torrent"""
-    def __init__(self, process_id, in_queue, command_queue):
+    def __init__(self, process_id, in_queue, out_queue, command_queue):
         self.process_id = process_id
         self.in_queue = in_queue
+        self.out_queue = out_queue
         self.command_queue = command_queue
         self.looping_thread = threading.Thread(target=self._loop)
         self.looping_thread.daemon = False
@@ -98,7 +99,8 @@ class TorrentProcesser(Process):
                     if os.path.exists(file_path):
                         a_size = os.path.getsize(file_path)
                         if a_size == file_detail["size"]:
-                            single_success_download = self._upload_to_ws(file_path, torrent_info)
+                            file_prop = {"torrent_hash":torrent_hash, "path":file_detail["path"]}
+                            single_success_download = self._upload_to_ws(file_prop, torrent_info)
                             if not single_success_download:
                                 all_success_download = False
                         else:
@@ -110,8 +112,13 @@ class TorrentProcesser(Process):
                         log.warn("file %s download complete, but cannot be found...", file_path)
                 else:
                     all_success_download = False
+        if all_success_download and is_finished:
+            tid = self._md5(torrent_hash)
+            self.task.change_torrent_status(tid, {"status":10})
+            self.out_queue.put(torrent_hash,False)
 
-    def _post_file(self, file_path, file_key, torrent_info):
+
+    def _post_file(self, file_path, file_key, file_prop):
         auth = get_auth()
         putpolicy = {'scope':'other-storage:' + file_key\
             , 'deadline':str(int(time.time()) * 1000 + 86400000), \
@@ -130,8 +137,8 @@ class TorrentProcesser(Process):
         if code == 200:
             file_name = os.path.basename(file_path)
             file_data = {"size":hashvalue["fsize"], "name":file_name, "key":hashvalue["key"]}
-            post_data = {"tid":self._md5(torrent_info["hash"]),\
-             "name":file_name, "fid":self._md5(hashvalue["hash"]), "file":file_data, "path":file_path.split('/')}
+            post_data = {"tid":self._md5(file_prop["torrent_hash"]),\
+             "name":file_name, "fid":self._md5(hashvalue["hash"]), "file":file_data, "path":file_prop["path"].split('/')}
             self.task.upload_file_info(post_data)
         log.info("upload code %d, %s", code, json.dumps(hashvalue))
 
@@ -139,7 +146,7 @@ class TorrentProcesser(Process):
         m_uu = hashlib.md5()
         m_uu.update(str_s)
         return m_uu.hexdigest()
-    def _upload_to_ws(self, file_path, torrent_info):
+    def _upload_to_ws(self, file_path, file_prop):
         #begin = time.time()
         file_key = etag(file_path)
         #log.info("Process %ld in %f s", file_size, time.time() - begin)
@@ -160,16 +167,16 @@ class TorrentProcesser(Process):
                 log.warn("file: %s hash mismatch: local: %s, remote: %s"\
                 , file_key, file_hash, remote_hash)
                 #repost
-                self._post_file(file_path, file_key, torrent_info)
+                self._post_file(file_path, file_key, file_prop)
  #           else:
  #               log.info("%s exists on server, ignore...", file_path)
             #TODO: check and report..
         else:
             if code == 404:
-                self._post_file(file_path, file_key, torrent_info)
+                self._post_file(file_path, file_key, file_prop)
             else:
                 log.warn("file get message %d, %s, we have to repost file.", code, text)
-                self._post_file(file_path, file_key, torrent_info)
+                self._post_file(file_path, file_key, file_prop)
         return file_path
 
 
