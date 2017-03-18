@@ -46,11 +46,10 @@ class TorrentProcesser(Process):
                     time.sleep(1)
 
     def _fetch_and_process(self):
-        if not self.in_queue.empty():
-            torrent_info = self.in_queue.get(block=False)
-            log.info("Assuming processing torrent %d.", self.process_id)
-            log.info("%s", json.dumps(torrent_info))
-            time.sleep(15)
+        torrent_info = self.in_queue.get(block=True)
+        log.info("Assuming processing torrent %d.", self.process_id)
+        log.info("%s", json.dumps(torrent_info))
+        time.sleep(15)
 
     def run(self):
         """Main process"""
