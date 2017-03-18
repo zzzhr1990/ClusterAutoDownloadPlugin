@@ -117,26 +117,22 @@ class Core(CorePluginBase):
 
     def _task_loop(self):
         while True:
-            log.info("TTL")
             self.record_lock.acquire()
-            log.info("AQS")
             if WorkConfig.disable:
                 self.record_lock.release()
-                log.info("DISR")
                 return
             if self.fetching_task:
                 log.warn("Slow fetching task.")
                 self.record_lock.release()
-                log.info("WRKR")
                 return
             self.fetching_task = True
+            self.record_lock.release()
             try:
                 self.processor.check_tasks()
             except Exception as e:
                 log.error("Exception occored in task loop. %s -- \r\n%s", e, traceback.format_exc())
             finally:
                 self.fetching_task = False
-                self.record_lock.release()
             self._sleep_and_wait(5)
 
     def _loop(self):
@@ -161,7 +157,6 @@ class Core(CorePluginBase):
         
 
     def _checking_tasks(self):
-        log.info("Checking tasks...")
         downloading_list = component.get("Core").get_torrents_status({}, {})
         for d_key in downloading_list:
             self.waiting_dict[d_key] = downloading_list[d_key]
