@@ -121,10 +121,8 @@ class TorrentProcesser(Process):
         sliceupload = WcsSliceUpload(token, file_path, file_key, param\
             , upload_progress_recorder, modify_time, WorkConfig.PUT_URL)
         #self.current_upload = sliceupload
-        log.info("FFFF")
-        if self.terminate:
+        if self.terminated:
             return 0, None
-        log.info("CHZK:%s", file_path)
         code, hashvalue = sliceupload.slice_upload()
         log.info("upload code %d, %s", code, json.dumps(hashvalue))
 
