@@ -103,53 +103,62 @@ class Core(CorePluginBase):
 
     def disable(self):
         """Call when plugin disabled."""
-        with self.record_lock:
-            WorkConfig.disable = True
-            log.warn("Trying to shutdown download plugin")
+        self.record_lock.acquire()
+        WorkConfig.disable = True
+        log.warn("Trying to shutdown download plugin")
         #
-            for queue in self.command_queues:
-                log.info("Sending...")
-                queue.put(True, block=False)
-                log.info("Send")
-            log.warn("Trying to shutdown download plugin...success")
+        for queue in self.command_queues:
+            log.info("Sending...")
+            queue.put(True, block=False)
+            log.info("Send")
+        self.record_lock.release()
+        log.warn("Trying to shutdown download plugin...success")
 
 
     def _task_loop(self):
-        with self.record_lock:
-            while not WorkConfig.disable:
-                if self.fetching_task:
-                    log.warn("Slow fetching task.")
-                    return
-                self.fetching_task = True
-                try:
-                    self.processor.check_tasks()
-                except Exception as e:
-                    log.error("Exception occored in task loop. %s -- \r\n%s", e, traceback.format_exc())
-                finally:
-                    self.fetching_task = False
-                self._sleep_and_wait(5)
+        while True:
+            self.record_lock.acquire()
+            if self.disable:
+                self.record_lock.release()
+                return
+            if self.fetching_task:
+                log.warn("Slow fetching task.")
+                self.record_lock.release()
+                return
+            self.fetching_task = True
+            try:
+                self.processor.check_tasks()
+            except Exception as e:
+                log.error("Exception occored in task loop. %s -- \r\n%s", e, traceback.format_exc())
+            finally:
+                self.fetching_task = False
+                self.record_lock.release()
+            self._sleep_and_wait(5)
 
     def _loop(self):
-        with self.record_lock:
-            while not WorkConfig.disable:
-                if self.busy:
-                    log.warn("Slow query found.")
-                    return
-                self.busy = True
-                try:
-                    self._checking_tasks()
-                except Exception as e:
-                    log.error("Exception occored in status loop. %s -- \r\n%s", e, traceback.format_exc())
-                finally:
-                    self.busy = False
-                if not WorkConfig.disable:
-                    self._sleep_and_wait(2)
-
+        while True:
+            self.record_lock.acquire()
+            if self.disable:
+                self.record_lock.release()
+                return
+            if self.busy:
+                log.warn("Slow query found.")
+                self.record_lock.release()
+                return
+            self.busy = True
+            try:
+                self._checking_tasks()
+            except Exception as e:
+                log.error("Exception occored in status loop. %s -- \r\n%s", e, traceback.format_exc())
+            finally:
+                self.busy = False
+                self.record_lock.release()
+            
+            self._sleep_and_wait(2)
+        
             #log.info("Trying to fetching tasks...")
 
     def _checking_tasks(self):
-        if WorkConfig.disable:
-            return
         downloading_list = component.get("Core").get_torrents_status({}, {})
         for d_key in downloading_list:
             self.waiting_dict[d_key] = downloading_list[d_key]
