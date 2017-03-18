@@ -14,6 +14,7 @@ from wcs.services.uploadprogressrecorder import UploadProgressRecorder
 from wcs.commons.util import etag
 from deluge.log import LOG as log
 from workconfig import get_auth
+from taskprocess import TaskProcess
 from wcssliceupload import WcsSliceUpload
 
 
@@ -27,6 +28,7 @@ class TorrentProcesser(Process):
         self.looping_thread = threading.Thread(target=self._loop)
         self.looping_thread.daemon = False
         self.terminated = False
+        self.task = TaskProcess(WorkConfig.SERVER_URL)
         super(TorrentProcesser, self).__init__()
 
     def _loop(self):
@@ -109,7 +111,9 @@ class TorrentProcesser(Process):
     def _post_file(self, file_path, file_key):
         auth = get_auth()
         putpolicy = {'scope':'other-storage:' + file_key\
-            , 'deadline':str(int(time.time()) * 1000 + 86400000), 'overwrite':1}
+            , 'deadline':str(int(time.time()) * 1000 + 86400000), \
+            'overwrite':1, 'returnBody':\
+            'url=$(url)&fsize=$(fsize)&bucket=$(bucket)&key=$(key)&hash=$(hash)&fsize=$(fsize)&mimeType=$(mimeType)'}
         token = auth.uploadtoken(putpolicy)
         param = {'position':'local', 'message':'upload'}
         upload_progress_recorder = UploadProgressRecorder()

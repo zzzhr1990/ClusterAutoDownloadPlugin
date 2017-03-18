@@ -30,6 +30,10 @@ class TaskProcess(object):
     def _task_in_process(self, torrent_id, core):
         return torrent_id in core.torrentmanager.torrents
 
+    def upload_file_info(self, hash, torrent_info):
+        """Check uploads on server."""
+        req = requests.post(self._base_url + '/v1/files'\
+        , headers={"X-Task-Token" : "1024tasktoken"}, timeout=5)
     def check_tasks(self):
         """Check tasks on server."""
         req = requests.get(self._base_url + '/v1/task'\
