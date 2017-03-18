@@ -97,7 +97,7 @@ class Core(CorePluginBase):
             proccess.start()
 
         #self.looping_thread.start()
-        #self.task_looping_thread.start()
+        self.task_looping_thread.start()
         log.info("Plugin %s enabled.", self.plugin_name)
 
     def disable(self):
@@ -125,6 +125,7 @@ class Core(CorePluginBase):
             finally:
                 self.fetching_task = False
             self._sleep_and_wait(5)
+            log.info("__TASK_LOP_CHK_%d", WorkConfig.disable)
 
     def _loop(self):
         while not WorkConfig.disable:
