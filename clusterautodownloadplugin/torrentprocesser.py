@@ -7,6 +7,7 @@ import traceback
 import datetime
 import threading
 from multiprocessing import Process
+from multiprocessing.queues import Empty
 from filemanager import BucketManager
 from workconfig import WorkConfig
 from wcs.services.uploadprogressrecorder import UploadProgressRecorder
@@ -32,6 +33,7 @@ class TorrentProcesser(Process):
         while True:
             log.info("CHECKING____%d", self.in_queue.empty())
             if not self.in_queue.empty():
+
                 log.info("Torrent process %d terminated.", self.process_id)
                 self.terminated = True
                 self.terminate()
@@ -49,10 +51,10 @@ class TorrentProcesser(Process):
     def _fetch_and_process(self):
         try:
             data = self.in_queue.get(True, 2)
-            log.info("%d processing torrents", 20)
-        except Exception as e:
-            log.error("EE_______GET_________. %s -- \r\n%s",\
-            e, traceback.format_exc())
+            log.info("%d processing torrents %s", self.process_id, data["hash"])
+            time.sleep(20)
+        except Empty:
+            pass
 
     def run(self):
         """Main process"""
