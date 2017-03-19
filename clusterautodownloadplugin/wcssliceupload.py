@@ -39,7 +39,7 @@ class WcsSliceUpload(object):
         
         self.uploadtoken = uploadtoken
         self.filepath = filepath
-        self.upload_progress_recorder = UploadProgressRecorder(process_id)
+        self.upload_progress_recorder = UploadProgressRecorder(str(process_id))
         self.modify_time = modify_time
         self.key = key
         self.size = os.path.getsize(self.filepath)
