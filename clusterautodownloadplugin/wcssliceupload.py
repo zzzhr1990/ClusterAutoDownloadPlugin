@@ -129,7 +129,7 @@ class WcsSliceUpload(object):
         offsets, uploadBatch = self.records_parse(records)
         #log.info('Recovery from upload record:offset %s, upload %s', offsets, uploadBatch)
         if len(offsets) != 0:
-            log.info('Thare are %d offsets need to upload', len(offsets))
+#            log.info('Thare are %d offsets need to upload', len(offsets))
             if uploadBatch == 'Null':
                 uploadBatch = GetUuid()
                 self.progress = 0
@@ -145,7 +145,7 @@ class WcsSliceUpload(object):
                 self.progress = float(current)/float(self.size)
             self.uploadBatch = uploadBatch
             
-            log.info('Now start upload file blocks')
+#            log.info('Now start upload file blocks')
             for offset in offsets:
                 if self.ternimate:
                     return False, None 
