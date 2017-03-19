@@ -24,22 +24,22 @@ from wcs.commons.http import _post
 from wcs.commons.util import readfile
 from wcs.commons.util import file_to_stream
 from wcs.commons.util import GetUuid
-from wcs.services.uploadprogressrecorder import UploadProgressRecorder
+from uploadprogressrecorder import UploadProgressRecorder
 from workconfig import WorkConfig
 from deluge.log import LOG as log
 
 #record_lock = multiprocessing.Lock()
-record_lock = threading.Lock()
+#record_lock = threading.Lock()
 
 
 
 class WcsSliceUpload(object):
     
-    def __init__(self, uploadtoken, filepath, key, params, upload_progress_recorder, modify_time, put_url):
+    def __init__(self,process_id ,uploadtoken, filepath, key, params, upload_progress_recorder, modify_time, put_url):
         
         self.uploadtoken = uploadtoken
         self.filepath = filepath
-        self.upload_progress_recorder = upload_progress_recorder
+        self.upload_progress_recorder = UploadProgressRecorder(process_id)
         self.modify_time = modify_time
         self.key = key
         self.size = os.path.getsize(self.filepath)
@@ -133,7 +133,6 @@ class WcsSliceUpload(object):
             if uploadBatch == 'Null':
                 uploadBatch = GetUuid()
                 self.progress = 0
-                log.info('current upload progress: %d', self.progress)
             else:
                 lastblock = self.size - (len(offsets)-1) * _BLOCK_SIZE
                 current = 0
@@ -144,7 +143,6 @@ class WcsSliceUpload(object):
                     else:
                         current += lastblock
                 self.progress = float(current)/float(self.size)
-                log.info('current upload progress: %d', current)
             self.uploadBatch = uploadBatch
             
             log.info('Now start upload file blocks')
@@ -165,7 +163,7 @@ class WcsSliceUpload(object):
             return False, None
         results = self.recovery_from_record()
         if self.iscomplet(results):
-            log.info('Now all blocks have upload suc.')
+            #log.info('Now all blocks have upload suc.')
             return self.make_file(self.PUT_URL, self.blockStatus(results), uploadBatch)
         else:
             fail_list = self.result_analysis(results)
@@ -203,9 +201,8 @@ class WcsSliceUpload(object):
         if self.ternimate:
             return
         blkcode, blktext = _post(url=url, headers=headers, data=bput)
-        if blkcode != 200:
-            log.info("result %d, msg %s", blkcode, blktext)
         while blkretry and self.need_retry(blkcode):
+            log.info(": re_posting ....)
             if self.ternimate:
                 return
             blkcode, blktext = _post(url=url, headers=headers, data=bput)
@@ -215,8 +212,8 @@ class WcsSliceUpload(object):
             result = [offset, blkcode, blktext['message']]
         else:
             result = self.make_bput(openfile, blktext['ctx'], self.uploadBatch, offset)
-        with record_lock:
-            self.record_upload_progress(result, self.uploadBatch)
+ #       with record_lock:
+        self.record_upload_progress(result, self.uploadBatch)
         
 
     def make_bput(self, inputfile, ctx, uploadBatch, offset):
@@ -267,7 +264,7 @@ class WcsSliceUpload(object):
         url = self.file_url(host)
         self.status = blockstatus
         body = ','.join(blockstatus)
-        log.info('The ctx is %s, then start to make_file', body)
+        #log.info('The ctx is %s, then start to make_file', body)
         headers = self.file_headers(uploadBatch)
         retry = mkfile_retries
         code,text = _post(url=url, headers=headers, data=body)
@@ -279,6 +276,6 @@ class WcsSliceUpload(object):
            log.error('Sorry, the make_file error, code is %d, the reason is %s', code, text)
 #           self.blockStatus = []
            self.upload_progress_recorder.delete_upload_record(self.key)
-        else:
-           log.info('Make_file suc! wcssliceupload complet!')
+#        else:
+#           log.info('Make_file suc! wcssliceupload complet!')
         return code, text

@@ -128,7 +128,7 @@ class TorrentProcesser(Process):
         param = {'position':'local', 'message':'upload'}
         upload_progress_recorder = UploadProgressRecorder()
         modify_time = time.time()
-        sliceupload = WcsSliceUpload(token, file_path, file_key, param\
+        sliceupload = WcsSliceUpload(self.process_id, token, file_path, file_key, param\
             , upload_progress_recorder, modify_time, WorkConfig.PUT_URL)
         #self.current_upload = sliceupload
         if self.terminated:
