@@ -187,11 +187,9 @@ class Core(CorePluginBase):
                 if dat != None:
                     if dat["finished"] is True:
                         core.remove_torrent(dat["hash"], True)
-                        log.info("Torrent %s Completed...", dat["hash"])
                     else:
                         if len(dat["files"]) > 0:
                             self._change_file_prop(core, dat)
-                    #self.waiting_dict.pop(dat["hash"])
                     self.working_dict.pop(dat["hash"])
             except Empty:
                 pass
