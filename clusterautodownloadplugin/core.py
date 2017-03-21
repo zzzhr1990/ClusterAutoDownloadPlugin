@@ -164,16 +164,13 @@ class Core(CorePluginBase):
                 self.busy = False
                 self.record_lock.release()
             self._sleep_and_wait(2)
-        
 
     def _checking_tasks(self):
         core = component.get("Core")
         while not self.response_queue.empty():
-            log.info("NEMp")
             try:
                 dat = self.response_queue.get(False)
                 if dat != None:
-                    log.info("!!!!!!!!!RESP")
                     if dat["finished"] is True:
                         core.remove_torrent(dat["hash"], True)
                         log.info("Torrent %s Completed...", dat["hash"])
@@ -183,12 +180,11 @@ class Core(CorePluginBase):
                     #self.waiting_dict.pop(dat["hash"])
                     self.working_dict.pop(dat["hash"])
             except Empty:
-                log.warn("!!!!!!!!!!!EMP")
                 pass
         
-        log.info("REFRESH_TASKS")
         waiting_dict = {}
         downloading_list = core.get_torrents_status({}, {})
+        log.info(json.dumps(downloading_list))
         for d_key in downloading_list:
             waiting_dict[d_key] = downloading_list[d_key]
         for d_key in self.working_dict:
