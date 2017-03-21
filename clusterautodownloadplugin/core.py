@@ -168,7 +168,9 @@ class Core(CorePluginBase):
 
     def _checking_tasks(self):
         core = component.get("Core")
+        log.info("CORE_CK")
         while not self.response_queue.empty:
+            log.info("NEMp")
             try:
                 dat = self.response_queue.get(False)
                 if dat != None:
