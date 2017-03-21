@@ -34,10 +34,9 @@ class TaskProcess(object):
         """Check uploads on server."""
         req = requests.post(self._base_url + '/v1/files'\
         , headers={"X-Task-Token" : "1024tasktoken"}, json=post, timeout=5)
-        log.info("Post to LX - %s", json.dumps(post))
         data = self.exec_requests_data_json(req)
-        if data != None:
-            log.info("Rec from LX %s", json.dumps(data))
+        if data is None:
+            log.warn("Rec from LX Eempty")
     def check_tasks(self):
         """Check tasks on server."""
         req = requests.get(self._base_url + '/v1/task'\
