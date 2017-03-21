@@ -167,14 +167,13 @@ class Core(CorePluginBase):
 
     def _change_file_prop(self, core, data):
         torrent_id = data["hash"]
-        stat = core.get_torrent_status(torrent_id,{"file_priorities"})
-        if stat == None or len(stat) < 1:
+        stat = core.get_torrent_status(torrent_id, {"file_priorities"})
+        if stat is None or len(stat) < 1:
             log.warn("Cannot find file_priorities for torrent %s", torrent_id)
         else:
-            for change_file in enumerate(data["files"]):
-                #stat[change_file["index"]] = 0
-                log.info(change_file["index"])
-            #core.set_torrent_file_priorities(torrent_id, stat)
+            for change_file in data["files"]:
+                stat[change_file["index"]] = 0
+            core.set_torrent_file_priorities(torrent_id, stat)
 
     def _checking_tasks(self):
         core = component.get("Core")
