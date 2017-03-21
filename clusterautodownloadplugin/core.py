@@ -165,6 +165,16 @@ class Core(CorePluginBase):
                 self.record_lock.release()
             self._sleep_and_wait(2)
 
+    def _change_file_prop(self, core, data):
+        torrent_id = data["hash"]
+        stat = core.get_torrent_status(torrent_id,{"file_priorities"})
+        if stat == None or len(stat) < 1:
+            log.warn("Cannot find file_priorities for torrent %s", torrent_id)
+        else:
+            for change_file in enumerate(data["files"]):
+                stat[change_file["index"]] = 0
+            core.set_torrent_file_priorities(torrent_id, stat)
+
     def _checking_tasks(self):
         core = component.get("Core")
         while not self.response_queue.empty():
@@ -176,15 +186,13 @@ class Core(CorePluginBase):
                         log.info("Torrent %s Completed...", dat["hash"])
                     else:
                         if len(dat["files"]) > 0:
-                            log.info("Torrent %s Some file completed, waitting for remove...", dat["hash"])
+                            self._change_file_prop(core, dat)
                     #self.waiting_dict.pop(dat["hash"])
                     self.working_dict.pop(dat["hash"])
             except Empty:
                 pass
-        
         waiting_dict = {}
         downloading_list = core.get_torrents_status({}, {})
-        log.info(json.dumps(downloading_list))
         for d_key in downloading_list:
             waiting_dict[d_key] = downloading_list[d_key]
         for d_key in self.working_dict:
