@@ -172,6 +172,7 @@ class Core(CorePluginBase):
             log.warn("Cannot find file_priorities for torrent %s", torrent_id)
         else:
             for change_file in data["files"]:
+                log.info("ORIGN_%d, path %s", stat[change_file["index"]], change_file["path"])
                 stat[change_file["index"]] = 0
             core.set_torrent_file_priorities(torrent_id, stat)
 
