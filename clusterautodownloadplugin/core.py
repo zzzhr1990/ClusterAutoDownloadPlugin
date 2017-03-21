@@ -172,8 +172,9 @@ class Core(CorePluginBase):
             log.warn("Cannot find file_priorities for torrent %s", torrent_id)
         else:
             for change_file in enumerate(data["files"]):
-                stat[change_file["index"]] = 0
-            core.set_torrent_file_priorities(torrent_id, stat)
+                #stat[change_file["index"]] = 0
+                log.info(change_file["index"])
+            #core.set_torrent_file_priorities(torrent_id, stat)
 
     def _checking_tasks(self):
         core = component.get("Core")
