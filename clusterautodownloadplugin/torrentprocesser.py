@@ -88,6 +88,7 @@ class TorrentProcesser(Process):
         progress = torrent_info["progress"]
 
         all_success_download = True
+        succeed_files = []
         #Assign download succ
         for index, file_detail in enumerate(torrent_info["files"]):
  #           if self.terminate:
@@ -107,6 +108,8 @@ class TorrentProcesser(Process):
                             single_success_download = self._upload_to_ws(file_path, file_prop)
                             if not single_success_download:
                                 all_success_download = False
+                            else:
+                                succeed_files.append(file_detail)
                         else:
                             all_success_download = False
                             log.warn("file %s size not equal %ld (need %ld)..."\
@@ -119,7 +122,11 @@ class TorrentProcesser(Process):
         if all_success_download and is_finished:
             tid = self._md5(torrent_hash)
             self.task.change_torrent_status(tid, {"status":10})
-            self.out_queue.put(torrent_hash,False)
+            self.out_queue.put\
+            ({"hash" : torrent_hash, "finished" : True, "files" : succeed_files}, False)
+        else:
+            self.out_queue.put\
+            ({"hash" : torrent_hash, "finished" : False, "files" : succeed_files}, False)
 
 
     def _post_file(self, file_path, file_key, file_prop):

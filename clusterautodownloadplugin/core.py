@@ -83,7 +83,7 @@ class Core(CorePluginBase):
         self.processor = TaskProcess(WorkConfig.SERVER_URL)
         self.processing_pool = []
         self.command_queues = []
-        self.waiting_dict = {}
+        self.working_dict = {}
         self.waiting_queue = multiprocessing.Queue()
         self.response_queue = multiprocessing.Queue()
         self.record_lock = threading.Lock()
@@ -168,24 +168,31 @@ class Core(CorePluginBase):
 
     def _checking_tasks(self):
         core = component.get("Core")
-        try:
-            dat = self.response_queue.get(False)
-            if dat != None:
-                core.remove_torrent(dat, True)
-                self.waiting_dict.pop(dat)
-        except Empty:
-            pass
+        while not self.response_queue.empty:
+            try:
+                dat = self.response_queue.get(False)
+                if dat != None:
+                    if dat["finished"] is True:
+                        core.remove_torrent(dat["hash"], True)
+                        log.info("Torrent %s Completed...", dat["hash"])
+                    else:
+                        if len(dat["files"] > 0):
+                            log.info("Torrent %s Some file completed, waitting for remove...", dat["hash"])
+                    #self.waiting_dict.pop(dat["hash"])
+                    self.working_dict.pop(dat["hash"])
+            except Empty:
+                pass
+        waiting_dict = {}
         downloading_list = core.get_torrents_status({}, {})
         for d_key in downloading_list:
-            self.waiting_dict[d_key] = downloading_list[d_key]
+            waiting_dict[d_key] = downloading_list[d_key]
+        for d_key in self.working_dict:
+            if d_key in waiting_dict:
+                waiting_dict.pop(d_key)
         push_len = WorkConfig.MAX_PROCESS - self.waiting_queue.qsize()
         if push_len > 0:
-            f_pop = []
-            for dd_key in self.waiting_dict:
-                f_pop.append(dd_key)
-                self.waiting_queue.put(self.waiting_dict[dd_key], False)
-            for a_delete in f_pop:
-                self.waiting_dict.pop(a_delete)
+            for dd_key in waiting_dict:
+                self.waiting_queue.put(waiting_dict[dd_key], False)
         
  
     def _sleep_and_wait(self, stime):
