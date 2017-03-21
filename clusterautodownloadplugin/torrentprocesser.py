@@ -55,8 +55,8 @@ class TorrentProcesser(Process):
     def _fetch_and_process(self):
         try:
             data = self.in_queue.get(True, 2)
-            #log.info("%d processing torrents %s", self.process_id, data["hash"])
             if data != None:
+                log.info("%d processing torrents %s", self.process_id, data["hash"])
                 self.process_single_torrent(data)
 
         except Empty:
@@ -65,14 +65,14 @@ class TorrentProcesser(Process):
     def run(self):
         """Main process"""
         self.looping_thread.start()
-        try:
-            while not self.terminated:
+        while not self.terminated:
+            try:
                 self._fetch_and_process()
-        except Exception as e:
-            log.error("Exception occored in torrent process. %s -- \r\n%s",\
-            e, traceback.format_exc())
-        finally:
-            self.terminated()
+            except Exception as e:
+                log.error("Exception occored in torrent process. %s -- \r\n%s",\
+                e, traceback.format_exc())
+            finally:
+                self.terminated()
 
     def process_single_torrent(self, torrent_info):
         """Add one torrent to process"""
