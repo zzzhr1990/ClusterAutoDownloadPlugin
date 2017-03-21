@@ -55,7 +55,7 @@ class TorrentProcesser(Process):
     def _fetch_and_process(self):
         try:
             data = self.in_queue.get(True, 2)
-            #log.info("%d processing torrents %s", self.process_id, data["hash"])
+            log.info("%d processing torrents %s", self.process_id, data["hash"])
             if data != None:
                 self.process_single_torrent(data)
 
