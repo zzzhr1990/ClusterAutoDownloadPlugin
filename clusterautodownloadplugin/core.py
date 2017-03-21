@@ -172,6 +172,7 @@ class Core(CorePluginBase):
             try:
                 dat = self.response_queue.get(False)
                 if dat != None:
+                    log.info("!!!!!!!!!RESP")
                     if dat["finished"] is True:
                         core.remove_torrent(dat["hash"], True)
                         log.info("Torrent %s Completed...", dat["hash"])
