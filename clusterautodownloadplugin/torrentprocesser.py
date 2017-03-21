@@ -28,7 +28,7 @@ class TorrentProcesser(Process):
         self.process_id = process_id
         self.in_queue = in_queue
         self.out_queue = out_queue
-        self.command_queue = command_queue
+        #self.command_queue = command_queue
         self.looping_thread = threading.Thread(target=self._loop)
         self.looping_thread.daemon = False
         self.terminated = False
@@ -37,11 +37,12 @@ class TorrentProcesser(Process):
 
     def _loop(self):
         while True:
-            if not self.command_queue.empty():
-                log.info("Torrent process %d terminated.", self.process_id)
-                self.terminated = True
-                self.terminate()
-                return
+ #           if not self.command_queue.empty():
+ #               log.info("Torrent process %d terminated.", self.process_id)
+ #               self.terminated = True
+ #               self.terminate()
+ #               return
+            log.info("QS_%d", self.out_queue.qsize)
             time.sleep(1)
 
     def _sleep_and_wait(self, stime):
