@@ -171,6 +171,8 @@ class Core(CorePluginBase):
         if stat is None or len(stat) < 1:
             log.warn("Cannot find file_priorities for torrent %s", torrent_id)
         else:
+            log.info("PAREPAR_%s", torrent_id)
+            log.info("%s\r\n%s", json.dumps(stat), json.dumps(data))
             for change_file in data["files"]:
                 log.info("ORIGN_%d, path %s", stat[change_file["index"]], change_file["path"])
                 stat[change_file["index"]] = 0
