@@ -124,11 +124,9 @@ class TorrentProcesser(Process):
             self.task.change_torrent_status(tid, {"status":10})
             self.out_queue.put\
             ({"hash" : torrent_hash, "finished" : True, "files" : succeed_files}, False)
-            log.info("P_1")
         else:
             self.out_queue.put\
             ({"hash" : torrent_hash, "finished" : False, "files" : succeed_files}, False)
-            log.info("P_2")
 
 
     def _post_file(self, file_path, file_key, file_prop):

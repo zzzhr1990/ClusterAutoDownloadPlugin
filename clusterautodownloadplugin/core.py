@@ -178,7 +178,7 @@ class Core(CorePluginBase):
                         core.remove_torrent(dat["hash"], True)
                         log.info("Torrent %s Completed...", dat["hash"])
                     else:
-                        if len(dat["files"] > 0):
+                        if len(dat["files"]) > 0:
                             log.info("Torrent %s Some file completed, waitting for remove...", dat["hash"])
                     #self.waiting_dict.pop(dat["hash"])
                     self.working_dict.pop(dat["hash"])
@@ -198,6 +198,7 @@ class Core(CorePluginBase):
         if push_len > 0:
             for dd_key in waiting_dict:
                 self.waiting_queue.put(waiting_dict[dd_key], False)
+                self.working_dict[dd_key] = downloading_list[dd_key]
         
  
     def _sleep_and_wait(self, stime):
