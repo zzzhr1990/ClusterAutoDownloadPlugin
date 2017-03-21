@@ -174,6 +174,7 @@ class Core(CorePluginBase):
             log.info("PAREPAR_%s", torrent_id)
             log.info("%s\r\n%s", json.dumps(stat), json.dumps(data))
             for change_file in data["files"]:
+                log.info(change_file["index"])
                 log.info("ORIGN_%d, path %s", stat[change_file["index"]], change_file["path"])
                 stat[change_file["index"]] = 0
             core.set_torrent_file_priorities(torrent_id, stat)
