@@ -186,6 +186,7 @@ class Core(CorePluginBase):
             except Empty:
                 log.warn("!!!!!!!!!!!EMP")
                 pass
+        log.info("REFRESH_TASKS")
         waiting_dict = {}
         downloading_list = core.get_torrents_status({}, {})
         for d_key in downloading_list:
