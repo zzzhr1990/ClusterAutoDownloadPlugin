@@ -181,6 +181,7 @@ class Core(CorePluginBase):
                     #self.waiting_dict.pop(dat["hash"])
                     self.working_dict.pop(dat["hash"])
             except Empty:
+                log.warn("!!!!!!!!!!!EMP")
                 pass
         waiting_dict = {}
         downloading_list = core.get_torrents_status({}, {})
