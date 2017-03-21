@@ -171,15 +171,13 @@ class Core(CorePluginBase):
         if stat is None or len(stat) < 1:
             log.warn("Cannot find file_priorities for torrent %s", torrent_id)
         else:
-            log.info("PAREPAR_%s", torrent_id)
-            log.info("%s\r\n%s", json.dumps(stat), json.dumps(data))
+            log.info(json.dumps(stat))
+            pst = stat["file_priorities"]
             for change_file in data["files"]:
-                log.info(change_file["index"])
-                log.info(len(stat))
-                log.info(type(change_file["index"]))
-                log.info("ORIGN_%d, path %s", stat[change_file["index"]], change_file["path"])
-                stat[change_file["index"]] = 0
-            core.set_torrent_file_priorities(torrent_id, stat)
+                pst[change_file["index"]] = 0
+            core.set_torrent_file_priorities(torrent_id, pst)
+            log.info(json.dumps(core.get_torrent_status(torrent_id, {"file_priorities"})))
+
 
     def _checking_tasks(self):
         core = component.get("Core")
