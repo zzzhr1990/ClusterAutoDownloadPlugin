@@ -42,7 +42,6 @@ class TorrentProcesser(Process):
  #               self.terminated = True
  #               self.terminate()
  #               return
-            log.info("QS_%d", self.out_queue.qsize)
             time.sleep(1)
 
     def _sleep_and_wait(self, stime):

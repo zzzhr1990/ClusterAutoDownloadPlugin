@@ -169,7 +169,7 @@ class Core(CorePluginBase):
     def _checking_tasks(self):
         core = component.get("Core")
         log.info("CORE_CK_%d", self.response_queue.qsize())
-        """while not self.response_queue.empty:
+        while not self.response_queue.empty:
             log.info("NEMp")
             try:
                 dat = self.response_queue.get(False)
@@ -186,7 +186,7 @@ class Core(CorePluginBase):
             except Empty:
                 log.warn("!!!!!!!!!!!EMP")
                 pass
-        """
+        
         log.info("REFRESH_TASKS")
         waiting_dict = {}
         downloading_list = core.get_torrents_status({}, {})
