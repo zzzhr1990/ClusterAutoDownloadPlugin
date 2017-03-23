@@ -143,7 +143,7 @@ class TorrentProcesser(Process):
         code, hashvalue = sliceupload.slice_upload()
         if code == 200:
             #Preview
-            info = log.info["avinfo"]
+            info = hashvalue["avinfo"]
             create_video_preview = False
             height = 0
             width = 0
