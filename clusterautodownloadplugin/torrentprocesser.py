@@ -112,7 +112,7 @@ class TorrentProcesser(Process):
                             , file_path, a_size, file_detail["size"])
                     else:
                         all_success_download = False
-                        log.warn("file %s download complete, but cannot be found...", file_path)
+                        log.warn("PID[%d] file %s download complete, but cannot be found...", self.process_id, file_path)
                 else:
                     all_success_download = False
         if all_success_download and is_finished:
@@ -142,6 +142,10 @@ class TorrentProcesser(Process):
             return 0, None
         code, hashvalue = sliceupload.slice_upload()
         if code == 200:
+            #Preview
+            info = log.info["avinfo"]
+            if info:
+                log.info("AVINFO %s", base64.urlsafe_b64decode(info))
             file_name = os.path.basename(file_path)
             file_data = {"size":hashvalue["fsize"], "name":file_name, "key":hashvalue["key"]}
             post_data = {"tid":self._md5(file_prop["torrent_hash"]),\

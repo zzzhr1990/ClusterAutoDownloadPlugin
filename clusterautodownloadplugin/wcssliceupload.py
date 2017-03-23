@@ -38,6 +38,7 @@ class WcsSliceUpload(object):
     def __init__(self,process_id ,uploadtoken, filepath, key, params, upload_progress_recorder, modify_time, put_url):
         
         self.uploadtoken = uploadtoken
+        self.process_id = process_id
         self.filepath = filepath
         self.upload_progress_recorder = UploadProgressRecorder(str(process_id))
         self.modify_time = modify_time
@@ -54,7 +55,7 @@ class WcsSliceUpload(object):
 
     def stop(self):
         self.ternimate = True
-        log.info("slice calling stop...%d", self.ternimate)
+        log.info("PID[%d] slice calling stop...%d",self.process_id], self.ternimate)
 
     def need_retry(self,code):
         if WorkConfig.disable:
@@ -124,7 +125,7 @@ class WcsSliceUpload(object):
         return [[rec['offset'], rec['code'], rec['ctx']] for rec in records]
     
     def slice_upload(self):
-        log.info('File %s slice upload start!', self.filepath)
+        log.info("PID[%d] File %s slice upload start!",self.process_id , self.filepath)
         records = self.recovery_from_record()
         offsets, uploadBatch = self.records_parse(records)
         #log.info('Recovery from upload record:offset %s, upload %s', offsets, uploadBatch)
@@ -167,7 +168,7 @@ class WcsSliceUpload(object):
             return self.make_file(self.PUT_URL, self.blockStatus(results), uploadBatch)
         else:
             fail_list = self.result_analysis(results)
-            log.info('Sorry, These block %s upload fail',fail_list )
+            log.info("PID[%d] Sorry, These block %s upload fail",self.process_id , fail_list )
             return -1, "slice upload fail" 
 
     def make_bput_post(self, ctx, bputnum, uploadBatch, bput_next):
