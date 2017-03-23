@@ -164,7 +164,8 @@ class TorrentProcesser(Process):
                             if duration < stream["duration"]:
                                 duration = stream["duration"]
             if create_video_preview:
-                log.info("Video need create preview %dx%d, %f", width, height, duration)
+                log.info("PreCreate Convert...")
+                log.info("Video need create preview %d x %d", width, height)
             file_name = os.path.basename(file_path)
             file_data = {"size":hashvalue["fsize"], "name":file_name, "key":hashvalue["key"]}
             post_data = {"tid":self._md5(file_prop["torrent_hash"]),\
