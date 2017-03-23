@@ -155,7 +155,7 @@ class WcsSliceUpload(object):
 
 #            pool.close()
 #            pool.join()
-         
+
         else:
             log.info('Do not need to upload, all file blocks have been upload')
 
