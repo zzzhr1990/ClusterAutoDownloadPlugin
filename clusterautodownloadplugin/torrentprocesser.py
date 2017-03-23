@@ -144,6 +144,7 @@ class TorrentProcesser(Process):
         if code == 200:
             #Preview
             info = hashvalue["avinfo"]
+            log.info("AVIF %s", info)
             create_video_preview = False
             height = 0
             width = 0
