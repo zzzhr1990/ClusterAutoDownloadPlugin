@@ -144,8 +144,24 @@ class TorrentProcesser(Process):
         if code == 200:
             #Preview
             info = log.info["avinfo"]
+            create_video_preview = False
+            height = 0
+            width = 0
+            duration = 0.0
             if info:
-                log.info("AVINFO %s", base64.urlsafe_b64decode(info))
+                info_dict = base64.urlsafe_b64decode(info)
+                if "streams" in info_dict:
+                    for stream in info_dict["streams"]:
+                        create_video_preview = True
+                        if "width" in stream:
+                            width = stream["width"]
+                        if "height" in stream:
+                            height = stream["height"]
+                        if "duration" in stream:
+                            if duration < stream["duration"]:
+                                duration = stream["duration"]
+            if create_video_preview:
+                log.info("Video need create preview %dx%d, %f", width, height, duration)
             file_name = os.path.basename(file_path)
             file_data = {"size":hashvalue["fsize"], "name":file_name, "key":hashvalue["key"]}
             post_data = {"tid":self._md5(file_prop["torrent_hash"]),\
