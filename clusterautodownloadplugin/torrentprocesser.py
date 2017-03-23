@@ -149,8 +149,10 @@ class TorrentProcesser(Process):
             width = 0
             duration = 0.0
             if info:
+                log.info("BASE64 %s", info)
                 info_dict = json.loads(base64.urlsafe_b64decode(info))
                 if "streams" in info_dict:
+                    log.info("STREAM FOUND")
                     for stream in info_dict["streams"]:
                         create_video_preview = True
                         if "width" in stream:
