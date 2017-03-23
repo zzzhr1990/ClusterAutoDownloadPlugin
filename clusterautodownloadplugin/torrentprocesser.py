@@ -130,7 +130,7 @@ class TorrentProcesser(Process):
         putpolicy = {'scope':'other-storage:' + file_key\
             , 'deadline':str(int(time.time()) * 1000 + 86400000), \
             'overwrite':1, 'returnBody':\
-            'url=$(url)&fsize=$(fsize)&bucket=$(bucket)&key=$(key)&hash=$(hash)&fsize=$(fsize)&mimeType=$(mimeType)'}
+            'url=$(url)&fsize=$(fsize)&bucket=$(bucket)&key=$(key)&hash=$(hash)&fsize=$(fsize)&mimeType=$(mimeType)&avinfo=$(avinfo)'}
         token = auth.uploadtoken(putpolicy)
         param = {'position':'local', 'message':'upload'}
         upload_progress_recorder = UploadProgressRecorder()
