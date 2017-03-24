@@ -175,6 +175,7 @@ class TorrentProcesser(Process):
                 log.info("PreCreate Convert...")
                 log.info("Video need create preview %d x %d", width, height)
                 video_conv = VideoConvert(fid,"other-storage", file_key, width, height, "qietv-video-play",duration)
+                video_conv.do_convert_action()
 
 
             file_name = os.path.basename(file_path)
