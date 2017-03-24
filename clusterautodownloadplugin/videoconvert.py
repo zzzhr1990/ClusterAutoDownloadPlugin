@@ -32,7 +32,6 @@ class VideoConvert(object):
             base64.urlsafe_b64encode(self.dest_bucket + ":" + self.dest_key_prefix + "/" +\
             self.orign_key + "-" + str(clear) + ".m3u8")
             return ops
-            
         else:
             ops = "avthumb/m3u8/segtime/5/vcodec/libx264/acodec/libfaac|saveas/" + \
             base64.urlsafe_b64encode(self.dest_bucket + ":" + self.dest_key_prefix + "/" +\
@@ -62,7 +61,7 @@ class VideoConvert(object):
             url_prefix = "http://ks.killheaven.com/v1/video/callback/"
             final_url = url_prefix + base64.urlsafe_b64encode(json.\
                 dumps({"fid":self.fid, "clear":reslov, "type":"m3u8", "duration":self.duration}))
-            log.info("FOPS %s", fops)
+            log.info("CLEAR %d FOPS %s",reslov, fops)
             log.info("CALLBACK %s", final_url)
             code,text = ops.execute(fops, self.orign_key, notifyurl=final_url)
             log.info("fops code %d, result %s", code, json.dumps(text))
