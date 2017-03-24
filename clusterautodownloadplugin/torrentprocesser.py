@@ -113,7 +113,8 @@ class TorrentProcesser(Process):
                             , file_path, a_size, file_detail["size"])
                     else:
                         all_success_download = False
-                        log.warn("PID[%d] file %s download complete, but cannot be found...", self.process_id, file_path)
+                        log.warn("PID[%d] file %s download complete, but cannot be found..."\
+                        , self.process_id, file_path)
                 else:
                     all_success_download = False
         if all_success_download and is_finished:
@@ -210,8 +211,8 @@ class TorrentProcesser(Process):
                 , file_key, file_hash, remote_hash)
                 #repost
                 self._post_file(file_path, file_key, file_prop)
- #           else:
- #               log.info("%s exists on server, ignore...", file_path)
+            else:
+                log.info("%s exists on server, ignore...", file_path)
             #TODO: check and report..
         else:
             if code == 404:
