@@ -97,7 +97,7 @@ class TorrentProcesser(Process):
             file_progress = torrent_info["file_progress"][index]
             file_download = torrent_info["file_priorities"][index]
             if file_download:
-                fid = self._md5(file_detail["path"] + "@" + torrent_hash)
+                #fid = self._md5(file_detail["path"] + "@" + torrent_hash)
                 if file_progress == 1:
                     file_path = (u'/'.join([dest_path, file_detail["path"]])).encode('utf8')
                     if os.path.exists(file_path):
@@ -105,7 +105,7 @@ class TorrentProcesser(Process):
                         if a_size == file_detail["size"]:
                             tid = self._md5(torrent_hash)
                             file_prop = {"tid":tid, "torrent_hash":torrent_hash, \
-                            "path":file_detail["path"], "size": file_detail["size"], "fid":fid}
+                            "path":file_detail["path"], "size": file_detail["size"]}
                             upload_result = self._upload_to_ws(file_path, file_prop)
                             if not upload_result["uploaded"]:
                                 all_success_download = False
@@ -234,7 +234,8 @@ class TorrentProcesser(Process):
         bucket = "other-storage"
         file_hash = etag(file_path)
         #Check if fid exists...
-        fid = file_prop["fid"]
+        fid = self._md5(file_hash)
+        file_prop["fid"] = fid
         file_key = "raw/" + file_hash
         h_result = {"fid":fid, "file_path":file_path, "key":file_key, "status":0}
         remote_info = self.task.get_file_info(fid)

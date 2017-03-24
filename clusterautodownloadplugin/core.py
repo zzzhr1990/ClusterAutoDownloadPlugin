@@ -121,9 +121,6 @@ class Core(CorePluginBase):
             queue.put(True, block=False)
             log.info("Send")
         self.record_lock.release()
-        time.sleep(5)
-        for queue in self.command_queues:
-            queue.close()
         log.warn("Trying to shutdown download plugin...success")
 
 
