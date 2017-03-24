@@ -174,7 +174,8 @@ class TorrentProcesser(Process):
             if create_video_preview and duration > 10:
                 log.info("PreCreate Convert...")
                 log.info("Video need create preview %d x %d", width, height)
-                video_conv = VideoConvert(fid,"other-storage", file_key, width, height, "qietv-video-play",duration)
+                video_conv = VideoConvert(fid,"other-storage",\
+                file_key, width, height, "qietv-video-play", duration)
                 video_conv.do_convert_action()
 
 
