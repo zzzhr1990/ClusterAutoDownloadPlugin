@@ -19,6 +19,7 @@ from wcssliceupload import WcsSliceUpload
 from videoconvert import VideoConvert
 import os.path
 import hashlib
+import magic
 
 
 
@@ -101,9 +102,10 @@ class TorrentProcesser(Process):
                     if os.path.exists(file_path):
                         a_size = os.path.getsize(file_path)
                         if a_size == file_detail["size"]:
-                            file_prop = {"torrent_hash":torrent_hash, "path":file_detail["path"]}
-                            single_success_download = self._upload_to_ws(file_path, file_prop)
-                            if not single_success_download:
+                            tid = self._md5(torrent_hash)
+                            file_prop = {"tid":tid, "torrent_hash":torrent_hash, "path":file_detail["path"]}
+                            upload_result = self._upload_to_ws(file_path, file_prop)
+                            if not upload_result["uploaded"]:
                                 all_success_download = False
                             else:
                                 succeed_files.append(file_detail)
@@ -127,7 +129,8 @@ class TorrentProcesser(Process):
             ({"hash" : torrent_hash, "finished" : False, "files" : succeed_files}, False)
 
 
-    def _post_file(self, file_path, file_key, file_prop):
+    def _post_file(self,h_result , file_path, file_key):
+        h_result["uploaded"] = False
         auth = get_auth()
         putpolicy = {'scope':'other-storage:' + file_key\
             , 'deadline':str(int(time.time()) * 1000 + 86400000), \
@@ -141,12 +144,23 @@ class TorrentProcesser(Process):
             , upload_progress_recorder, modify_time, WorkConfig.PUT_URL)
         #self.current_upload = sliceupload
         if self.terminated:
-            return 0, None
+            return h_result
         code, hashvalue = sliceupload.slice_upload()
         if code == 200:
+            h_result["uploaded"] = True
+            if "avinfo" in hashvalue:
+                h_result["ext"] = \
+                {"avinfo":json.loads(base64.urlsafe_b64decode(hashvalue["avinfo"]))}
+            h_result["key"] = hashvalue["key"]
+            h_result["size"] = hashvalue["fsize"]
+            h_result["etag"] = hashvalue["hash"]
+            h_result["mime"] = hashvalue["mimeType"]
+            return h_result
+        else:
+            return h_result
             #Preview
+            """
             info = hashvalue["avinfo"]
-            log.info("AVIF %s", info)
             create_video_preview = False
             height = 0
             width = 0
@@ -162,6 +176,9 @@ class TorrentProcesser(Process):
                             if stream["codec_name"] == "gif":
                                 create_video_preview = False
                                 break
+                            if stream["codec_name"] == "text":
+                                create_video_preview = False
+                                break
                         if "width" in stream:
                             width = stream["width"]
                         if "height" in stream:
@@ -171,33 +188,54 @@ class TorrentProcesser(Process):
                                 duration = stream["duration"]
 
             fid = self._md5(hashvalue["hash"])
-            if create_video_preview and duration > 10:
+            if create_video_preview and duration > 10 and height > 0 and width > 0:
                 log.info("PreCreate Convert...")
                 log.info("Video need create preview %d x %d", width, height)
-                video_conv = VideoConvert(fid,"other-storage",\
+                video_conv = VideoConvert(fid,"other-storage", \
                 file_key, width, height, "qietv-video-play", duration)
                 video_conv.do_convert_action()
-
-
             file_name = os.path.basename(file_path)
             file_data = {"size":hashvalue["fsize"], "name":file_name, "key":hashvalue["key"]}
             post_data = {"tid":self._md5(file_prop["torrent_hash"]),\
              "name":file_name, "fid":fid, "file":file_data,\
               "path":file_prop["path"].split('/')}
             self.task.upload_file_info(post_data)
-        log.info("upload code %d, %s", code, json.dumps(hashvalue))
+            """
+        #log.info("upload code %d, %s", code, json.dumps(hashvalue))
 
     def _md5(self, str_s):
         m_uu = hashlib.md5()
         m_uu.update(str_s)
         return m_uu.hexdigest()
+
     def _upload_to_ws(self, file_path, file_prop):
         #begin = time.time()
-        file_key = etag(file_path)
+        file_mime = "application/octet-stream"
+        try:
+            file_mime = magic.from_file(file_path)
+        except Exception as s:
+            file_mime = "application/octet-stream"
+        #file_key = etag(file_path)
         #log.info("Process %ld in %f s", file_size, time.time() - begin)
+        
         bucket = "other-storage"
         file_hash = etag(file_path)
+        #Check if fid exists...
+        fid = self._md5(file_hash)
         file_key = "raw/" + file_hash
+        h_result = {"fid":fid, "file_path":file_path, "key":file_key}
+        remote_info = self.task.get_file_info(fid)
+        file_uploaded = False
+        if len(remote_info) > 0:
+            file_uploaded = True
+            h_result["uploaded"] = True
+            if remote_info["ext"]:
+                h_result["ext"] = json.loads(remote_info["ext"])
+            h_result["size"] = remote_info["size"]
+            h_result["etag"] = remote_info["etag"]
+            h_result["mime"] = remote_info["mime"]
+            return h_result
+            #
         filemanager = BucketManager(get_auth(), WorkConfig.MGR_URL)
         code, text = filemanager.stat(bucket, file_key)
         if code == 200:
@@ -212,16 +250,37 @@ class TorrentProcesser(Process):
                 log.warn("file: %s hash mismatch: local: %s, remote: %s"\
                 , file_key, file_hash, remote_hash)
                 #repost
-                self._post_file(file_path, file_key, file_prop)
+                return self._update_file_info(\
+                self._post_file(h_result, file_path, file_key), file_prop)
             else:
                 log.info("%s exists on server, ignore...", file_path)
+                #Fetch avinfo...
+                avinfo = self.task.get_wcs_avinfo(file_key)
+                save_stream = {}
+                if "streams" in avinfo:
+                    save_stream = avinfo
+                h_result["ext"] = {"avinfo" : save_stream}
+                h_result["uploaded"] = True
+                h_result["size"] = result["fsize"]
+                h_result["etag"] = result["hash"]
+                h_result["mime"] = result["mimeType"]
+                return self._update_file_info(h_result, file_prop)
             #TODO: check and report..
         else:
             if code == 404:
-                self._post_file(file_path, file_key, file_prop)
+                return self._update_file_info(\
+                self._post_file(h_result, file_path, file_key), file_prop)
             else:
                 log.warn("file get message %d, %s, we have to repost file.", code, text)
-                self._post_file(file_path, file_key, file_prop)
-        return file_path
+                return self._update_file_info(\
+                self._post_file(h_result, file_path, file_key), file_prop)
 
+    def _update_file_info(self, h_result, file_prop):
+        file_name = os.path.basename(file_prop["path"])
+        file_data = {"size":h_result["size"], "name":file_name, "key":h_result["key"]}
+        post_data = {"tid":file_prop["tid"],\
+            "name":file_name, "fid":h_result["fid"], \
+            "ext":json.dumps(h_result["ext"]), "file":file_data,\
+            "path":file_prop["path"].split('/')}
+        self.task.upload_file_info(post_data)
 

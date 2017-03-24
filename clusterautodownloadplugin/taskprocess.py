@@ -30,6 +30,24 @@ class TaskProcess(object):
     def _task_in_process(self, torrent_id, core):
         return torrent_id in core.torrentmanager.torrents
 
+    def get_file_info(self, file_id):
+        """Check This File Status"""
+        req = requests.get(self._base_url + "/v1/files/source/" + file_id\
+        , headers={"X-Task-Token" : "1024tasktoken"}, timeout=5)
+        data = self.exec_requests_data_json(req)
+        if data is None:
+            log.warn("Rec from LX Eempty")
+            return None
+        else:
+            return data
+
+    def get_wcs_avinfo(self, key):
+        """Check This File Status"""
+        req = requests.get("http://other.qiecdn.com/" + key + "?op=avinfo", timeout=60)
+        if req.status != 200:
+            return {}
+        return req.json()
+
     def upload_file_info(self, post):
         """Check uploads on server."""
         req = requests.post(self._base_url + '/v1/files'\

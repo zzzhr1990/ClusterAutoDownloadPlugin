@@ -56,7 +56,7 @@ from workconfig import WorkConfig
 from taskprocess import TaskProcess
 from torrentprocesser import TorrentProcesser
 from multiprocessing.queues import Empty
-
+from videoconvert import VideoConvert
 
 
 
@@ -103,6 +103,10 @@ class Core(CorePluginBase):
         self.looping_thread.start()
         self.task_looping_thread.start()
         log.info("- Plugin %s enabled.", self.plugin_name)
+        #TODO remove_torrent
+
+        vc = VideoConvert("42b5498acaf981a7e553361138096d57", "other-storage", "raw/lrFa9h9xwGRzoQFcXh-kopfCyDhA",1920,1080,"qietv-video-play",2736)
+        vc.do_convert_action()
 
     def disable(self):
         """Call when plugin disabled."""
