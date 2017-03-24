@@ -116,7 +116,7 @@ class TorrentProcesser(Process):
                                         if "avinfo" in upload_result["ext"]:
                                             log.info("AVINFO_FOUND...")
                                             avinfo = upload_result["ext"]["avinfo"]
-                                            self._parse_and_convert(avinfo, h_result, file_prop)
+                                            self._parse_and_convert(avinfo, upload_result, file_prop)
                                         else:
                                             log.info("AVINFO_MISSING")
                                     else:
