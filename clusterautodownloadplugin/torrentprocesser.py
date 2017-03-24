@@ -81,8 +81,8 @@ class TorrentProcesser(Process):
         dest_path = torrent_info["save_path"]
         if torrent_info["move_completed"]:
             dest_path = torrent_info["move_completed_path"]
-        progress = torrent_info["progress"]
-
+        #progress = torrent_info["progress"]
+        log.info(json.dumps(torrent_info))
         all_success_download = True
         succeed_files = []
         #Assign download succ
@@ -156,6 +156,10 @@ class TorrentProcesser(Process):
                     log.info("STREAM FOUND")
                     for stream in info_dict["streams"]:
                         create_video_preview = True
+                        if "codec_name" in stream:
+                            if stream["codec_name"] == "gif":
+                                create_video_preview = False
+                                break
                         if "width" in stream:
                             width = stream["width"]
                         if "height" in stream:
@@ -163,13 +167,20 @@ class TorrentProcesser(Process):
                         if "duration" in stream:
                             if duration < stream["duration"]:
                                 duration = stream["duration"]
-            if create_video_preview:
+
+            fid = self._md5(hashvalue["hash"])
+            if create_video_preview and duration > 10:
                 log.info("PreCreate Convert...")
                 log.info("Video need create preview %d x %d", width, height)
+                dest_key = "sp/m3u8/" + time.strftime("%Y%m%d",time.localtime())
+                ops_prefix = "avthumb/m3u8/segtime/5/vcodec/libx264/acodec/libfaac|saveas/"
+
+
             file_name = os.path.basename(file_path)
             file_data = {"size":hashvalue["fsize"], "name":file_name, "key":hashvalue["key"]}
             post_data = {"tid":self._md5(file_prop["torrent_hash"]),\
-             "name":file_name, "fid":self._md5(hashvalue["hash"]), "file":file_data, "path":file_prop["path"].split('/')}
+             "name":file_name, "fid":fid, "file":file_data,\
+            "path":file_prop["path"].split('/')}
             self.task.upload_file_info(post_data)
         log.info("upload code %d, %s", code, json.dumps(hashvalue))
 
