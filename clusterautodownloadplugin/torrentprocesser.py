@@ -16,6 +16,7 @@ from deluge.log import LOG as log
 from workconfig import get_auth
 from taskprocess import TaskProcess
 from wcssliceupload import WcsSliceUpload
+from videoconvert import VideoConvert
 import os.path
 import hashlib
 
@@ -82,7 +83,7 @@ class TorrentProcesser(Process):
         if torrent_info["move_completed"]:
             dest_path = torrent_info["move_completed_path"]
         #progress = torrent_info["progress"]
-        log.info(json.dumps(torrent_info))
+        #log.info(json.dumps(torrent_info))
         all_success_download = True
         succeed_files = []
         #Assign download succ
@@ -172,15 +173,14 @@ class TorrentProcesser(Process):
             if create_video_preview and duration > 10:
                 log.info("PreCreate Convert...")
                 log.info("Video need create preview %d x %d", width, height)
-                dest_key = "sp/m3u8/" + time.strftime("%Y%m%d",time.localtime())
-                ops_prefix = "avthumb/m3u8/segtime/5/vcodec/libx264/acodec/libfaac|saveas/"
+                video_conv = VideoConvert(fid,"other-storage", file_key, width, height, "qietv-video-play",duration)
 
 
             file_name = os.path.basename(file_path)
             file_data = {"size":hashvalue["fsize"], "name":file_name, "key":hashvalue["key"]}
             post_data = {"tid":self._md5(file_prop["torrent_hash"]),\
              "name":file_name, "fid":fid, "file":file_data,\
-            "path":file_prop["path"].split('/')}
+              "path":file_prop["path"].split('/')}
             self.task.upload_file_info(post_data)
         log.info("upload code %d, %s", code, json.dumps(hashvalue))
 
