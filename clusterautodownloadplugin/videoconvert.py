@@ -31,10 +31,12 @@ class VideoConvert(object):
             + str(_width) + "x" + str(_height) + "/autoscale/1|saveas/"
             base64.urlsafe_b64encode(self.dest_bucket + ":" + self.dest_key_prefix + "/" +\
             self.orign_key + "-" + str(clear) + ".m3u8")
+            return ops
         else:
             ops = "avthumb/m3u8/segtime/5/vcodec/libx264/acodec/libfaac|saveas/" + \
             base64.urlsafe_b64encode(self.dest_bucket + ":" + self.dest_key_prefix + "/" +\
             self.orign_key + "-9999" + ".m3u8")
+            return ops
 
     def do_convert_action(self):
         """POST"""
