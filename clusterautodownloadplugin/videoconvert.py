@@ -32,6 +32,7 @@ class VideoConvert(object):
             base64.urlsafe_b64encode(self.dest_bucket + ":" + self.dest_key_prefix + "/" +\
             self.orign_key + "-" + str(clear) + ".m3u8")
             return ops
+            
         else:
             ops = "avthumb/m3u8/segtime/5/vcodec/libx264/acodec/libfaac|saveas/" + \
             base64.urlsafe_b64encode(self.dest_bucket + ":" + self.dest_key_prefix + "/" +\
