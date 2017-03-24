@@ -53,18 +53,20 @@ class VideoConvert(object):
             max_reslov = 9999
         action_list.append({"clear":max_reslov, "cmd":self._calc_ops_command()})
 
+        actions = []
         for ops in action_list:
             reslov = ops["clear"]
             fops = ops["cmd"]
             auth = get_auth()
-            ops = PersistentFop(auth,WorkConfig.MGR_URL, self.orign_bucket)
+            ops = PersistentFop(auth, WorkConfig.MGR_URL, self.orign_bucket)
             url_prefix = "http://ks.killheaven.com/v1/video/callback/"
             final_url = url_prefix + base64.urlsafe_b64encode(json.\
                 dumps({"fid":self.fid, "clear":reslov, "type":"m3u8", "duration":self.duration}))
-            log.info("CLEAR %d FOPS %s",reslov, fops)
-            log.info("CALLBACK %s", final_url)
-            code,text = ops.execute(fops, self.orign_key, notifyurl=final_url)
-            log.info("fops code %d, result %s", code, json.dumps(text))
+#            log.info("CLEAR %d FOPS %s",reslov, fops)
+#            log.info("CALLBACK %s", final_url)
+            code, text = ops.execute(fops, self.orign_key, notifyurl=final_url)
+            actions.append({"clear":reslov, "code":code, "resp":text})
+        return actions
 
 
 

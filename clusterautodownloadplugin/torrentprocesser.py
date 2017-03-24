@@ -97,13 +97,15 @@ class TorrentProcesser(Process):
             file_progress = torrent_info["file_progress"][index]
             file_download = torrent_info["file_priorities"][index]
             if file_download:
+                fid = self._md5(file_detail["path"] + "@" + torrent_hash)
                 if file_progress == 1:
                     file_path = (u'/'.join([dest_path, file_detail["path"]])).encode('utf8')
                     if os.path.exists(file_path):
                         a_size = os.path.getsize(file_path)
                         if a_size == file_detail["size"]:
                             tid = self._md5(torrent_hash)
-                            file_prop = {"tid":tid, "torrent_hash":torrent_hash, "path":file_detail["path"]}
+                            file_prop = {"tid":tid, "torrent_hash":torrent_hash, \
+                            "path":file_detail["path"], "size": file_detail["size"], "fid":fid}
                             upload_result = self._upload_to_ws(file_path, file_prop)
                             if not upload_result["uploaded"]:
                                 all_success_download = False
@@ -113,6 +115,8 @@ class TorrentProcesser(Process):
                                     if "ext" in upload_result:
                                         if "avinfo" in upload_result["ext"]:
                                             log.info("AVINFO_FOUND...")
+                                            avinfo = upload_result["ext"]["avinfo"]
+                                            self._parse_and_convert(avinfo, h_result, file_prop)
                                         else:
                                             log.info("AVINFO_MISSING")
                                     else:
@@ -230,7 +234,7 @@ class TorrentProcesser(Process):
         bucket = "other-storage"
         file_hash = etag(file_path)
         #Check if fid exists...
-        fid = self._md5(file_hash)
+        fid = file_prop["fid"]
         file_key = "raw/" + file_hash
         h_result = {"fid":fid, "file_path":file_path, "key":file_key, "status":0}
         remote_info = self.task.get_file_info(fid)
@@ -292,4 +296,49 @@ class TorrentProcesser(Process):
             "ext":json.dumps(h_result["ext"]), "file":file_data,\
             "path":file_prop["path"].split('/')}
         self.task.upload_file_info(post_data)
+    
+    def _update_convert_status(self, h_result, file_prop, status):
+        #file_name = os.path.basename(file_prop["path"])
+        #file_data = {"size":h_result["size"], "name":file_name, "key":h_result["key"]}
+        post_data = {"tid":file_prop["tid"],\
+            "fid":h_result["fid"], \
+            "status":status}
+        self.task.upload_file_info(post_data)
+    
+    def _parse_and_convert(self, avinfo, h_result, file_prop):
+        create_video_preview = False
+        height = 0
+        width = 0
+        duration = 0.0
+        if "streams" in avinfo:
+            for stream in avinfo["streams"]:
+                create_video_preview = True
+                if "codec_name" in stream:
+                    if stream["codec_name"] == "gif":
+                        create_video_preview = False
+                        break
+                    if stream["codec_name"] == "text":
+                        create_video_preview = False
+                        break
+                    if "width" in stream:
+                        width = stream["width"]
+                    if "height" in stream:
+                        height = stream["height"]
+                    if "duration" in stream:
+                        if duration < stream["duration"]:
+                            duration = stream["duration"]
+
+        if create_video_preview:
+            log.info("Video need create preview %d x %d", width, height)
+            v_conv = VideoConvert(h_result["fid"], "other-storage",\
+             h_result["key"], width, height, "qietv-video-play", duration)
+            v_conv.do_convert_action()
+            self._update_convert_status(h_result, file_prop, 2)
+        else:
+            self._update_convert_status(h_result, file_prop, 1)
+
+
+
+
+
 
