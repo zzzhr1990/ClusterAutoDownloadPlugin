@@ -108,6 +108,15 @@ class TorrentProcesser(Process):
                             if not upload_result["uploaded"]:
                                 all_success_download = False
                             else:
+                                if upload_result["status"] == 0:
+                                    log.info("Checking if need convert...")
+                                    if "ext" in upload_result:
+                                        if "avinfo" in upload_result["ext"]:
+                                            log.info("AVINFO_FOUND...")
+                                        else:
+                                            log.info("AVINFO_MISSING")
+                                    else:
+                                        log.info("EXT MISSING")
                                 succeed_files.append(file_detail)
                         else:
                             all_success_download = False
@@ -223,9 +232,8 @@ class TorrentProcesser(Process):
         #Check if fid exists...
         fid = self._md5(file_hash)
         file_key = "raw/" + file_hash
-        h_result = {"fid":fid, "file_path":file_path, "key":file_key}
+        h_result = {"fid":fid, "file_path":file_path, "key":file_key, "status":0}
         remote_info = self.task.get_file_info(fid)
-        file_uploaded = False
         if len(remote_info) > 0:
             file_uploaded = True
             h_result["uploaded"] = True
@@ -234,6 +242,7 @@ class TorrentProcesser(Process):
             h_result["size"] = remote_info["size"]
             h_result["etag"] = remote_info["etag"]
             h_result["mime"] = remote_info["mime"]
+            h_result["status"] = remote_info["status"]
             return h_result
             #
         filemanager = BucketManager(get_auth(), WorkConfig.MGR_URL)
