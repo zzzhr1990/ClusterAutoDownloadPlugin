@@ -28,7 +28,7 @@ class VideoConvert(object):
         if clear:
             _width, _height = self._calc_size(clear)
             ops = "avthumb/m3u8/segtime/5/vcodec/libx264/acodec/libfaac/s/" \
-            + str(_width) + "x" + str(_height) + "/autoscale/1|saveas/"
+            + str(_width) + "x" + str(_height) + "/autoscale/1|saveas/" + \
             base64.urlsafe_b64encode(self.dest_bucket + ":" + self.dest_key_prefix + "/" +\
             self.orign_key + "-" + str(clear) + ".m3u8")
             return ops
