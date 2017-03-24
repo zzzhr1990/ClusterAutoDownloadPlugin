@@ -57,7 +57,6 @@ class VideoConvert(object):
             auth = get_auth()
             ops = PersistentFop(auth,WorkConfig.MGR_URL, self.orign_bucket)
             url_prefix = "http://ks.killheaven.com/v1/video/callback/"
-            url_data = base64.urlsafe_b64encode(json)
             code,text = ops.execute(fops, self.orign_key, notifyurl=url_prefix \
             + base64.urlsafe_b64encode(json.dumps({"fid":self.fid, "clear":reslov, "type":"m3u8", "duration":self.duration})))
             log.info("fops code %d, result %s", code, json.dumps(text))
