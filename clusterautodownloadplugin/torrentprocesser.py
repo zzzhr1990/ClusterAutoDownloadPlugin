@@ -264,7 +264,7 @@ class TorrentProcesser(Process):
                 log.warn("file: %s hash mismatch: local: %s, remote: %s"\
                 , file_key, file_hash, remote_hash)
                 #repost
-                return self._update_file_info(\
+                return self._create_file_info(\
                 self._post_file(h_result, file_path, file_key), file_prop)
             else:
                 log.info("%s exists on server, ignore...", file_path)
@@ -278,33 +278,31 @@ class TorrentProcesser(Process):
                 h_result["size"] = result["fsize"]
                 h_result["etag"] = result["hash"]
                 h_result["mime"] = result["mimeType"]
-                return self._update_file_info(h_result, file_prop)
+                return self._create_file_info(h_result, file_prop)
             #TODO: check and report..
         else:
             if code == 404:
-                return self._update_file_info(\
+                return self._create_file_info(\
                 self._post_file(h_result, file_path, file_key), file_prop)
             else:
                 log.warn("file get message %d, %s, we have to repost file.", code, text)
-                return self._update_file_info(\
+                return self._create_file_info(\
                 self._post_file(h_result, file_path, file_key), file_prop)
 
-    def _update_file_info(self, h_result, file_prop):
+    def _create_file_info(self, h_result, file_prop):
         file_name = os.path.basename(file_prop["path"])
         file_data = {"size":h_result["size"], "name":file_name, "key":h_result["key"]}
         post_data = {"tid":file_prop["tid"],\
             "name":file_name, "fid":h_result["fid"], \
             "ext":json.dumps(h_result["ext"]), "file":file_data,\
             "path":file_prop["path"].split('/')}
-        self.task.upload_file_info(post_data)
+        self.task.create_file_info(post_data)
     
     def _update_convert_status(self, h_result, file_prop, status):
         #file_name = os.path.basename(file_prop["path"])
         #file_data = {"size":h_result["size"], "name":file_name, "key":h_result["key"]}
-        post_data = {"tid":file_prop["tid"],\
-            "fid":h_result["fid"], \
-            "status":status}
-        self.task.upload_file_info(post_data)
+        post_data = {"status":status}
+        self.task.update_file_info(h_result["fid"], post_data)
     
     def _parse_and_convert(self, avinfo, h_result, file_prop):
         create_video_preview = False

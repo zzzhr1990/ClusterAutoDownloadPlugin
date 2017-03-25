@@ -48,13 +48,22 @@ class TaskProcess(object):
             return {}
         return req.json()
 
-    def upload_file_info(self, post):
+    def create_file_info(self, post):
         """Check uploads on server."""
         req = requests.post(self._base_url + '/v1/files'\
         , headers={"X-Task-Token" : "1024tasktoken"}, json=post, timeout=5)
         data = self.exec_requests_data_json(req)
         if data is None:
             log.warn("Rec from LX Eempty")
+
+    def update_file_info(self, fid ,post):
+        """Check uploads on server."""
+        req = requests.post(self._base_url + '/v1/source/' + fid\
+        , headers={"X-Task-Token" : "1024tasktoken"}, json=post, timeout=5)
+        data = self.exec_requests_data_json(req)
+        if data is None:
+            log.warn("Rec from LX Eempty")
+
     def check_tasks(self):
         """Check tasks on server."""
         req = requests.get(self._base_url + '/v1/task'\
