@@ -119,6 +119,7 @@ class TorrentProcesser(Process):
                                             self._parse_and_convert(avinfo, upload_result, file_prop)
                                         else:
                                             log.info("AVINFO_MISSING")
+                                            log.info("%s", json.dumps(upload_result))
                                     else:
                                         log.info("EXT MISSING")
                                 succeed_files.append(file_detail)
@@ -164,6 +165,8 @@ class TorrentProcesser(Process):
             if "avinfo" in hashvalue:
                 h_result["ext"] = \
                 {"avinfo":json.loads(base64.urlsafe_b64decode(hashvalue["avinfo"]))}
+            else:
+                log.info("Missing avinfo...")
             h_result["key"] = hashvalue["key"]
             h_result["size"] = hashvalue["fsize"]
             h_result["etag"] = hashvalue["hash"]
@@ -248,6 +251,7 @@ class TorrentProcesser(Process):
             h_result["etag"] = remote_info["etag"]
             h_result["mime"] = remote_info["mime"]
             h_result["status"] = remote_info["status"]
+            h_result["step"] = "ALREADY_EXISTS_ON_LX_SERVER"
             return h_result
             #
         filemanager = BucketManager(get_auth(), WorkConfig.MGR_URL)
@@ -264,6 +268,7 @@ class TorrentProcesser(Process):
                 log.warn("file: %s hash mismatch: local: %s, remote: %s"\
                 , file_key, file_hash, remote_hash)
                 #repost
+                h_result["step"] = "ALREADY_EXISTS_BUT_HASH_MISMATCH_REPOST"
                 return self._create_file_info(\
                 self._post_file(h_result, file_path, file_key), file_prop)
             else:
@@ -278,14 +283,17 @@ class TorrentProcesser(Process):
                 h_result["size"] = result["fsize"]
                 h_result["etag"] = result["hash"]
                 h_result["mime"] = result["mimeType"]
+                h_result["step"] = "ALREADY_EXISTS_WCS_SERVER_IGNORE_UPDATE"
                 return self._create_file_info(h_result, file_prop)
             #TODO: check and report..
         else:
             if code == 404:
+                h_result["step"] = "NEW_UPLOAD"
                 return self._create_file_info(\
                 self._post_file(h_result, file_path, file_key), file_prop)
             else:
                 log.warn("file get message %d, %s, we have to repost file.", code, text)
+                h_result["step"] = "OTHER_CODE_NEW_UPLOAD"
                 return self._create_file_info(\
                 self._post_file(h_result, file_path, file_key), file_prop)
 
