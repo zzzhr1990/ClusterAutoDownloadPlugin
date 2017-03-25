@@ -111,7 +111,7 @@ class TorrentProcesser(Process):
                                 all_success_download = False
                             else:
                                 if upload_result["status"] == 0:
-                                    log.info("Checking if need convert...")
+                                    log.info("Checking if need convert...%s", file_path)
                                     if "ext" in upload_result:
                                         if "avinfo" in upload_result["ext"]:
                                             log.info("AVINFO_FOUND...")
