@@ -297,6 +297,7 @@ class TorrentProcesser(Process):
             "ext":json.dumps(h_result["ext"]), "file":file_data,\
             "path":file_prop["path"].split('/')}
         self.task.create_file_info(post_data)
+        return h_result
     
     def _update_convert_status(self, h_result, file_prop, status):
         #file_name = os.path.basename(file_prop["path"])
