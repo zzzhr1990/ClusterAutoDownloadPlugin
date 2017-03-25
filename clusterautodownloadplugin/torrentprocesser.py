@@ -122,6 +122,7 @@ class TorrentProcesser(Process):
                                             log.info("%s", json.dumps(upload_result))
                                     else:
                                         log.info("EXT MISSING")
+                                        log.info("%s", json.dumps(upload_result))
                                 succeed_files.append(file_detail)
                         else:
                             all_success_download = False
@@ -293,7 +294,8 @@ class TorrentProcesser(Process):
                 self._post_file(h_result, file_path, file_key), file_prop)
             else:
                 log.warn("file get message %d, %s, we have to repost file.", code, text)
-                h_result["step"] = "OTHER_CODE_NEW_UPLOAD"
+                h_result["step"] = "OTHER_CODE
+                _NEW_UPLOAD"
                 return self._create_file_info(\
                 self._post_file(h_result, file_path, file_key), file_prop)
 
