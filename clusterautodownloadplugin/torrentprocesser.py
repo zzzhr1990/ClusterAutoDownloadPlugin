@@ -342,9 +342,10 @@ class TorrentProcesser(Process):
 
         if create_video_preview:
             log.info("Video need create preview %d x %d", width, height)
-            v_conv = VideoConvert(h_result["fid"], "other-storage",\
-             h_result["key"], width, height, "qietv-video-play", duration)
-            v_conv.do_convert_action()
+            v_conv = VideoConvert(h_result["fid"], "other-storage", \
+            h_result["key"], width, height, "qietv-video-play", duration)
+            exec_result = v_conv.do_convert_action()
+            log.info("PID[%d] exec convert action %s %s", self.pid, h_result["fid"], json.dumps(exec_result))
             self._update_convert_status(h_result, file_prop, 2)
         else:
             self._update_convert_status(h_result, file_prop, 1)
