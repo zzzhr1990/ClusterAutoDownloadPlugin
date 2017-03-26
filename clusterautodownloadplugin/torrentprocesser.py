@@ -59,10 +59,10 @@ class TorrentProcesser(Process):
             data = self.in_queue.get(True, 2)
             if data != None:
                 start = time.time()
-                log.info("PID[%d] Starting processing torrent %s", self.pid, data["hash"])
+                log.info("PID[%d] Starting processing torrent %s", self.process_id, data["hash"])
                 start = time.time()
                 self.process_single_torrent(data)
-                log.info("PID[%d] Starting processing torrent %s in %d ms", self.pid, data["hash"], \
+                log.info("PID[%d] Starting processing torrent %s in %d ms", self.process_id, data["hash"], \
                 (time.time() - start) * 1000)
 
         except Empty:
@@ -345,7 +345,7 @@ class TorrentProcesser(Process):
             v_conv = VideoConvert(h_result["fid"], "other-storage", \
             h_result["key"], width, height, "qietv-video-play", duration)
             exec_result = v_conv.do_convert_action()
-            log.info("PID[%d] exec convert action %s %s", self.pid, h_result["fid"], json.dumps(exec_result))
+            log.info("PID[%d] exec convert action %s %s", self.process_id, h_result["fid"], json.dumps(exec_result))
             self._update_convert_status(h_result, file_prop, 2)
         else:
             self._update_convert_status(h_result, file_prop, 1)
