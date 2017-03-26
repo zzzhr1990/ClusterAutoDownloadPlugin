@@ -32,7 +32,7 @@ class TaskProcess(object):
 
     def get_file_info(self, file_id):
         """Check This File Status"""
-        req = requests.get(self._base_url + "/v1/files/source/" + file_id\
+        req = requests.get(self._base_url + "/v1/source/" + file_id\
         , headers={"X-Task-Token" : "1024tasktoken"}, timeout=5)
         data = self.exec_requests_data_json(req)
         if data is None:
