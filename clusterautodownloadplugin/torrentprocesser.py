@@ -59,7 +59,11 @@ class TorrentProcesser(Process):
             data = self.in_queue.get(True, 2)
             if data != None:
                 start = time.time()
+                log.info("Starting processing torrent %s", data["hash"])
+                start = time.time()
                 self.process_single_torrent(data)
+                log.info("Starting processing torrent %s in %d ms", data["hash"], \
+                (time.time() - start) * 1000)
 
         except Empty:
             time.sleep(2)
