@@ -114,7 +114,6 @@ class TorrentProcesser(Process):
                                     log.info("Checking if need convert...%s", file_path)
                                     if "ext" in upload_result:
                                         if "avinfo" in upload_result["ext"]:
-                                            log.info("AVINFO_FOUND...")
                                             avinfo = upload_result["ext"]["avinfo"]
                                             self._parse_and_convert(avinfo, upload_result, file_prop)
                                         else:
@@ -144,7 +143,7 @@ class TorrentProcesser(Process):
             ({"hash" : torrent_hash, "finished" : False, "files" : succeed_files}, False)
 
 
-    def _post_file(self,h_result , file_path, file_key):
+    def _post_file(self, h_result , file_path, file_key):
         h_result["uploaded"] = False
         auth = get_auth()
         putpolicy = {'scope':'other-storage:' + file_key\
@@ -307,13 +306,13 @@ class TorrentProcesser(Process):
             "path":file_prop["path"].split('/')}
         self.task.create_file_info(post_data)
         return h_result
-    
+
     def _update_convert_status(self, h_result, file_prop, status):
         #file_name = os.path.basename(file_prop["path"])
         #file_data = {"size":h_result["size"], "name":file_name, "key":h_result["key"]}
         post_data = {"status":status}
         self.task.update_file_info(h_result["fid"], post_data)
-    
+
     def _parse_and_convert(self, avinfo, h_result, file_prop):
         create_video_preview = False
         height = 0
