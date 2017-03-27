@@ -142,7 +142,7 @@ class TorrentProcesser(Process):
             self.task.change_torrent_status(tid, {"status":10})
             self.out_queue.put\
             ({"hash" : torrent_hash, "finished" : True, "files" : succeed_files}, False)
-            log.info("%s download finished." %torrent_hash)
+            log.info("%s(tid=%s) download finished.", torrent_hash, tid)
         else:
             self.out_queue.put\
             ({"hash" : torrent_hash, "finished" : False, "files" : succeed_files}, False)
