@@ -310,6 +310,7 @@ class TorrentProcesser(Process):
             "ext":json.dumps(h_result["ext"]), "file":file_data,\
             "path":file_prop["path"].split('/')}
         self.task.create_file_info(post_data)
+        log.info("Post to LX Server to create file...[%s], [%s]", json.dumps(h_result), json.dumps(post_data))
         return h_result
 
     def _update_convert_status(self, h_result, file_prop, status):
