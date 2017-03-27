@@ -59,11 +59,11 @@ class TorrentProcesser(Process):
             data = self.in_queue.get(True, 2)
             if data != None:
                 start = time.time()
-                log.info("PID[%d] Starting processing torrent %s", self.process_id, data["hash"])
+                #log.info("PID[%d] Starting processing torrent %s", self.process_id, data["hash"])
                 start = time.time()
                 self.process_single_torrent(data)
-                log.info("PID[%d] Starting processing torrent %s in %d ms", self.process_id, data["hash"], \
-                (time.time() - start) * 1000)
+                #log.info("PID[%d] Starting processing torrent %s in %d ms", self.process_id, data["hash"], \
+                #(time.time() - start) * 1000)
 
         except Empty:
             time.sleep(2)
@@ -142,6 +142,7 @@ class TorrentProcesser(Process):
             self.task.change_torrent_status(tid, {"status":10})
             self.out_queue.put\
             ({"hash" : torrent_hash, "finished" : True, "files" : succeed_files}, False)
+            log.info("%s download finished." %torrent_hash)
         else:
             self.out_queue.put\
             ({"hash" : torrent_hash, "finished" : False, "files" : succeed_files}, False)
