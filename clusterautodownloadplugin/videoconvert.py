@@ -8,7 +8,7 @@ from persistentfop import PersistentFop
 
 class VideoConvert(object):
     """V"""
-    def __init__(self,fid ,orign_bucket, orign_key, width, height, dest_bucket, duration):
+    def __init__(self, fid, orign_bucket, orign_key, width, height, dest_bucket, duration):
         self.fid = fid
         self.orign_bucket = orign_bucket
         self.orign_key = orign_key
@@ -36,7 +36,8 @@ class VideoConvert(object):
         else:
             file_addr = self.dest_bucket + ":" + self.dest_key_prefix + "/" +\
             self.orign_key + "-9999" + ".m3u8"
-            ops = "avthumb/m3u8/segtime/5/vcodec/libx264/acodec/libfaac|saveas/" + \
+            ops = "avthumb/m3u8/segtime/5/vcodec/libx264/acodec/libfaac/s/" + str(self.width) \
+            + "x" + str(self.height) + "/autoscale/1|saveas/" + \
             base64.urlsafe_b64encode(file_addr)
             return ops, file_addr
 
