@@ -108,7 +108,7 @@ class Core(CorePluginBase):
         #TODO remove_torrent
 
         log.info("#########DEBUGS")
-        time.sleep(5)
+        
         auth = get_auth()
         dmgr = Fmgr(auth)
         fops = "bucket/" + base64.urlsafe_b64encode("qietv-video-play") \
@@ -120,6 +120,7 @@ class Core(CorePluginBase):
         code, text = dmgr.m3u8_delete(fops)
         log.info("ops code %d, txt %s", code, text)
         log.info(text)
+        time.sleep(5)
         vc = VideoConvert("42b5498acaf981a7e553361138096d57", "other-storage", "raw/lrFa9h9xwGRzoQFcXh-kopfCyDhA",1920,1080,"qietv-video-play",2736)
         vc.do_convert_action()
         log.info("#########DEBUG")
