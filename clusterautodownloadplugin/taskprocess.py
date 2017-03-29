@@ -58,7 +58,7 @@ class TaskProcess(object):
 
     def update_file_info(self, fid, post):
         """Check uploads on server."""
-        req = requests.post(self._base_url + '/v1/files/source/' + fid\
+        req = requests.put(self._base_url + '/v1/files/source/' + fid\
         , headers={"X-Task-Token" : "1024tasktoken"}, json=post, timeout=5)
         data = self.exec_requests_data_json(req)
         if data is None:
