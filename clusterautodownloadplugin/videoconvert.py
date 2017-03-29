@@ -73,6 +73,8 @@ class VideoConvert(object):
 #            log.info("CALLBACK %s", final_url)
             code, text = ops.execute(fops, self.orign_key, notifyurl=final_url)
             actions.append({"clear":reslov, "code":code, "resp":text, "file":file_addr})
+            if code != 200:
+                log.info("exec fops error code %d, response %s", code, text)
         return actions
 
 
