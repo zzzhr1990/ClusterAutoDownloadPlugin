@@ -57,6 +57,8 @@ from taskprocess import TaskProcess
 from torrentprocesser import TorrentProcesser
 from multiprocessing.queues import Empty
 from videoconvert import VideoConvert
+from fmgr import Fmgr
+from workconfig import get_auth
 
 
 
@@ -106,6 +108,16 @@ class Core(CorePluginBase):
         #TODO remove_torrent
 
         log.info("#########DEBUG")
+        auth = get_auth()
+        dmgr = Fmgr(auth)
+        buckets = 
+        fops = "bucket/" + base64.urlsafe_b64encode("qietv-video-play") \
+        + "/key/" + base64.urlsafe_b64encode("sp/m3u8/20170329/raw/lrFa9h9xwGRzoQFcXh-kopfCyDhA-720.m3u8") + "/deletets/1;"\
+        + "bucket/" + base64.urlsafe_b64encode("qietv-video-play") \
+        + "/key/" + base64.urlsafe_b64encode("sp/m3u8/20170329/raw/lrFa9h9xwGRzoQFcXh-kopfCyDhA-480.m3u8") + "/deletets/1;"\
+        + "bucket/" + base64.urlsafe_b64encode("qietv-video-play") \
+        + "/key/" + base64.urlsafe_b64encode("sp/m3u8/20170329/raw/lrFa9h9xwGRzoQFcXh-kopfCyDhA-9999.m3u8") + "/deletets/1"\
+        dmgr.m3u8_delete(fops)
         vc = VideoConvert("42b5498acaf981a7e553361138096d57", "other-storage", "raw/lrFa9h9xwGRzoQFcXh-kopfCyDhA",1920,1080,"qietv-video-play",2736)
         vc.do_convert_action()
         log.info("#########DEBUG")

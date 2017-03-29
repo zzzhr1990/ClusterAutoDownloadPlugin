@@ -342,6 +342,10 @@ class TorrentProcesser(Process):
                         if duration < stream["duration"]:
                             duration = stream["duration"]
 
+        if width < 1:
+            create_video_preview = False
+        if height < 1:
+            create_video_preview = False
         if create_video_preview:
             log.info("Video need create preview %d x %d", width, height)
             v_conv = VideoConvert(h_result["fid"], "other-storage", \
