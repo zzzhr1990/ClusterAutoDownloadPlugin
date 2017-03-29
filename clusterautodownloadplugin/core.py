@@ -108,6 +108,7 @@ class Core(CorePluginBase):
         #TODO remove_torrent
 
         log.info("#########DEBUGS")
+        time.sleep(5)
         auth = get_auth()
         dmgr = Fmgr(auth)
         fops = "bucket/" + base64.urlsafe_b64encode("qietv-video-play") \
