@@ -1,7 +1,7 @@
 import base64
 import json
 from wcs.commons.auth import Auth
-from wcs.commons.config import MGR_URL
+from workconfig import WorkConfig
 from wcs.commons.http import _post
 from wcs.commons.http import _get
 from wcs.commons.util import entry
@@ -11,7 +11,7 @@ class Fmgr(object):
 
     def __init__(self, auth):
         self.auth = auth
-        self.host = MGR_URL
+        self.host = WorkConfig.MGR_URL
 
     def gernerate_headers(self,url,body=None):
         token = self.auth.managertoken(url,body=body)
