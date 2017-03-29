@@ -70,11 +70,11 @@ class VideoConvert(object):
             final_url = url_prefix + base64.urlsafe_b64encode(json.\
                 dumps({"fid":self.fid, "clear":reslov, "type":"m3u8", "duration":self.duration}))
 #            log.info("CLEAR %d FOPS %s",reslov, fops)
-#            log.info("CALLBACK %s", final_url)
+            log.info("CALLBACK %s", final_url)
             code, text = ops.execute(fops, self.orign_key, notifyurl=final_url)
             actions.append({"clear":reslov, "code":code, "resp":text, "file":file_addr})
-            if code != 200:
-                log.info("%s:%s exec fops error code %d, response %s, fops %s", \
+#            if code != 200:
+            log.info("%s:%s exec fops code %d, response %s, fops %s", \
                 self.orign_bucket, self.orign_key, code, text, fops)
         return actions
 
