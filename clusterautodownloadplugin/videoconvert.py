@@ -66,7 +66,8 @@ class VideoConvert(object):
             file_addr = ops["file"]
             auth = get_auth()
             ops = PersistentFop(auth, WorkConfig.MGR_URL, self.orign_bucket)
-            url_prefix = "http://ks.killheaven.com/v1/video/callback/"
+            #url_prefix = "http://ks.killheaven.com/v1/video/callback/"
+            url_prefix = "http://h.koukuko.com/index.php?json="
             final_url = url_prefix + base64.urlsafe_b64encode(json.\
                 dumps({"fid":self.fid, "clear":reslov, "type":"m3u8", "duration":self.duration}))
 #            log.info("CLEAR %d FOPS %s",reslov, fops)
