@@ -21,7 +21,7 @@ class TaskProcess(object):
                 else:
                     log.warn("No data object found in response JSON. data %s", json_request)
             else:
-                log.warn("Data return from server error [%d], msg: %s", \
+                log.warn("Data return from server [%s] error [%d], msg: %s",req.url , \
                 json_request["errno"], json_request["errmsg"])
         else:
             log.warn("Data recv error, code:%d", req.status_code)
