@@ -84,9 +84,24 @@ class TorrentProcessor(object):
         if downloaded_dict:
             # Refresh files
             for torrent_id in downloaded_dict:
+                md5_tid = Util.md5(torrent_id)
                 if torrent_id in torrents_info:
                     file_prop = torrents_info[torrent_id]["file_priorities"]
-                    logging.info("old_file_prop: %s", file_prop)
+                    progress = torrents_info[torrent_id]["progress"]
+                    remote_file_prop = self.master.get_torrent_status(md5_tid)
+                    if remote_file_prop:
+                        if remote_file_prop["updatedtime"] > 0:
+                            if "info" in remote_file_prop:
+                                if remote_file_prop["info"]:
+                                    file_prop = json.loads(remote_file_prop["info"])
+                                else:
+                                    logging.warning("Remote status null %s", md5_tid)
+                            else:
+                                logging.warning("Remote status missing %s", md5_tid)
+                        else:
+                            logging.info("Remote status create new for %s", md5_tid)
+                    else:
+                        logging.warning("Remote status cannot found for %s", md5_tid)
                     for downloaded in downloaded_dict[torrent_id]:
                         d_succ = downloaded["upload_success"]
                         if d_succ:
@@ -95,6 +110,7 @@ class TorrentProcessor(object):
                             file_index = downloaded["file_index"]
                             file_prop[file_index] = 0
                     count = 0
+                    
                     for i_count in file_prop:
                         count = count + i_count
                     if count < 1:
@@ -102,20 +118,18 @@ class TorrentProcessor(object):
                         #TODO:REMOVE Torrent
                         self.working_dict.pop(torrent_id)
                         core.remove_torrent(torrent_id, True)
-                        tid = Util.md5(torrent_id)
-                        self.master.change_torrent_status(tid\
+                        self.master.change_torrent_status(md5_tid\
                             , {"status" : 10, "infohash" : torrent_id})
                     else:
                         #TODO:CHANGE TORRENT_STATUS
-                        logging.info("new_file_prop: %s", file_prop)
                         core.set_torrent_file_priorities(torrent_id, file_prop)
-                        logging.info("F_ID %s", json.dumps(core.get_torrent_status(torrent_id, {"file_priorities"})))
+                        self.master.refresh_torrent_progress(md5_tid\
+                        , progress, json.dumps(file_prop))
                 else:
                     logging.warning("%s cannot be found in torrent list", torrent_id)
             #TODO:REFRESH TORRENT
         # ensure remove all success files.
         for torrent_id in torrents_info:
-            logging.info("-- %s", Util.md5(torrent_id))
             work_list = self._process_single_torrent(torrent_id, torrents_info[torrent_id])
             if work_list:
                 if not torrent_id in self.working_dict:
@@ -136,12 +150,31 @@ class TorrentProcessor(object):
         wait_to_add = []
         #Findout if it need to upload.
         #is_finished = torrent_info["is_finished"]
+        md5_tid = Util.md5(torrent_id)
         dest_path = torrent_info["save_path"]
         if torrent_info["move_completed"]:
             dest_path = torrent_info["move_completed_path"]
+        remote_file_prop = self.master.get_torrent_status(md5_tid)
+        file_prop = []
+        if remote_file_prop:
+            if remote_file_prop["updatedtime"] > 0:
+                if "info" in remote_file_prop:
+                    if remote_file_prop["info"]:
+                        file_prop = json.loads(remote_file_prop["info"])
+                    else:
+                        logging.warning("Remote status null %s", md5_tid)
+                else:
+                    logging.warning("Remote status missing %s", md5_tid)
+            else:
+                logging.info("Remote status create new for %s", md5_tid)
+        else:
+            logging.warning("Remote status cannot found for %s", md5_tid)
         for index, file_detail in enumerate(torrent_info["files"]):
             file_progress = torrent_info["file_progress"][index]
             file_download = torrent_info["file_priorities"][index]
+            if file_prop:
+                if file_prop[index] == 0:
+                    continue
             if file_download:
                 if file_progress == 1:
                     file_path = u'/'.join([dest_path, file_detail["path"]])

@@ -2,6 +2,7 @@ import requests
 import base64
 import json
 import logging
+import time
 
 class MasterApi(object):
     """Task form task server."""
@@ -111,6 +112,17 @@ class MasterApi(object):
         
     def change_torrent_status(self, tid, torrent_info):
         """Change the torrent status on server."""
+        req = requests.put(self._base_url + '/v1/task/' + tid\
+        , headers={"X-Task-Token" : "1024tasktoken"}, timeout=5, json=torrent_info)
+        self.exec_requests_data_json(req)
+    def get_torrent_status(self, tid):
+        """Change the torrent status on server."""
+        req = requests.put(self._base_url + '/v1/task/' + tid\
+        , headers={"X-Task-Token" : "1024tasktoken"}, timeout=5)
+        self.exec_requests_data_json(req)
+    def refresh_torrent_progress(self, tid, progress, info):
+        """Change the torrent status on server."""
+        torrent_info = {"progress":progress, "info":info, "updatedtime":time.time() * 1000}
         req = requests.put(self._base_url + '/v1/task/' + tid\
         , headers={"X-Task-Token" : "1024tasktoken"}, timeout=5, json=torrent_info)
         self.exec_requests_data_json(req)
