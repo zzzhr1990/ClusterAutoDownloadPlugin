@@ -117,7 +117,7 @@ class MasterApi(object):
         self.exec_requests_data_json(req)
     def get_torrent_status(self, tid):
         """Change the torrent status on server."""
-        req = requests.put(self._base_url + '/v1/task/' + tid\
+        req = requests.get(self._base_url + '/v1/task/' + tid\
         , headers={"X-Task-Token" : "1024tasktoken"}, timeout=5)
         self.exec_requests_data_json(req)
     def refresh_torrent_progress(self, tid, progress, info):
