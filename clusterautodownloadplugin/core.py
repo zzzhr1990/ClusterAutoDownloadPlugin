@@ -151,7 +151,7 @@ class Core(CorePluginBase):
 
     def _checking_torrent_status(self):
         core = component.get("Core")
-        self.torrent_processor.update_torrent_info(core)
+        #self.torrent_processor.update_torrent_info(core)
 
  
     def _sleep_and_wait(self, stime):
