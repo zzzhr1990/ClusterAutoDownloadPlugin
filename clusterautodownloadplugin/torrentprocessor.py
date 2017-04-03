@@ -9,14 +9,13 @@ from util import Util
 
 class TorrentProcessor(object):
     """Processing Torrents"""
-    def __init__(self, max_child_process, server_name, core, master):
+    def __init__(self, max_child_process, server_name, master):
         self.max_child_process = max_child_process
         self.server_name = server_name
         self.file_processors = []
         self.working_dict = {}
         self.in_queue = multiprocessing.Queue()
         self.out_queue = multiprocessing.Queue()
-        self.core = core
         self.disable = False
         self.master = master
         #self.task_looping_thread = threading.Thread(target=self._time_tick)
@@ -53,7 +52,8 @@ class TorrentProcessor(object):
     #        except Exception as e:
     #            logging.error(e)
     #            logging.error("Exception occored in _time_tick.\r\n%s", traceback.format_exc())
-    def update_torrent_info(self, torrents_info):
+    def update_torrent_info(self, core):
+        torrents_info = core.get_torrents_status({}, {})
         """Used for update torrent info."""
         #Checking if finished.
         downloaded_dict = {}
@@ -101,15 +101,15 @@ class TorrentProcessor(object):
                         logging.info("Torrent %s downloaded finished...", torrent_id)
                         #TODO:REMOVE Torrent
                         self.working_dict.pop(torrent_id)
-                        self.core.remove_torrent(torrent_id, True)
+                        core.remove_torrent(torrent_id, True)
                         tid = Util.md5(torrent_id)
                         self.master.change_torrent_status(tid\
                             , {"status" : 10, "infohash" : torrent_id})
                     else:
                         #TODO:CHANGE TORRENT_STATUS
                         logging.info("new_file_prop: %s", file_prop)
-                        self.core.set_torrent_file_priorities(torrent_id, file_prop)
-                        logging.info("F_ID %s", json.dumps(self.core.get_torrent_status(torrent_id, {"file_priorities"})))
+                        core.set_torrent_file_priorities(torrent_id, file_prop)
+                        logging.info("F_ID %s", json.dumps(core.get_torrent_status(torrent_id, {"file_priorities"})))
                 else:
                     logging.warning("%s cannot be found in torrent list", torrent_id)
             #TODO:REFRESH TORRENT

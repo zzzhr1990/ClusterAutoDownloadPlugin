@@ -81,7 +81,7 @@ class Core(CorePluginBase):
         self.fetching_task = False
         self.processor = MasterApi(PGlobalConfig.master_api_server_prefix)
         self.torrent_processor = TorrentProcessor(PGlobalConfig.max_process,\
-         PGlobalConfig.server_name, component.get("Core"), self.processor)
+         PGlobalConfig.server_name, self.processor)
         
         self.record_lock = threading.Lock()
         log.info("Cluster downloader init.")
@@ -151,8 +151,7 @@ class Core(CorePluginBase):
 
     def _checking_torrent_status(self):
         core = component.get("Core")
-        downloading_list = core.get_torrents_status({}, {})
-        self.torrent_processor.update_torrent_info(downloading_list)
+        self.torrent_processor.update_torrent_info(core)
 
  
     def _sleep_and_wait(self, stime):
