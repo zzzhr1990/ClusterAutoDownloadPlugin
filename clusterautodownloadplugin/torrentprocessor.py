@@ -84,6 +84,7 @@ class TorrentProcessor(object):
         if downloaded_dict:
             # Refresh files
             for torrent_id in downloaded_dict:
+                logging.info("%s", Util.md5(torrent_id))
                 if torrent_id in torrents_info:
                     file_prop = torrents_info[torrent_id]["file_priorities"]
                     logging.info("old_file_prop: %s", file_prop)
