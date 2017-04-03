@@ -119,7 +119,7 @@ class Core(CorePluginBase):
             self.fetching_task = True
             self.record_lock.release()
             try:
-                self.processor.check_tasks()
+                self.processor.check_tasks(component.get("Core"))
             except Exception as e:
                 log.error("Exception occored in task loop. %s -- \r\n%s", e, traceback.format_exc())
             finally:
