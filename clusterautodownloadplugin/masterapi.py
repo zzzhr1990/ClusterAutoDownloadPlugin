@@ -109,7 +109,7 @@ class MasterApi(object):
                 logging.error("Unable to add torrent file!: %s", ex)
         else:
             logging.warn("Unsupported %s", task_type)
-        
+
     def change_torrent_status(self, tid, torrent_info):
         """Change the torrent status on server."""
         req = requests.put(self._base_url + '/v1/task/' + tid\
@@ -117,10 +117,9 @@ class MasterApi(object):
         self.exec_requests_data_json(req)
     def get_torrent_status(self, tid):
         """Change the torrent status on server."""
-        logging.info("Req: %s", self._base_url + '/v1/task/' + tid)
         req = requests.get(self._base_url + '/v1/task/' + tid\
         , headers={"X-Task-Token" : "1024tasktoken"}, timeout=5)
-        self.exec_requests_data_json(req)
+        return self.exec_requests_data_json(req)
     def refresh_torrent_progress(self, tid, progress, info):
         """Change the torrent status on server."""
         torrent_info = {"progress":progress, "info":info, "updatedtime":time.time() * 1000}

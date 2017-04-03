@@ -130,7 +130,6 @@ class TorrentProcessor(object):
             #TODO:REFRESH TORRENT
         # ensure remove all success files.
         for torrent_id in torrents_info:
-            logging.info("----- %s", Util.md5(torrent_id))
             work_list = self._process_single_torrent(torrent_id, torrents_info[torrent_id])
             if work_list:
                 if not torrent_id in self.working_dict:
