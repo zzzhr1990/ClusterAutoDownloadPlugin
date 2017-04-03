@@ -86,6 +86,7 @@ class TorrentProcessor(object):
             for torrent_id in downloaded_dict:
                 if torrent_id in torrents_info:
                     file_prop = torrents_info[torrent_id]["file_priorities"]
+                    logging.info("old_file_prop: %s", file_prop)
                     for downloaded in downloaded_dict[torrent_id]:
                         d_succ = downloaded["upload_success"]
                         if d_succ:
@@ -106,6 +107,7 @@ class TorrentProcessor(object):
                             , {"status" : 10, "infohash" : torrent_id})
                     else:
                         #TODO:CHANGE TORRENT_STATUS
+                        logging.info("new_file_prop: %s", file_prop)
                         self.core.set_torrent_file_priorities(torrent_id, file_prop)
                 else:
                     logging.warning("%s cannot be found in torrent list", torrent_id)

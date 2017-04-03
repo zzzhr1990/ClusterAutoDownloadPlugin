@@ -5,7 +5,7 @@ class PGlobalConfig(object):
     wcs_put_url = "http://qietv.up21.v1.wcsapi.com"
     wcs_mgr_url = "http://qietv.mgr21.v1.wcsapi.com"
     wcs_avinfo_prefix = "http://other.qiecdn.com"
-    max_process = 2
+    max_process = 1
     wcs_source_file_bucket = "other-storage"
     wcs_video_dest_bucket = "qietv-video-play"
     server_name = "bj-208"
