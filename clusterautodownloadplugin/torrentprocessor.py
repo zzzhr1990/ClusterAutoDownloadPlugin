@@ -1,7 +1,7 @@
 import logging
 import multiprocessing
 import threading
-import six, os, time
+import six, os, time, json
 import traceback
 from singlefileprocessor import SingleFileProcesser
 from multiprocessing.queues import Empty
@@ -109,6 +109,7 @@ class TorrentProcessor(object):
                         #TODO:CHANGE TORRENT_STATUS
                         logging.info("new_file_prop: %s", file_prop)
                         self.core.set_torrent_file_priorities(torrent_id, file_prop)
+                        logging.info("F_ID %s", json.dumps(self.core.get_torrent_status(torrent_id, {"file_priorities"})))
                 else:
                     logging.warning("%s cannot be found in torrent list", torrent_id)
             #TODO:REFRESH TORRENT
