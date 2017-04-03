@@ -165,8 +165,6 @@ class TorrentProcessor(object):
                         logging.warning("Remote status null %s", md5_tid)
                 else:
                     logging.warning("Remote status missing %s", md5_tid)
-            else:
-                logging.info("Remote status create new for %s", md5_tid)
         else:
             logging.warning("Remote status cannot found for %s", md5_tid)
         for index, file_detail in enumerate(torrent_info["files"]):
