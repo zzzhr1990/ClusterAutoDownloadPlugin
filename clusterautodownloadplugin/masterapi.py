@@ -56,6 +56,7 @@ class MasterApi(object):
             if "data" in data:
                 data_arr = data["data"]
                 for single_data in data_arr:
+                    logging.info("tid %s, torrent_hash %s", single_data["tid"], single_data["infohash"])
                     self.fetch_single_task(single_data, core)
             else:
                 logging.warning("No data object found in response JSON['data'].\r\n%s", data)
