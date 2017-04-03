@@ -1,9 +1,9 @@
 import base64
+import logging
 import time
 import json
-from workconfig import get_auth
-from workconfig import WorkConfig
-from deluge.log import LOG as log
+from util import Util
+from globalconfig import PGlobalConfig
 from persistentfop import PersistentFop
 
 class VideoConvert(object):
@@ -64,22 +64,16 @@ class VideoConvert(object):
             reslov = ops["clear"]
             fops = ops["cmd"]
             file_addr = ops["file"]
-            auth = get_auth()
-            ops = PersistentFop(auth, WorkConfig.MGR_URL, self.orign_bucket)
-            url_prefix = "http://ks.killheaven.com/v1/video/callback/"
+            auth = Util.default_wcs_auth()
+            ops = PersistentFop(auth, PGlobalConfig.wcs_mgr_url, self.orign_bucket)
+            url_prefix = PGlobalConfig.master_api_server_prefix + "/v1/video/callback/"
             #url_prefix = "http://h.koukuko.com/index.php?json="
             final_url = url_prefix + base64.urlsafe_b64encode(json.\
                 dumps({"fid":self.fid, "clear":reslov, "type":"m3u8", "duration":self.duration}))
 #            log.info("CLEAR %d FOPS %s",reslov, fops)
-            log.info("R_CALLBACK %s", final_url)
             code, text = ops.execute(fops, self.orign_key, notifyurl=final_url)
             actions.append({"clear":reslov, "code":code, "resp":text, "file":file_addr})
 #            if code != 200:
-            log.info("%s:%s exec fops code %d, response %s, fops %s", \
+            logging.debug("%s:%s exec fops code %d, response %s, fops %s", \
                 self.orign_bucket, self.orign_key, code, text, fops)
         return actions
-
-
-
-
-

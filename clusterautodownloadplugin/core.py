@@ -52,13 +52,10 @@ from deluge.plugins.pluginbase import CorePluginBase
 import deluge.component as component
 import deluge.configmanager
 from deluge.core.rpcserver import export
-from workconfig import WorkConfig
-from taskprocess import TaskProcess
-from torrentprocesser import TorrentProcesser
-from multiprocessing.queues import Empty
-from videoconvert import VideoConvert
-from fmgr import Fmgr
-from workconfig import get_auth
+from torrentprocessor import TorrentProcessor
+from globalconfig import PGlobalConfig
+from masterapi import MasterApi
+
 
 
 
@@ -79,29 +76,19 @@ class Core(CorePluginBase):
         self.looping_thread.daemon = True
         self.task_looping_thread = threading.Thread(target=self._task_loop)
         self.task_looping_thread.daemon = True
-        WorkConfig.disable = True
+        self.disabled = True
         self.busy = False
         self.fetching_task = False
-        self.processor = TaskProcess(WorkConfig.SERVER_URL)
-        self.processing_pool = []
-        self.command_queues = []
-        self.working_dict = {}
-        self.waiting_queue = multiprocessing.Queue()
-        self.response_queue = multiprocessing.Queue()
+        self.processor = MasterApi(PGlobalConfig.master_api_server_prefix)
+        self.torrent_processor = TorrentProcessor(PGlobalConfig.max_process,\
+         PGlobalConfig.server_name, component.get("Core"), self.processor)
+        
         self.record_lock = threading.Lock()
-        log.info("Cluster downloader init, poolsize %d", WorkConfig.MAX_PROCESS)
+        log.info("Cluster downloader init.")
 
     def enable(self):
         """Call when plugin enabled."""
-        WorkConfig.disable = False
-        for i in range(0, WorkConfig.MAX_PROCESS):
-            command_queue = multiprocessing.Queue()
-            proccess = TorrentProcesser(i, self.waiting_queue, self.response_queue, command_queue)
-            self.command_queues.append(command_queue)
-            self.processing_pool.append(proccess)
-            proccess.daemon = True
-            proccess.start()
-
+        self.disabled = False
         self.looping_thread.start()
         self.task_looping_thread.start()
         log.info("- Plugin %s enabled.", self.plugin_name)
@@ -110,15 +97,10 @@ class Core(CorePluginBase):
     def disable(self):
         """Call when plugin disabled."""
         self.record_lock.acquire()
-        WorkConfig.disable = True
-        self.waiting_queue.close()
-        self.response_queue.close()
+        self.disabled = True
+        
         log.warn("Trying to shutdown download plugin")
-        #
-        for queue in self.command_queues:
-            log.info("Sending...")
-            queue.put(True, block=False)
-            log.info("Send")
+        self.torrent_processor.disable_process()
         self.record_lock.release()
         log.warn("Trying to shutdown download plugin...success")
 
@@ -126,7 +108,7 @@ class Core(CorePluginBase):
     def _task_loop(self):
         while True:
             self.record_lock.acquire()
-            if WorkConfig.disable:
+            if self.disabled:
                 self.record_lock.release()
                 log.info("Ternimate task loop...")
                 return
@@ -147,7 +129,7 @@ class Core(CorePluginBase):
     def _loop(self):
         while True:
             self.record_lock.acquire()
-            if WorkConfig.disable:
+            if self.disabled:
                 self.record_lock.release()
                 log.info("Ternimate check loop...")
                 return
@@ -157,7 +139,7 @@ class Core(CorePluginBase):
                 return
             self.busy = True
             try:
-                self._checking_tasks()
+                self._checking_torrent_status()
             except Exception as e:
                 log.error("Exception occored in status loop. %s -- \r\n%s", e, traceback.format_exc())
             finally:
@@ -165,60 +147,23 @@ class Core(CorePluginBase):
                 self.record_lock.release()
             self._sleep_and_wait(2)
 
-    def _change_file_prop(self, core, data):
-        torrent_id = data["hash"]
-        stat = core.get_torrent_status(torrent_id, {"file_priorities"})
-        if stat is None or len(stat) < 1:
-            log.warn("Cannot find file_priorities for torrent %s", torrent_id)
-        else:
-            log.info(json.dumps(stat))
-            pst = stat["file_priorities"]
-            for change_file in data["files"]:
-                pst[change_file["index"]] = 0
-            core.set_torrent_file_priorities(torrent_id, pst)
-            log.info(json.dumps(core.get_torrent_status(torrent_id, {"file_priorities"})))
 
 
-    def _checking_tasks(self):
+    def _checking_torrent_status(self):
         core = component.get("Core")
         downloading_list = core.get_torrents_status({}, {})
-        log.info(json.dumps(downloading_list))
-        return
-        while not self.response_queue.empty():
-            try:
-                dat = self.response_queue.get(False)
-                if dat != None:
-                    if dat["finished"] is True:
-                        core.remove_torrent(dat["hash"], True)
-                    else:
-                        if len(dat["files"]) > 0:
-                            self._change_file_prop(core, dat)
-                    self.working_dict.pop(dat["hash"])
-            except Empty:
-                pass
-        waiting_dict = {}
-        downloading_list = core.get_torrents_status({}, {})
-        for d_key in downloading_list:
-            waiting_dict[d_key] = downloading_list[d_key]
-        for d_key in self.working_dict:
-            if d_key in waiting_dict:
-                waiting_dict.pop(d_key)
-        push_len = WorkConfig.MAX_PROCESS - self.waiting_queue.qsize()
-        if push_len > 0:
-            for dd_key in waiting_dict:
-                self.waiting_queue.put(waiting_dict[dd_key], False)
-                self.working_dict[dd_key] = downloading_list[dd_key]
-        
+        self.torrent_processor.update_torrent_info(downloading_list)
+
  
     def _sleep_and_wait(self, stime):
         self.record_lock.acquire()
-        if not WorkConfig.disable:
+        if not self.disabled:
             self.record_lock.release()
             if stime < 1:
                 stime = 1
             for i in range(0, stime):
                 self.record_lock.acquire()
-                if not WorkConfig.disable:
+                if not self.disabled:
                     self.record_lock.release()
                     time.sleep(1)
                 else:
