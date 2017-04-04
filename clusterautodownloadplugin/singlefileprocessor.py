@@ -71,6 +71,7 @@ class SingleFileProcesser(Process):
             logging.warning("file %s size not match (%ld/%ld), return."\
             , file_path, file_size, a_file_size)
             return False
+        dat["file_name"] = os.path.basename(file_path)
         #Calc file_hash
         file_hash = Util.wcs_etag(file_path)
         file_id = Util.md5(file_hash)
@@ -136,9 +137,8 @@ class SingleFileProcesser(Process):
         if height < 1:
             create_video_preview = False
         if create_video_preview:
-            logging.info(json.dumps(dat))
             logging.info("File %s video %s need create preview %d x %d",\
-             file_id, dat["name"], width, height)
+             file_id, dat["file_name"], width, height)
             file_key = dat["file_key"]
             v_conv = VideoConvert(file_id,\
              PGlobalConfig.wcs_source_file_bucket, file_key, width, height, \
@@ -204,7 +204,7 @@ class SingleFileProcesser(Process):
     
     def _create_file_info(self, dat):
         file_path = dat["file_path"]
-        file_name = os.path.basename(file_path)
+        file_name = dat["file_name"]
         torrent_id = dat["torrent_id"]
         file_size = dat["file_size"]
         fid = dat["file_id"]
