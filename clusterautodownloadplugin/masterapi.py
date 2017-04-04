@@ -56,7 +56,8 @@ class MasterApi(object):
             if "data" in data:
                 data_arr = data["data"]
                 for single_data in data_arr:
-                    logging.info("tid %s, torrent_hash %s", single_data["tid"], single_data["infohash"])
+                    logging.info("tid %s, torrent_hash %s"\
+                    , single_data["tid"], single_data["infohash"])
                     self.fetch_single_task(single_data, core)
             else:
                 logging.warning("No data object found in response JSON['data'].\r\n%s", data)
@@ -71,7 +72,7 @@ class MasterApi(object):
             logging.info("Torrent %s[%s] already in download list."\
                 , single_task["tid"], single_task["infohash"])
             self.change_torrent_status(single_task["tid"]\
-                , {"status" : 5, "infohash" : single_task["infohash"]})
+                , {"status" : 5})
             return
         if task_type == "torrent":
             req = requests.get(single_task["url"], \
@@ -83,10 +84,13 @@ class MasterApi(object):
                     torrent_id = core.add_torrent_file(single_task["tid"],\
                     base64.encodestring(req.content), {})
                     if torrent_id != None:
-                        logging.info("Successfly add torrent, tid: %s Hash:%s, id:%s" , single_task["tid"], single_task["infohash"], torrent_id)
+                        logging.info("Successfly add torrent, tid: %s Hash:%s, id:%s"\
+                        , single_task["tid"], single_task["infohash"], torrent_id)
                         self.change_torrent_status(single_task["tid"]\
                             , {"status" : 5})
-                        logging.info(json.dumps(core.get_torrent_status(torrent_id, {})))
+                        if single_task["infohash"] != torrent_id:
+                            logging.warning("Task infohash mismatch tid %s, calc_hash %s, info %s",\
+                             single_task["tid"], torrent_id, json.dumps(single_task))
                     else:
                         logging.info(\
                             "Torrent %s[%s] already in download list but not figured before."\
@@ -96,13 +100,13 @@ class MasterApi(object):
                     return
             else:
                 logging.warning("Add torrent file error.")
-        if task_type == "magnet":
+        elif task_type == "magnet":
             try:
                 torrent_id = core.add_torrent_magnet(single_task["source"], {})
                 if torrent_id != None:
                     logging.info("Successfly add magnet, tid: %s", single_task["tid"])
                     self.change_torrent_status(single_task["tid"]\
-                        , {"status" : 5, "infohash" : torrent_id})
+                        , {"status" : 5})
                 else:
                     logging.warning(\
                         "Magnet %s[%s] already in download list but not figured before."\
