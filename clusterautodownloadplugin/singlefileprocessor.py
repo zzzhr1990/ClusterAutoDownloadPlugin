@@ -103,15 +103,15 @@ class SingleFileProcesser(Process):
             return True
     def _check_and_try_convert(self, dat):
         #
+        file_id = dat["file_id"]
         if not "ext" in dat:
             logging.warning("No ext in file %s", json.dumps(dat))
-            return True
+            return self._update_convert_status(file_id, 1)
         if not "avinfo" in dat["ext"]:
             logging.warning("No avinfo in file %s", json.dumps(dat))
-            return False
+            return self._update_convert_status(file_id, 1)
         avinfo = dat["ext"]["avinfo"]
         create_video_preview = False
-        file_id = dat["file_id"]
         height = 0
         width = 0
         duration = 0.0
