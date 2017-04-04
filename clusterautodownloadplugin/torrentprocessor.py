@@ -119,7 +119,7 @@ class TorrentProcessor(object):
                         self.working_dict.pop(torrent_id)
                         core.remove_torrent(torrent_id, True)
                         self.master.change_torrent_status(md5_tid\
-                            , {"status" : 10, "infohash" : torrent_id})
+                            , {"status" : 10})
                     else:
                         #TODO:CHANGE TORRENT_STATUS
                         core.set_torrent_file_priorities(torrent_id, file_prop)
