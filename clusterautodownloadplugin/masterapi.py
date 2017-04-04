@@ -83,9 +83,9 @@ class MasterApi(object):
                     torrent_id = core.add_torrent_file(single_task["tid"],\
                     base64.encodestring(req.content), {})
                     if torrent_id != None:
-                        logging.info("Successfly add torrent, tid: %s", single_task["tid"])
+                        logging.info("Successfly add torrent, tid: %s Hash:%s, id:%s" , single_task["tid"], single_task["infohash"], torrent_id)
                         self.change_torrent_status(single_task["tid"]\
-                            , {"status" : 5, "infohash" : torrent_id})
+                            , {"status" : 5})
                     else:
                         logging.info(\
                             "Torrent %s[%s] already in download list but not figured before."\
