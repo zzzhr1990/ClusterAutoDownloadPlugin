@@ -104,7 +104,7 @@ class SingleFileProcesser(Process):
         #
         if not "ext" in dat:
             logging.warning("No ext in file %s", json.dumps(dat))
-            return False
+            return True
         if not "avinfo" in dat["ext"]:
             logging.warning("No avinfo in file %s", json.dumps(dat))
             return False
