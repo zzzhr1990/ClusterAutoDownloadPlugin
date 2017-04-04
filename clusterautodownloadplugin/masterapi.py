@@ -86,6 +86,7 @@ class MasterApi(object):
                         logging.info("Successfly add torrent, tid: %s Hash:%s, id:%s" , single_task["tid"], single_task["infohash"], torrent_id)
                         self.change_torrent_status(single_task["tid"]\
                             , {"status" : 5})
+                        logging.info(json.dumps(core.get_torrent_status(torrent_id, {})))
                     else:
                         logging.info(\
                             "Torrent %s[%s] already in download list but not figured before."\
