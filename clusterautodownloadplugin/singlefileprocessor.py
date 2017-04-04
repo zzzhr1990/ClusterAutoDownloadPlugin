@@ -137,7 +137,7 @@ class SingleFileProcesser(Process):
             create_video_preview = False
         if create_video_preview:
             logging.info("File %s video %s need create preview %d x %d",\
-             file_id, dat["file_name"], width, height)
+             file_id, dat["name"], width, height)
             file_key = dat["file_key"]
             v_conv = VideoConvert(file_id,\
              PGlobalConfig.wcs_source_file_bucket, file_key, width, height, \
