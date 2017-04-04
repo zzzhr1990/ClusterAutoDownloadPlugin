@@ -136,6 +136,7 @@ class SingleFileProcesser(Process):
         if height < 1:
             create_video_preview = False
         if create_video_preview:
+            logging.info(json.dumps(dat))
             logging.info("File %s video %s need create preview %d x %d",\
              file_id, dat["name"], width, height)
             file_key = dat["file_key"]
