@@ -53,6 +53,7 @@ class TorrentProcessor(object):
     #            logging.error(e)
     #            logging.error("Exception occored in _time_tick.\r\n%s", traceback.format_exc())
     def update_torrent_info(self, core):
+        return
         torrents_info = core.get_torrents_status({}, {})
         """Used for update torrent info."""
         #Checking if finished.
