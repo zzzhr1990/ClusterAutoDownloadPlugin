@@ -149,7 +149,7 @@ class SingleFileProcesser(Process):
             return self._update_convert_status(file_id, 2)
         else:
             return self._update_convert_status(file_id, 1)
-    def _update_convert_status(self,file_id , status):
+    def _update_convert_status(self, file_id , status):
         post_data = {"status":status}
         is_succ = self.master.update_file_info(file_id, post_data)
         if not is_succ:
