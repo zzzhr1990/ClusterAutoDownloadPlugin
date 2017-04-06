@@ -179,7 +179,7 @@ class SingleFileProcesser(Process):
             if dat["need_fix"]:
                 logging.warning("File %s, need fix etag., rmote %s - %s"\
                 , file_id, file_hash, json.dumps(remote_info))
-                 dat["step"] = "ALREADY_EXISTS_ON_LX_SERVER_BUT_NEED_FIX"
+                dat["step"] = "ALREADY_EXISTS_ON_LX_SERVER_BUT_NEED_FIX"
             else:
                 return dat
         #logging.info("Checking file %s on WCS", file_id)

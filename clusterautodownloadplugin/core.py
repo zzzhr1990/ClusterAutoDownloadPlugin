@@ -82,7 +82,7 @@ class Core(CorePluginBase):
         self.processor = MasterApi(PGlobalConfig.master_api_server_prefix)
         self.torrent_processor = TorrentProcessor(PGlobalConfig.max_process,\
          PGlobalConfig.server_name, self.processor)
-        
+
         self.record_lock = threading.Lock()
         log.info("Cluster downloader init.")
 
