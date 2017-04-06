@@ -98,7 +98,6 @@ class Core(CorePluginBase):
         """Call when plugin disabled."""
         self.record_lock.acquire()
         self.disabled = True
-        
         log.warn("Trying to shutdown download plugin")
         self.torrent_processor.disable_process()
         self.record_lock.release()

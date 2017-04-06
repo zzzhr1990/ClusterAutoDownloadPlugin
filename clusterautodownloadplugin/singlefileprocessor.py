@@ -158,6 +158,7 @@ class SingleFileProcesser(Process):
     def _check_and_upload(self, dat):
         bucket = PGlobalConfig.wcs_source_file_bucket
         file_hash = dat["file_hash"]
+        dat["need_fix"] = False
         file_key = u'raw/' + file_hash
         dat["file_key"] = file_key
         file_id = dat["file_id"]
@@ -170,9 +171,17 @@ class SingleFileProcesser(Process):
             if remote_info["etag"] != file_hash:
                 logging.warning("File %s, etag mismatch. local %s, rmote %s - %s"\
                 , file_id, file_hash, remote_info["etag"], json.dumps(remote_info))
+                dat["need_fix"] = True
             if remote_info["ext"]:
                 dat["ext"] = json.loads(remote_info["ext"])
-            return dat
+            else:
+                dat["need_fix"] = True
+            if dat["need_fix"]:
+                logging.warning("File %s, need fix etag., rmote %s - %s"\
+                , file_id, file_hash, json.dumps(remote_info))
+                 dat["step"] = "ALREADY_EXISTS_ON_LX_SERVER_BUT_NEED_FIX"
+            else:
+                return dat
         #logging.info("Checking file %s on WCS", file_id)
         file_manager = WcsBucketManager(Util.default_wcs_auth(), PGlobalConfig.wcs_mgr_url)
         code, result = file_manager.stat(bucket, file_key)
@@ -224,6 +233,8 @@ class SingleFileProcesser(Process):
             "name":file_name, "fid":fid, "etag":file_hash, "key":file_key,\
             "ext":file_ext, "file":file_data, "updatedtime":updated_time, \
             "path":torrent_path_array}
+        if dat["need_fix"]:
+            return self.master.update_file_info(fid,post_data)
         return self.master.create_file_info(post_data)
 
     def _do_wcs_upload(self, dat, bucket, file_key):
