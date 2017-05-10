@@ -89,7 +89,7 @@ class Core(CorePluginBase):
         if "sid" in self.config:
             self.sid = self.config["sid"]
         else:
-            self.sid = uuid.uuid4()
+            self.sid = uuid.uuid4().urn[9:]
         log.info("Set sid %s", self.sid)
         if "name" in self.config:
             self.name = self.config["name"]
