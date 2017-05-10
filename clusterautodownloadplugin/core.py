@@ -45,6 +45,7 @@ import base64
 import traceback
 import datetime
 import threading
+import uuid
 import multiprocessing
 from deluge.error import InvalidTorrentError
 from deluge.log import LOG as log
@@ -55,22 +56,22 @@ from deluge.core.rpcserver import export
 from torrentprocessor import TorrentProcessor
 from globalconfig import PGlobalConfig
 from masterapi import MasterApi
-
-
-
+from controllerapi import ControllerApi
 
 
 DEFAULT_PREFS = {
-    "test":"NiNiNi"
+    "test": "NiNiNi"
 }
+
 
 class Core(CorePluginBase):
     '''Init Function'''
+
     def __init__(self, plugin_name):
         self.plugin_name = plugin_name
         self.processing = False
         self.config = deluge.configmanager\
-        .ConfigManager("clusterautodownloadplugin.conf", DEFAULT_PREFS)
+            .ConfigManager("clusterautodownloadplugin.conf", DEFAULT_PREFS)
         super(Core, self).__init__(plugin_name)
         self.looping_thread = threading.Thread(target=self._loop)
         self.looping_thread.daemon = True
@@ -80,11 +81,26 @@ class Core(CorePluginBase):
         self.busy = False
         self.fetching_task = False
         self.processor = MasterApi(PGlobalConfig.master_api_server_prefix)
-        self.torrent_processor = TorrentProcessor(PGlobalConfig.max_process,\
-         PGlobalConfig.server_name, self.processor)
+        self.torrent_processor = TorrentProcessor(PGlobalConfig.max_process,
+                                                  PGlobalConfig.server_name, self.processor)
 
         self.record_lock = threading.Lock()
         log.info("Cluster downloader init.")
+        if self.config["sid"]:
+            self.sid = self.config["sid"]
+        else:
+            self.sid = uuid.uuid4()
+        log.info("Set sid %s", self.sid)
+        if self.config["name"]:
+            self.name = self.config["name"]
+        else:
+            self.name = "Unknown"
+        if self.config["controller"]:
+            self.controller = self.config["controller"]
+        else:
+            self.controller = "http://119.29.174.171:8080"
+            log.info("- Use %s default.", self.controller)
+        self.controller_api = ControllerApi(self.controller)
 
     def enable(self):
         """Call when plugin enabled."""
@@ -92,17 +108,19 @@ class Core(CorePluginBase):
         self.looping_thread.start()
         self.task_looping_thread.start()
         log.info("- Plugin %s enabled.", self.plugin_name)
-
+        c_data = self.controller_api.register_server(self.sid, self.name)
+        log.info("Register Server %s", json.dumps(c_data))
 
     def disable(self):
         """Call when plugin disabled."""
+        c_data = self.controller_api.shutdown_server(self.sid, self.name)
+        log.info("Shutdown Server %s", json.dumps(c_data))
         self.record_lock.acquire()
         self.disabled = True
         log.warn("Trying to shutdown download plugin")
         self.torrent_processor.disable_process()
         self.record_lock.release()
         log.warn("Trying to shutdown download plugin...success")
-
 
     def _task_loop(self):
         while True:
@@ -120,7 +138,8 @@ class Core(CorePluginBase):
             try:
                 self.processor.check_tasks(component.get("Core"))
             except Exception as e:
-                log.error("Exception occored in task loop. %s -- \r\n%s", e, traceback.format_exc())
+                log.error("Exception occored in task loop. %s -- \r\n%s",
+                          e, traceback.format_exc())
             finally:
                 self.fetching_task = False
             self._sleep_and_wait(5)
@@ -140,19 +159,17 @@ class Core(CorePluginBase):
             try:
                 self._checking_torrent_status()
             except Exception as e:
-                log.error("Exception occored in status loop. %s -- \r\n%s", e, traceback.format_exc())
+                log.error("Exception occored in status loop. %s -- \r\n%s",
+                          e, traceback.format_exc())
             finally:
                 self.busy = False
                 self.record_lock.release()
             self._sleep_and_wait(2)
 
-
-
     def _checking_torrent_status(self):
         core = component.get("Core")
         self.torrent_processor.update_torrent_info(core)
 
- 
     def _sleep_and_wait(self, stime):
         self.record_lock.acquire()
         if not self.disabled:
