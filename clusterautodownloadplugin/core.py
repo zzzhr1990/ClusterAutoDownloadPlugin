@@ -86,16 +86,16 @@ class Core(CorePluginBase):
 
         self.record_lock = threading.Lock()
         log.info("Cluster downloader init.")
-        if self.config["sid"]:
+        if "sid" in self.config:
             self.sid = self.config["sid"]
         else:
             self.sid = uuid.uuid4()
         log.info("Set sid %s", self.sid)
-        if self.config["name"]:
+        if "name" in self.config:
             self.name = self.config["name"]
         else:
             self.name = "Unknown"
-        if self.config["controller"]:
+        if "controller" in self.config:
             self.controller = self.config["controller"]
         else:
             self.controller = "http://119.29.174.171:8080"
