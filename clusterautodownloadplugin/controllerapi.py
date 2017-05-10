@@ -16,7 +16,6 @@ class ControllerApi(object):
         if req.status_code == 200:
             json_request = req.json()
             if json_request["success"]:
-                logging.info("SUCCCCCCCCCCCCCCC!!!!!!!!!!")
                 if "data" in json_request:
                     return json_request["data"]
                 else:

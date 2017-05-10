@@ -104,12 +104,12 @@ class Core(CorePluginBase):
 
     def enable(self):
         """Call when plugin enabled."""
-        self.disabled = False
-        self.looping_thread.start()
-        self.task_looping_thread.start()
-        log.info("- Plugin %s enabled.", self.plugin_name)
         c_data = self.controller_api.register_server(self.sid, self.name)
         log.info("Register Server %s", json.dumps(c_data))
+        self.disabled = False
+        self.looping_thread.start()
+        # self.task_looping_thread.start()
+        log.info("- Plugin %s enabled.", self.plugin_name)
 
     def disable(self):
         """Call when plugin disabled."""
