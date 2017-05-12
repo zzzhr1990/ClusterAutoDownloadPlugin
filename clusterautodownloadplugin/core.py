@@ -107,7 +107,7 @@ class Core(CorePluginBase):
         c_data = self.controller_api.register_server(self.sid, self.name)
         log.info("Register Server %s", json.dumps(c_data))
         self.disabled = False
-        self.looping_thread.start()
+        # self.looping_thread.start()
         # self.task_looping_thread.start()
         log.info("- Plugin %s enabled.", self.plugin_name)
 
