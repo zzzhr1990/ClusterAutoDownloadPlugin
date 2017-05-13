@@ -89,9 +89,9 @@ class Core(CorePluginBase):
         if "mqhost" in self.config:
             mq_host = self.config["mqhost"]
 
-        mq_port = self.config.get("mqport", 5672)
-        mq_user = self.config.get("mquser", "")
-        mq_pass = self.config.get("mqpass", "")
+        mq_port = self._get_config_or_default("mqport", 5672)
+        mq_user = self._get_config_or_default("mquser", "")
+        mq_pass = self._get_config_or_default("mqpass", "")
 
         self.mq_service = MqService(
             mq_host, mq_port, mq_user, mq_pass, self.core)
@@ -112,6 +112,11 @@ class Core(CorePluginBase):
             self.controller = "http://119.29.174.171:8080"
             log.info("- Use %s default.", self.controller)
         self.controller_api = ControllerApi(self.controller)
+
+    def _get_config_or_default(self, key, default_value):
+        if key in self.config:
+            return self.config[key]
+        return default_value
 
     def enable(self):
         """Call when plugin enabled."""
