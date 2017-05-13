@@ -1,4 +1,3 @@
-from kombu import Consumer as KConsumer
 from kombu.mixins import ConsumerMixin
 from kombu import Connection, Exchange, Queue
 import logging
@@ -22,8 +21,8 @@ class MqService(ConsumerMixin):
 
     def get_consumers(self, Consumer, channel):
         """D"""
-        return [KConsumer(channel, self.torrent_queue,
-                          callbacks=[self.on_message])]
+        return [Consumer(channel, self.torrent_queue,
+                         callbacks=[self.on_message])]
 
     def on_message(self, body, message):
         """d"""
