@@ -1,3 +1,4 @@
+from kombu import Consumer as KConsumer
 from kombu.mixins import ConsumerMixin
 from kombu import Connection, Exchange, Queue
 import logging
