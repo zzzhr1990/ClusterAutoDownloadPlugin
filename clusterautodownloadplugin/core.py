@@ -57,6 +57,7 @@ from torrentprocessor import TorrentProcessor
 from globalconfig import PGlobalConfig
 from masterapi import MasterApi
 from controllerapi import ControllerApi
+from mqservice import MqService
 
 
 DEFAULT_PREFS = {
@@ -83,7 +84,17 @@ class Core(CorePluginBase):
         self.processor = MasterApi(PGlobalConfig.master_api_server_prefix)
         self.torrent_processor = TorrentProcessor(PGlobalConfig.max_process,
                                                   PGlobalConfig.server_name, self.processor)
+        self.core = component.get("Core")
+        mq_host = "localhost"
+        if "mqhost" in self.config:
+            mq_host = self.config["mqhost"]
 
+        mq_port = self.config.get("mqport", 5672)
+        mq_user = self.config.get("mquser", "")
+        mq_pass = self.config.get("mqpass", "")
+
+        self.mq_service = MqService(
+            mq_host, mq_port, mq_user, mq_pass, self.core)
         self.record_lock = threading.Lock()
         log.info("Cluster downloader init.")
         if "sid" in self.config:
@@ -104,6 +115,8 @@ class Core(CorePluginBase):
 
     def enable(self):
         """Call when plugin enabled."""
+        self.mq_service.start_async()
+        return
         c_data = self.controller_api.register_server(self.sid, self.name)
         log.info("Register Server %s", json.dumps(c_data))
         self.disabled = False
@@ -113,6 +126,8 @@ class Core(CorePluginBase):
 
     def disable(self):
         """Call when plugin disabled."""
+        self.mq_service.stop()
+        return
         c_data = self.controller_api.shutdown_server(self.sid, self.name)
         log.info("Shutdown Server %s", json.dumps(c_data))
         self.record_lock.acquire()
