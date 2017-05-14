@@ -57,4 +57,5 @@ class MqService(ConsumerMixin):
                                                           base64.encodestring(req.content), {})
             logging.info(torrent_id)
         else:
+            logging.info(req.status_code)
             return False
