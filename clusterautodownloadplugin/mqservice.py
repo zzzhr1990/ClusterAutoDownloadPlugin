@@ -91,7 +91,8 @@ class MqService(ConsumerProducerMixin):
                     "Torrent id mismatch!!!! rechange....%s", json.dumps(info))
             logging.info("Added torrent success %s", torrent_id)
             # Get Torrent File Info
-            file_data = self.deluge_api.get_torrent_status(torrent_id, {})
+            file_data = self.deluge_api.get_torrent_status(
+                torrent_id, ["file_priorities", "files", "hash"])
             self._delive_torrent_parse_success(info["hash"], file_data)
         except RuntimeError as ex:
             logging.warning(
@@ -115,7 +116,7 @@ class MqService(ConsumerProducerMixin):
         logging.info("suc_publish")
         self.producer.publish(
             {'success': True, 'status': 100, 'message': 'OK',
-             'hash': url_hash, 'data': json.dumps(data)},
+             'hash': url_hash, 'data': data},
             exchange='offline-exchange',
             routing_key="torrent-task.pre_parse",
             retry=True,
