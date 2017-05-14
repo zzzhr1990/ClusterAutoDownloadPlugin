@@ -10,6 +10,7 @@ import json
 import threading
 import requests
 import base64
+import magic
 
 
 class MqService(ConsumerMixin):
@@ -35,11 +36,9 @@ class MqService(ConsumerMixin):
         """d"""
         xbody = message.body
         try:
-            self._on_torrent_added(json.loads(body))
+            self._on_torrent_added(json.loads(body), message)
         except Exception as e:
             logging.info(e)
-
-        message.ack()
 
     def start_async(self):
         """Start this async"""
@@ -50,22 +49,37 @@ class MqService(ConsumerMixin):
         """stop"""
         self.should_stop = True
 
-    def _on_torrent_added(self, info):
+    def _on_torrent_added(self, info, message):
         # Get File.
-        req = requests.get(info["url"], timeout=5)
-        if req.status_code == 200:
-            # torrent_id = self.deluge_api.add_torrent_file(info["hash"],
-            #                                              base64.encodestring(req.content), {})
-            # logging.info(torrent_id)
-            filedump = req.content
-            try:
-                torrent_info = lt.torrent_info(lt.bdecode(filedump))
-                info_hash_unicode = unicode(torrent_info.info_hash())
-                logging.info("Torrent id %s", info_hash_unicode)
-                etag = Util.wcs_etag_bytes(filedump)
-                logging.info("etag %s", etag)
-            except RuntimeError as ex:
-                logging.info(ex)
+        url = info["url"]
+        file_hash = info["hash"]
+        data = self._try_and_get_content(url, file_hash)
+        if not data:
+            message.requeue()
+            return
         else:
-            logging.info("%s download %d", info["url"], req.status_code)
-            return False
+            message.ack()
+        # Check MIME
+        mime = Util.mime_buffer(data)
+        logging.info(mime)
+
+    def _try_and_get_content(self, url, file_hash, try_time=10):
+        req = requests.get(url, timeout=5)
+        if try_time < 0:
+            logging.error("Download file %s error", url)
+        try:
+            if req.status_code < 400:
+                filedump = req.content
+                etag = Util.wcs_etag_bytes(filedump)
+                if etag != file_hash:
+                    logging.warn("File %s , hash %s mismatch. atr %s",
+                                 str(url), str(file_hash), str(etag))
+                    return self._try_and_get_content(url, file_hash, try_time - 1)
+                return filedump
+            else:
+                logging.warn("File %s , errorcode %d.",
+                             str(url), req.status_code)
+                return self._try_and_get_content(url, file_hash, try_time - 1)
+        except RuntimeError as ex:
+            logging.error(ex)
+            return self._try_and_get_content(url, file_hash, try_time - 1)
