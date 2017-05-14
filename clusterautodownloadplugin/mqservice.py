@@ -62,7 +62,7 @@ class MqService(ConsumerMixin):
                 torrent_info = lt.torrent_info(lt.bdecode(filedump))
                 info_hash_unicode = unicode(torrent_info.info_hash())
                 logging.info("Torrent id %s", info_hash_unicode)
-                etag = Util.wcs_etag(BytesIO(filedump))
+                etag = Util.wcs_etag_bytes(filedump)
                 logging.info("etag %s", etag)
             except RuntimeError as ex:
                 logging.info(ex)
