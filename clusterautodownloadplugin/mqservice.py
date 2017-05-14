@@ -34,6 +34,7 @@ class MqService(ConsumerProducerMixin):
 
     def on_message(self, body, message):
         """d"""
+        logging.info("ON@")
         xbody = message.body
         try:
             self._on_torrent_added(json.loads(body), message)
