@@ -34,8 +34,8 @@ class MqService(ConsumerProducerMixin):
 
     def on_message(self, body, message):
         """d"""
-        logging.info("ON@")
-        xbody = message.body
+        # logging.info("ON@")
+        #xbody = message.body
         try:
             self._on_torrent_added(json.loads(body), message)
         except Exception as e:
@@ -78,7 +78,19 @@ class MqService(ConsumerProducerMixin):
             self._delive_torrent_parse_fail(-1, file_hash)
 
     def _add_new_torrent_file(self, info, torrent_data, torrent_hash):
-        pass
+        try:
+            torrent_id = self.deluge_api.add_torrent_file(
+                info["hash"], base64.encodestring(torrent_data), {})
+            if not torrent_id:
+                logging.info("%s existed.", torrent_hash)
+                torrent_id = torrent_hash
+            else:
+                logging.warn(
+                    "Torrent id mismatch!!!! rechange....%s", json.dumps(info))
+            logging.info("Added torrent success %s", torrent_id)
+        except RuntimeError as ex:
+            logging.warning(
+                'Unable to add torrent, failed: %s', ex)
 
     def _delive_torrent_parse_fail(self, status, file_or_url_hash):
         # Report
