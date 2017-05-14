@@ -26,13 +26,13 @@ class MqService(ConsumerMixin):
     def get_consumers(self, Consumer, channel):
         """D"""
         return [KConsumer(channel, self.torrent_queue,
-                          callbacks=[self.on_message], accept=['json'])]
+                          callbacks=[self.on_message])]
 
     def on_message(self, body, message):
         """d"""
         xbody = message.body
         try:
-            self._on_torrent_added(xbody)
+            self._on_torrent_added(json.loads(xbody))
         except Exception as e:
             logging.info(e)
 
