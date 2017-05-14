@@ -1,5 +1,5 @@
 from kombu import Consumer as KConsumer
-from kombu.mixins import ConsumerMixin
+from kombu.mixins import ConsumerProducerMixin
 from kombu import Connection, Exchange, Queue
 from deluge._libtorrent import lt
 from util import Util
@@ -13,7 +13,7 @@ import base64
 import magic
 
 
-class MqService(ConsumerMixin):
+class MqService(ConsumerProducerMixin):
     """Mq"""
 
     def __init__(self, mq_host, mq_port, mq_user, mq_password, deluge_api):
@@ -29,8 +29,12 @@ class MqService(ConsumerMixin):
 
     def get_consumers(self, Consumer, channel):
         """D"""
-        return [KConsumer(channel, self.torrent_queue,
-                          callbacks=[self.on_message])]
+        return [Consumer(channel, self.torrent_queue,
+                         on_message=self.handle_message, accept='application/json')]
+
+    def handle_message(self, message):
+        """Message"""
+        logging.info("On~~~")
 
     def on_message(self, body, message):
         """d"""
@@ -65,7 +69,6 @@ class MqService(ConsumerMixin):
         if mime == 'application/x-bittorrent':
             try:
                 torrent_info = lt.torrent_info(lt.bdecode(data))
-                logging.info(json.dumps(torrent_info))
                 torrent_hash = unicode(torrent_info.info_hash())
             except RuntimeError as ex:
                 logging.warning(
@@ -81,6 +84,7 @@ class MqService(ConsumerMixin):
         pass
 
     def _delive_torrent_parse_fail(self, status, file_or_url_hash):
+        # Report
         pass
 
     def _try_and_get_content(self, url, file_hash, try_time=10):
