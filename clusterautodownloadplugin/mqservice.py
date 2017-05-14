@@ -29,12 +29,8 @@ class MqService(ConsumerProducerMixin):
 
     def get_consumers(self, Consumer, channel):
         """D"""
-        return [Consumer(channel, self.torrent_queue,
-                         on_message=self.handle_message, accept='application/json')]
-
-    def handle_message(self, message):
-        """Message"""
-        logging.info("On~~~")
+        return [KConsumer(channel, self.torrent_queue,
+                          callbacks=[self.on_message], accept='application/json')]
 
     def on_message(self, body, message):
         """d"""
