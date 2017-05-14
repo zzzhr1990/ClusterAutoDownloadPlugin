@@ -51,6 +51,7 @@ class MqService(ConsumerMixin):
         req = requests.get(info["url"],
                            headers={"X-Task-Token": "1024tasktoken"}, timeout=5)
         if req.status_code == 200:
+            logging.info("LOL")
             torrent_id = self.deluge_api.add_torrent_file(info["hash"],
                                                           base64.encodestring(req.content), {})
             logging.info("Adding torrent %s", torrent_id)
