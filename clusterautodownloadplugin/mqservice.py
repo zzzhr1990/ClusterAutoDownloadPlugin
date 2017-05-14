@@ -70,12 +70,13 @@ class MqService(ConsumerProducerMixin):
             except RuntimeError as ex:
                 logging.warning(
                     'Unable to add torrent, decoding filedump failed: %s', ex)
-                self._delive_torrent_parse_fail(-2, file_hash)
+                self._delive_torrent_parse_fail(-2,
+                                                file_hash, 'TORRENT_PROCESS_FAILED')
                 return
             self._add_new_torrent_file(info, data, torrent_hash)
         else:
             logging.warn("%s is not a torrent file. %s", url, mime)
-            self._delive_torrent_parse_fail(-1, file_hash)
+            self._delive_torrent_parse_fail(-1, file_hash, 'MIME_MISMATCH')
 
     def _add_new_torrent_file(self, info, torrent_data, torrent_hash):
         try:
@@ -88,13 +89,33 @@ class MqService(ConsumerProducerMixin):
                 logging.warn(
                     "Torrent id mismatch!!!! rechange....%s", json.dumps(info))
             logging.info("Added torrent success %s", torrent_id)
+            # Get Torrent File Info
+            file_data = self.deluge_api.get_torrent_status(torrent_id)
+            self._delive_torrent_parse_success(info["hash"], file_data)
         except RuntimeError as ex:
             logging.warning(
                 'Unable to add torrent, failed: %s', ex)
+            self._delive_torrent_parse_fail(-5, info['hash'], 'DELUGE_ERROR')
 
-    def _delive_torrent_parse_fail(self, status, file_or_url_hash):
+    def _delive_torrent_parse_fail(self, status, url_hash, message):
         # Report
-        pass
+        self.producer.publish(
+            {'success': False, 'status': status,
+             'hash': url_hash, 'message': message},
+            exchange='offline-exchange',
+            routing_key="torrent-task.pre_parse",
+            retry=True,
+        )
+
+    def _delive_torrent_parse_success(self, url_hash, data):
+        # Report
+        self.producer.publish(
+            {'success': True, 'status': 100, 'message': 'OK',
+             'hash': url_hash, 'data': data},
+            exchange='offline-exchange',
+            routing_key="torrent-task.pre_parse",
+            retry=True,
+        )
 
     def _try_and_get_content(self, url, file_hash, try_time=10):
         req = requests.get(url, timeout=5)
