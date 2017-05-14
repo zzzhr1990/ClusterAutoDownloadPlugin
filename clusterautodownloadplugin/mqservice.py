@@ -95,7 +95,7 @@ class MqService(ConsumerProducerMixin):
             logging.info("Added torrent success %s", torrent_id)
             # Get Torrent File Info
             file_data = self.deluge_api.get_torrent_status(
-                torrent_id, [])
+                torrent_id, ["name", "hash", "files", "file_priorities"])
             self._delive_torrent_parse_success(info["hash"], file_data, info)
         except RuntimeError as ex:
             logging.warning(
