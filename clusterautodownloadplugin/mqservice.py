@@ -45,5 +45,5 @@ class MqService(ConsumerMixin):
 
     def _on_torrent_added(self, info):
         # Get File.
-        req = requests.get(single_task["url"],
+        req = requests.get(info["url"],
                            headers={"X-Task-Token": "1024tasktoken"}, timeout=5)
