@@ -39,6 +39,7 @@ class MqService(ConsumerProducerMixin):
         try:
             self._on_torrent_added(json.loads(body), message)
         except Exception as e:
+            logging.info("!!!!FITAL_EXC %s", body)
             logging.info(e)
 
     def start_async(self):
@@ -90,7 +91,7 @@ class MqService(ConsumerProducerMixin):
                     "Torrent id mismatch!!!! rechange....%s", json.dumps(info))
             logging.info("Added torrent success %s", torrent_id)
             # Get Torrent File Info
-            file_data = self.deluge_api.get_torrent_status(torrent_id)
+            file_data = self.deluge_api.get_torrent_status(torrent_id, {})
             self._delive_torrent_parse_success(info["hash"], file_data)
         except RuntimeError as ex:
             logging.warning(
