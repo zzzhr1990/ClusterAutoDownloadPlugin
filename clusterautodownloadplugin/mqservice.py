@@ -34,7 +34,8 @@ class MqService(ConsumerMixin):
         \"type\":\"torrent\",\"userId\":\"1\",\"key\":\"user-upload/Ft7r9oFcC5lFFXIPLQKmPIjE7EuD\",
         \"url\":\"http://other.qiecdn.com/user-upload/Ft7r9oFcC5lFFXIPLQKmPIjE7EuD\",
         \"hash\":\"Ft7r9oFcC5lFFXIPLQKmPIjE7EuD\"}"""
-        self._on_torrent_added(message.body)
+        # self._on_torrent_added(message.body)
+        logging.info("MSG RECV")
         message.ack()
 
     def start_async(self):
