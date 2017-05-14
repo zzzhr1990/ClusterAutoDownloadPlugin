@@ -2,6 +2,8 @@ from kombu import Consumer as KConsumer
 from kombu.mixins import ConsumerMixin
 from kombu import Connection, Exchange, Queue
 from deluge._libtorrent import lt
+from util import Util
+from io import BytesIO
 import logging
 import uuid
 import json
@@ -50,10 +52,8 @@ class MqService(ConsumerMixin):
 
     def _on_torrent_added(self, info):
         # Get File.
-        logging.info(type(info))
         req = requests.get(info["url"], timeout=5)
         if req.status_code == 200:
-            logging.info("Down!!")
             # torrent_id = self.deluge_api.add_torrent_file(info["hash"],
             #                                              base64.encodestring(req.content), {})
             # logging.info(torrent_id)
@@ -62,7 +62,8 @@ class MqService(ConsumerMixin):
                 torrent_info = lt.torrent_info(lt.bdecode(filedump))
                 info_hash_unicode = unicode(torrent_info.info_hash())
                 logging.info("Torrent id %s", info_hash_unicode)
-                logging.info(type(filedump))
+                etag = Util.wcs_etag(BytesIO(filedump))
+                logging.info("etag %s", etag)
             except RuntimeError as ex:
                 logging.info(ex)
         else:
