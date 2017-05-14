@@ -122,6 +122,7 @@ class MqService(ConsumerProducerMixin):
             retry=True,
         )
         logging.info("suc_publish_end")
+        logging.info(json.dumps(data))
 
     def _try_and_get_content(self, url, file_hash, try_time=10):
         req = requests.get(url, timeout=5)
