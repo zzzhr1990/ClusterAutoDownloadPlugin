@@ -112,6 +112,7 @@ class MqService(ConsumerProducerMixin):
 
     def _delive_torrent_parse_success(self, url_hash, data):
         # Report
+        logging.info("suc_publish")
         self.producer.publish(
             {'success': True, 'status': 100, 'message': 'OK',
              'hash': url_hash, 'data': data},
@@ -119,6 +120,7 @@ class MqService(ConsumerProducerMixin):
             routing_key="torrent-task.pre_parse",
             retry=True,
         )
+        logging.info("suc_publish_end")
 
     def _try_and_get_content(self, url, file_hash, try_time=10):
         req = requests.get(url, timeout=5)
