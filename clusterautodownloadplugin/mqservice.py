@@ -52,6 +52,7 @@ class MqService(ConsumerMixin):
         logging.info(type(info))
         req = requests.get(info["url"], timeout=5)
         if req.status_code == 200:
+            logging.info("Down!!")
             torrent_id = self.deluge_api.add_torrent_file(info["hash"],
                                                           base64.encodestring(req.content), {})
             logging.info(torrent_id)
