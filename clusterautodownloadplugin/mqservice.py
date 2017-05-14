@@ -26,6 +26,7 @@ class MqService(ConsumerProducerMixin):
         self.connection = Connection(
             hostname=mq_host, port=mq_port, password=mq_password, userid=mq_user)
         self.torrent_queue(self.connection).declare()
+        self.server_id = server_id
 
     def get_consumers(self, Consumer, channel):
         """D"""
@@ -53,6 +54,7 @@ class MqService(ConsumerProducerMixin):
 
     def _on_torrent_added(self, info, message):
         # Get File.
+        info['sid'] = self.server_id
         url = info["url"]
         file_hash = info["hash"]
         data = self._try_and_get_content(url, file_hash)
@@ -124,7 +126,7 @@ class MqService(ConsumerProducerMixin):
             retry=True,
         )
         logging.info("suc_publish_end")
-        logging.info(json.dumps(info))
+        logging.info(json.dumps(data))
 
     def _try_and_get_content(self, url, file_hash, try_time=10):
         req = requests.get(url, timeout=5)
