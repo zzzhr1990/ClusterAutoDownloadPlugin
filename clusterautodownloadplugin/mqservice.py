@@ -60,8 +60,8 @@ class MqService(ConsumerMixin):
             filedump = req.content
             try:
                 torrent_info = lt.torrent_info(lt.bdecode(filedump))
-                torrent_id = str(torrent_info.info_hash())
-                logging.info("Torrent id %s", torrent_id)
+                info_hash = torrent_info.info_hash()
+                logging.info("Torrent id %s", type(info_hash))
             except RuntimeError as ex:
                 logging.info(ex)
         else:
