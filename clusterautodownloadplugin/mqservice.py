@@ -32,7 +32,7 @@ class MqService(ConsumerMixin):
         """d"""
         xbody = message.body
         try:
-            self._on_torrent_added(xbody)
+            self._on_torrent_added(json.loads(body))
         except Exception as e:
             logging.info(e)
 
