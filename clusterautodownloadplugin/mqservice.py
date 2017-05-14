@@ -51,7 +51,7 @@ class MqService(ConsumerMixin):
         # Get File.
         req = requests.get(info["url"], timeout=5)
         if req.status_code == 200:
-            torrent_id = self.deluge_api.add_torrent_file(single_task["tid"],
+            torrent_id = self.deluge_api.add_torrent_file(info["hash"],
                                                           base64.encodestring(req.content), {})
             logging.info(torrent_id)
         else:
