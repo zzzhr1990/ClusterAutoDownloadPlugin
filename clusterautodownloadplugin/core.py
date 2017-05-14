@@ -93,8 +93,6 @@ class Core(CorePluginBase):
         mq_user = self._get_config_or_default("mquser", "")
         mq_pass = self._get_config_or_default("mqpass", "")
 
-        self.mq_service = MqService(
-            mq_host, mq_port, mq_user, mq_pass, self.core)
         self.record_lock = threading.Lock()
         log.info("Cluster downloader init.")
         if "sid" in self.config:
@@ -111,6 +109,8 @@ class Core(CorePluginBase):
         else:
             self.controller = "http://119.29.174.171:8080"
             log.info("- Use %s default.", self.controller)
+        self.mq_service = MqService(self.sid,
+                                    mq_host, mq_port, mq_user, mq_pass, self.core)
         self.controller_api = ControllerApi(self.controller)
 
     def _get_config_or_default(self, key, default_value):

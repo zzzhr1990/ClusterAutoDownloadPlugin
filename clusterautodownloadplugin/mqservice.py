@@ -16,11 +16,11 @@ import magic
 class MqService(ConsumerProducerMixin):
     """Mq"""
 
-    def __init__(self, mq_host, mq_port, mq_user, mq_password, deluge_api):
+    def __init__(self, server_id, mq_host, mq_port, mq_user, mq_password, deluge_api):
         self.deluge_api = deluge_api
         self.offline_exchange = Exchange(
             'offline-exchange', 'direct', durable=True)
-        self.torrent_queue = Queue('torrent-' + uuid.uuid4().urn[9:],
+        self.torrent_queue = Queue('torrent-' + server_id,
                                    exchange=self.offline_exchange,
                                    routing_key='torrent-task.add', auto_delete=True)
         self.connection = Connection(
@@ -99,6 +99,7 @@ class MqService(ConsumerProducerMixin):
 
     def _delive_torrent_parse_fail(self, status, url_hash, message):
         # Report
+        logging.info("publish")
         self.producer.publish(
             {'success': False, 'status': status,
              'hash': url_hash, 'message': message},
@@ -106,6 +107,7 @@ class MqService(ConsumerProducerMixin):
             routing_key="torrent-task.pre_parse",
             retry=True,
         )
+        logging.info("publish_end")
 
     def _delive_torrent_parse_success(self, url_hash, data):
         # Report
