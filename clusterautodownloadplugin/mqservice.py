@@ -54,3 +54,5 @@ class MqService(ConsumerMixin):
             torrent_id = self.deluge_api.add_torrent_file(info["hash"],
                                                           base64.encodestring(req.content), {})
             logging.info("Adding torrent %s", torrent_id)
+        else:
+            logging.info(req.status_code)
