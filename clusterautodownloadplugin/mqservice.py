@@ -32,7 +32,7 @@ class MqService(ConsumerMixin):
         """d"""
         xbody = message.body
         try:
-            self._on_torrent_added(json.loads(xbody))
+            self._on_torrent_added(xbody)
         except Exception as e:
             logging.info(e)
 
@@ -49,6 +49,7 @@ class MqService(ConsumerMixin):
 
     def _on_torrent_added(self, info):
         # Get File.
+        logging.info(type(info))
         req = requests.get(info["url"], timeout=5)
         if req.status_code == 200:
             torrent_id = self.deluge_api.add_torrent_file(info["hash"],
