@@ -72,12 +72,13 @@ class MqService(ConsumerProducerMixin):
                 logging.warning(
                     'Unable to add torrent, decoding filedump failed: %s', ex)
                 self._delive_torrent_parse_fail(-2,
-                                                file_hash, 'TORRENT_PROCESS_FAILED')
+                                                file_hash, 'TORRENT_PROCESS_FAILED', info)
                 return
             self._add_new_torrent_file(info, data, torrent_hash)
         else:
             logging.warn("%s is not a torrent file. %s", url, mime)
-            self._delive_torrent_parse_fail(-1, file_hash, 'MIME_MISMATCH')
+            self._delive_torrent_parse_fail(-1,
+                                            file_hash, 'MIME_MISMATCH', info)
 
     def _add_new_torrent_file(self, info, torrent_data, torrent_hash):
         try:
@@ -93,31 +94,31 @@ class MqService(ConsumerProducerMixin):
             # Get Torrent File Info
             file_data = self.deluge_api.get_torrent_status(
                 torrent_id, ["file_priorities", "files", "hash"])
-            file_data["orign"] = info
-            self._delive_torrent_parse_success(info["hash"], file_data)
+            self._delive_torrent_parse_success(info["hash"], file_data, info)
         except RuntimeError as ex:
             logging.warning(
                 'Unable to add torrent, failed: %s', ex)
-            self._delive_torrent_parse_fail(-5, info['hash'], 'DELUGE_ERROR')
+            self._delive_torrent_parse_fail(-5,
+                                            info['hash'], 'DELUGE_ERROR', info)
 
-    def _delive_torrent_parse_fail(self, status, url_hash, message):
+    def _delive_torrent_parse_fail(self, status, url_hash, message, info):
         # Report
         logging.info("publish")
         self.producer.publish(
             {'success': False, 'status': status,
-             'hash': url_hash, 'message': message},
+             'hash': url_hash, 'message': message, 'info': info},
             exchange='offline-exchange',
             routing_key="torrent-task.pre_parse",
             retry=True,
         )
         logging.info("publish_end")
 
-    def _delive_torrent_parse_success(self, url_hash, data):
+    def _delive_torrent_parse_success(self, url_hash, data, info):
         # Report
         logging.info("suc_publish")
         self.producer.publish(
             {'success': True, 'status': 100, 'message': 'OK',
-             'hash': url_hash, 'data': data},
+             'hash': url_hash, 'data': data, 'info': info},
             exchange='offline-exchange',
             routing_key="torrent-task.pre_parse",
             retry=True,
