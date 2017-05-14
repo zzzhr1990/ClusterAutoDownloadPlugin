@@ -1,6 +1,7 @@
 from kombu import Consumer as KConsumer
 from kombu.mixins import ConsumerMixin
 from kombu import Connection, Exchange, Queue
+from deluge._libtorrent import lt
 import logging
 import uuid
 import json
@@ -53,9 +54,16 @@ class MqService(ConsumerMixin):
         req = requests.get(info["url"], timeout=5)
         if req.status_code == 200:
             logging.info("Down!!")
-            torrent_id = self.deluge_api.add_torrent_file(info["hash"],
-                                                          base64.encodestring(req.content), {})
-            logging.info(torrent_id)
+            # torrent_id = self.deluge_api.add_torrent_file(info["hash"],
+            #                                              base64.encodestring(req.content), {})
+            # logging.info(torrent_id)
+            filedump = req.content
+            try:
+                torrent_info = lt.torrent_info(lt.bdecode(filedump))
+                torrent_id = str(torrent_info.info_hash())
+                logging.info("Torrent id %s", torrent_id)
+            except RuntimeError as ex:
+                logging.info(ex)
         else:
             logging.info("%s download %d", info["url"], req.status_code)
             return False
