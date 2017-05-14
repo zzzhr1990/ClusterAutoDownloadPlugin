@@ -3,6 +3,7 @@ from kombu.mixins import ConsumerMixin
 from kombu import Connection, Exchange, Queue
 import logging
 import uuid
+import json
 import threading
 
 
@@ -27,7 +28,8 @@ class MqService(ConsumerMixin):
 
     def on_message(self, body, message):
         """d"""
-        logging.info(type(body))
+        body = message.body
+        logging.info(json.dumps(body))
         message.ack()
 
     def start_async(self):
