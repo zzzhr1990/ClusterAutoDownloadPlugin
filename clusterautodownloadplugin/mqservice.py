@@ -61,7 +61,27 @@ class MqService(ConsumerMixin):
             message.ack()
         # Check MIME
         mime = Util.mime_buffer(data)
-        logging.info(mime)
+        torrent_hash = None
+        if mime == 'application/x-bittorrent':
+            try:
+                torrent_info = lt.torrent_info(lt.bdecode(data))
+                logging.info(json.dumps(torrent_info))
+                torrent_hash = unicode(torrent_info.info_hash())
+            except RuntimeError as ex:
+                logging.warning(
+                    'Unable to add torrent, decoding filedump failed: %s', ex)
+                self._delive_torrent_parse_fail(-2, file_hash)
+                return
+            self._add_new_torrent_file(info, data, torrent_hash)
+        else:
+            logging.warn("%s is not a torrent file. %s", url, mime)
+            self._delive_torrent_parse_fail(-1, file_hash)
+
+    def _add_new_torrent_file(self, info, torrent_data, torrent_hash):
+        pass
+
+    def _delive_torrent_parse_fail(self, status, file_or_url_hash):
+        pass
 
     def _try_and_get_content(self, url, file_hash, try_time=10):
         req = requests.get(url, timeout=5)
