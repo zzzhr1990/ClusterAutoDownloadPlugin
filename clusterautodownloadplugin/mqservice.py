@@ -31,7 +31,11 @@ class MqService(ConsumerMixin):
     def on_message(self, body, message):
         """d"""
         xbody = message.body
-        logging.info(json.dumps(xbody))
+        try:
+            self._on_torrent_added(xbody)
+        except Exception as e:
+            logging.info(e)
+
         message.ack()
 
     def start_async(self):
@@ -45,5 +49,10 @@ class MqService(ConsumerMixin):
 
     def _on_torrent_added(self, info):
         # Get File.
-        req = requests.get(info["url"],
-                           headers={"X-Task-Token": "1024tasktoken"}, timeout=5)
+        req = requests.get(info["url"], timeout=5)
+        if req.status_code == 200:
+            torrent_id = self.deluge_api.add_torrent_file(single_task["tid"],
+                                                          base64.encodestring(req.content), {})
+            logging.info(torrent_id)
+        else:
+            return False
