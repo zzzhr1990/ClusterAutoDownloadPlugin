@@ -30,12 +30,8 @@ class MqService(ConsumerMixin):
 
     def on_message(self, body, message):
         """d"""
-        """{\"bucket\":\"other-storage\",\"storeFileId\":\"Ft7r9oFcC5lFFXIPLQKmPIjE7EuD\",
-        \"type\":\"torrent\",\"userId\":\"1\",\"key\":\"user-upload/Ft7r9oFcC5lFFXIPLQKmPIjE7EuD\",
-        \"url\":\"http://other.qiecdn.com/user-upload/Ft7r9oFcC5lFFXIPLQKmPIjE7EuD\",
-        \"hash\":\"Ft7r9oFcC5lFFXIPLQKmPIjE7EuD\"}"""
-        # self._on_torrent_added(message.body)
-        logging.info("MSG RECV")
+        xbody = message.body
+        logging.info(json.dumps(xbody))
         message.ack()
 
     def start_async(self):
@@ -49,12 +45,5 @@ class MqService(ConsumerMixin):
 
     def _on_torrent_added(self, info):
         # Get File.
-        req = requests.get(info["url"],
+        req = requests.get(single_task["url"],
                            headers={"X-Task-Token": "1024tasktoken"}, timeout=5)
-        if req.status_code == 200:
-            logging.info("LOL")
-            torrent_id = self.deluge_api.add_torrent_file(info["hash"],
-                                                          base64.encodestring(req.content), {})
-            logging.info("Adding torrent %s", torrent_id)
-        else:
-            logging.info(req.status_code)
