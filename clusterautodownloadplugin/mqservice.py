@@ -115,7 +115,7 @@ class MqService(ConsumerProducerMixin):
         logging.info("suc_publish")
         self.producer.publish(
             {'success': True, 'status': 100, 'message': 'OK',
-             'hash': url_hash, 'data': data},
+             'hash': url_hash, 'data': json.dumps(data)},
             exchange='offline-exchange',
             routing_key="torrent-task.pre_parse",
             retry=True,
