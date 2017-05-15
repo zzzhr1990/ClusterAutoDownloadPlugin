@@ -85,7 +85,7 @@ class MqService(ConsumerProducerMixin):
     def _add_new_torrent_file(self, info, torrent_data, torrent_hash):
         try:
             torrent_id = self.deluge_api.add_torrent_file(
-                info["hash"], base64.encodestring(torrent_data), {})
+                info["hash"], base64.encodestring(torrent_data), {'add_paused': True})
             if not torrent_id:
                 logging.info("%s existed.", torrent_hash)
                 torrent_id = torrent_hash
