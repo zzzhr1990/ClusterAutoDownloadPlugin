@@ -122,6 +122,7 @@ class MqService(ConsumerProducerMixin):
             self.deluge_api.set_torrent_file_priorities(torrent_id, tmp)
             logging.info(json.dumps(tmp))
             logging.info(json.dumps(file_data['file_priorities']))
+            self.deluge_api.resume_torrent([torrent_id])
             self.deluge_api.rename_files(torrent_id, to_change)
             logging.info("File Renamed. %s", torrent_id)
         except RuntimeError as ex:
