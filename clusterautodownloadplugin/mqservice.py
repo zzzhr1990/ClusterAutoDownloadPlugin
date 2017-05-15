@@ -76,6 +76,11 @@ class MqService(ConsumerProducerMixin):
         if mime == 'application/x-bittorrent':
             try:
                 torrent_info = lt.torrent_info(lt.bdecode(data))
+                files = torrent_info.files()
+                try:
+                    json.dumps(files)
+                except RuntimeError as esx:
+                    logging.error(esx)
                 torrent_hash = unicode(torrent_info.info_hash())
             except RuntimeError as ex:
                 logging.warning(
@@ -106,7 +111,9 @@ class MqService(ConsumerProducerMixin):
                 torrent_id,
                 [])
             self._delive_torrent_parse_success(info["hash"], file_data, info)
+            # mapped_files
             # Change FileName...
+            """
             to_change = []
             for file_info in file_data['files']:
                 to_change.append(
@@ -125,6 +132,7 @@ class MqService(ConsumerProducerMixin):
             self.deluge_api.resume_torrent([torrent_id])
             self.deluge_api.rename_files(torrent_id, to_change)
             logging.info("File Renamed. %s", torrent_id)
+            """
         except RuntimeError as ex:
             logging.warning(
                 'Unable to add torrent, failed: %s', ex)
@@ -154,7 +162,6 @@ class MqService(ConsumerProducerMixin):
             retry=True,
         )
         logging.info("suc_publish_end")
-        logging.info(json.dumps(data))
 
     def _try_and_get_content(self, url, file_hash, try_time=10):
         req = requests.get(url, timeout=5)
