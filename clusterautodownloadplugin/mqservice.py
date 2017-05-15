@@ -28,9 +28,15 @@ class MqService(ConsumerProducerMixin):
         self.torrent_queue(self.connection).declare()
         self.server_id = server_id
         deluge_api.eventmanager.register_event_handler(
-            "TorrentFileRenamedEvent", self._on_torrent_rename)
+            "TorrentFileCompletedEvent", self._on_torrent_file_completed)
         # listen to TorrentFileRenamedEvent
+        # may be error?
+        # TorrentFileCompletedEvent?torrent_id
+        # TorrentFileCompletedEvent?single file..torrent_id, index
         self.name_cache = {}
+
+    def _on_torrent_file_completed(self, torrent_id, index):
+        logging.info("%s of %d completed.", torrent_id, index)
 
     def _on_torrent_rename(self, torrent_id, index, name):
         logging.info("changing %s to %s (%d)", torrent_id, name, index)
