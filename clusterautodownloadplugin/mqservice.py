@@ -80,11 +80,14 @@ class MqService(ConsumerProducerMixin):
                 torrent_hash = unicode(torrent_info.info_hash())
                 files_count = torrent_info.num_files()
                 file_map = {}
+                orign_map = {}
                 for i in range(0, files_count):
                     file_inf = torrent_info.file_at(i)
                     file_name = file_inf.path
+                    orign_map[i] = file_name
                     file_map[i] = torrent_hash + "/" + Util.md5(file_name)
-                self._add_new_torrent_file(info, data, torrent_hash, file_map)
+                self._add_new_torrent_file(
+                    info, data, torrent_hash, file_map, orign_map)
             except RuntimeError as ex:
                 logging.warning(
                     'Unable to add torrent, decoding filedump failed: %s', ex)
@@ -96,7 +99,7 @@ class MqService(ConsumerProducerMixin):
             self._delive_torrent_parse_fail(-1,
                                             file_hash, 'MIME_MISMATCH', info)
 
-    def _add_new_torrent_file(self, info, torrent_data, torrent_hash, file_map):
+    def _add_new_torrent_file(self, info, torrent_data, torrent_hash, file_map, orign_map):
         try:
             torrent_id = self.deluge_api.add_torrent_file(
                 info["hash"], base64.encodestring(torrent_data),
@@ -113,7 +116,10 @@ class MqService(ConsumerProducerMixin):
             file_data = self.deluge_api.get_torrent_status(
                 torrent_id,
                 [])
+            for file_info in file_data['files']:
+                file_info['path'] = orign_map[file_info['index']]
             self._delive_torrent_parse_success(info["hash"], file_data, info)
+            self.deluge_api.resume_torrent([torrent_id])
             # mapped_files
             # Change FileName...
             """
