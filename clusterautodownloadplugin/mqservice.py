@@ -76,21 +76,21 @@ class MqService(ConsumerProducerMixin):
         if mime == 'application/x-bittorrent':
             try:
                 torrent_info = lt.torrent_info(lt.bdecode(data))
-                files = torrent_info.files()
-                try:
-                    for file_inf in files:
-                        logging.info("path %s - hash %s",
-                                     file_inf.path, str(file_inf.filehash))
-                except RuntimeError as esx:
-                    logging.error(esx)
+                # create file map
                 torrent_hash = unicode(torrent_info.info_hash())
+                files_count = torrent_info.num_files()
+                file_map = {}
+                for i in range(0, files_count):
+                    file_inf = torrent_info.file_at(i)
+                    file_name = file_inf.path
+                    file_map[i] = torrent_hash + "/" + Util.md5(file_name)
+                self._add_new_torrent_file(info, data, torrent_hash, file_map)
             except RuntimeError as ex:
                 logging.warning(
                     'Unable to add torrent, decoding filedump failed: %s', ex)
                 self._delive_torrent_parse_fail(-2,
                                                 file_hash, 'TORRENT_PROCESS_FAILED', info)
                 return
-            self._add_new_torrent_file(info, data, torrent_hash)
         else:
             logging.warn("%s is not a torrent file. %s", url, mime)
             self._delive_torrent_parse_fail(-1,
