@@ -27,6 +27,12 @@ class MqService(ConsumerProducerMixin):
             hostname=mq_host, port=mq_port, password=mq_password, userid=mq_user)
         self.torrent_queue(self.connection).declare()
         self.server_id = server_id
+        deluge_api.register_event_handler.register_event_handler(
+            "TorrentFileRenamedEvent", self._on_torrent_rename)
+        # listen to TorrentFileRenamedEvent
+
+    def _on_torrent_rename(self, torrent_id, index, name):
+        logging.info("changing %s to %s (%d)", torrent_id, name, index)
 
     def get_consumers(self, Consumer, channel):
         """D"""
