@@ -30,6 +30,7 @@ class MqService(ConsumerProducerMixin):
         deluge_api.eventmanager.register_event_handler(
             "TorrentFileRenamedEvent", self._on_torrent_rename)
         # listen to TorrentFileRenamedEvent
+        self.name_cache = {}
 
     def _on_torrent_rename(self, torrent_id, index, name):
         logging.info("changing %s to %s (%d)", torrent_id, name, index)
@@ -111,6 +112,13 @@ class MqService(ConsumerProducerMixin):
                 to_change.append(
                     (file_info['index'], torrent_id + '/'
                      + Util.md5(file_info['path'].encode('utf-8').strip())))
+            # Record original file to download.
+            self.name_cache[torrent_id]['data'] = file_data['file_priorities']
+            self.name_cache[torrent_id]['count'] = 0
+            tmp = []
+            for d in file_data['file_priorities']:
+                tmp.append(0)
+            self.deluge_api.set_torrent_file_priorities(torrent_id, tmp)
             self.deluge_api.rename_files(torrent_id, to_change)
             logging.info("File Renamed. %s", torrent_id)
         except RuntimeError as ex:
