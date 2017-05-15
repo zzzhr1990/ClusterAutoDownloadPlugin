@@ -99,6 +99,13 @@ class MqService(ConsumerProducerMixin):
                 torrent_id,
                 [])
             self._delive_torrent_parse_success(info["hash"], file_data, info)
+            # Change FileName...
+            to_change = []
+            for file_info in file_data['files']:
+                to_change.append(
+                    (file_info['index'], torrent_id + '/' + Util.md5(file_info['path'])))
+            self.deluge_api.rename_files(torrent_id, to_change)
+            logging.info("File Renamed.")
         except RuntimeError as ex:
             logging.warning(
                 'Unable to add torrent, failed: %s', ex)
