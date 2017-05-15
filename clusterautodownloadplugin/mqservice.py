@@ -41,7 +41,7 @@ class MqService(ConsumerProducerMixin):
             self._on_torrent_added(json.loads(body), message)
         except Exception as e:
             logging.info("!!!!FITAL_EXC %s", body)
-            logging.info(e)
+            logging.error(e)
 
     def start_async(self):
         """Start this async"""
@@ -103,7 +103,8 @@ class MqService(ConsumerProducerMixin):
             to_change = []
             for file_info in file_data['files']:
                 to_change.append(
-                    (file_info['index'], torrent_id + '/' + Util.md5(file_info['path'])))
+                    (file_info['index'], torrent_id + '/'
+                     + Util.md5(file_info['path'].encode('utf-8').strip())))
             self.deluge_api.rename_files(torrent_id, to_change)
             logging.info("File Renamed.")
         except RuntimeError as ex:
