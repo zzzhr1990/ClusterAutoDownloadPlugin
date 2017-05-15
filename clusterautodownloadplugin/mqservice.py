@@ -96,10 +96,11 @@ class MqService(ConsumerProducerMixin):
             self._delive_torrent_parse_fail(-1,
                                             file_hash, 'MIME_MISMATCH', info)
 
-    def _add_new_torrent_file(self, info, torrent_data, torrent_hash):
+    def _add_new_torrent_file(self, info, torrent_data, torrent_hash, file_map):
         try:
             torrent_id = self.deluge_api.add_torrent_file(
-                info["hash"], base64.encodestring(torrent_data), {'add_paused': True})
+                info["hash"], base64.encodestring(torrent_data),
+                {'add_paused': True, 'mapped_files': file_map})
             if not torrent_id:
                 logging.info("%s existed.", torrent_hash)
                 torrent_id = torrent_hash
