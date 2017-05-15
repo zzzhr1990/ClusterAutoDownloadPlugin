@@ -78,7 +78,8 @@ class MqService(ConsumerProducerMixin):
                 torrent_info = lt.torrent_info(lt.bdecode(data))
                 files = torrent_info.files()
                 try:
-                    json.dumps(files)
+                    for file_inf in files:
+                        logging("path %s", file_inf.path)
                 except RuntimeError as esx:
                     logging.error(esx)
                 torrent_hash = unicode(torrent_info.info_hash())
