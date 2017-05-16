@@ -24,6 +24,8 @@ class EventPacher(object):
         self.tmp_events['on_alert_torrent_finished'] = torrent_manager.on_alert_torrent_finished
         torrent_manager.on_alert_torrent_finished = self.on_alert_torrent_finished
 
+        logging.info("all events patched.")
+
         # TorrentAddedEvent already have, ignore...
         # TorrentFinishedEvent already have
         # on_alert_torrent_paused no need
