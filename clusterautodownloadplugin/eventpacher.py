@@ -19,6 +19,10 @@ class EventPacher(object):
         # on_alert_file_completed
         self.torrent_manager = torrent_manager
         self.tmp_events['on_alert_file_completed'] = torrent_manager.on_alert_file_completed
+        torrent_manager.on_alert_file_completed = self.on_alert_file_completed
+
+        self.tmp_events['on_alert_torrent_finished'] = torrent_manager.on_alert_torrent_finished
+        torrent_manager.on_alert_torrent_finished = self.on_alert_torrent_finished
 
         # TorrentAddedEvent already have, ignore...
         # TorrentFinishedEvent already have
@@ -36,5 +40,11 @@ class EventPacher(object):
     def on_alert_file_completed(self, alert):
         """path on_alert_file_completed"""
         logging.info("**************************")
-        self.torrent_manager.on_alert_file_completed(alert)
+        self.tmp_events['on_alert_file_completed'](alert)
         logging.info("@@@@@@@@@@@@@@@@@@@@@@@@@@")
+
+    def on_alert_torrent_finished(self, alert):
+        """patch on_alert_torrent_finished"""
+        logging.info("oooooooooooooooooooooooooo")
+        self.tmp_events['on_alert_torrent_finished'](alert)
+        logging.info("ffffffffffffffffffffffffff")
