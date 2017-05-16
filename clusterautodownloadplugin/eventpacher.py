@@ -61,10 +61,10 @@ class EventPacher(object):
         self.tmp_events['on_alert_torrent_finished'](alert)
         logging.info("ffffffffffffffffffffffffff")
 
-    def on_alert_torrent_finished(self, alert):
+    def on_alert_storage_moved(self, alert):
         """patch on_alert_torrent_finished"""
-        logging.info("oooooooooooooooooooooooooo on_alert_torrent_finished")
-        self.tmp_events['on_alert_torrent_finished'](alert)
+        logging.info("oooooooooooooooooooooooooo on_alert_storage_moved")
+        self.tmp_events['on_alert_storage_moved'](alert)
         logging.info("ffffffffffffffffffffffffff")
 
     def on_alert_storage_moved_failed(self, alert):
