@@ -58,6 +58,7 @@ from globalconfig import PGlobalConfig
 from masterapi import MasterApi
 from controllerapi import ControllerApi
 from mqservice import MqService
+from eventpacher import EventPacher
 
 
 DEFAULT_PREFS = {
@@ -85,6 +86,8 @@ class Core(CorePluginBase):
         self.torrent_processor = TorrentProcessor(PGlobalConfig.max_process,
                                                   PGlobalConfig.server_name, self.processor)
         self.core = component.get("Core")
+        self.event_patcher = EventPacher(self.core)
+        self.event_patcher.patch_events()
         mq_host = "localhost"
         if "mqhost" in self.config:
             mq_host = self.config["mqhost"]
