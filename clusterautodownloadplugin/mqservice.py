@@ -29,11 +29,16 @@ class MqService(ConsumerProducerMixin):
         self.server_id = server_id
         deluge_api.eventmanager.register_event_handler(
             "TorrentFileCompletedEvent", self._on_torrent_file_completed)
+        deluge_api.eventmanager.register_event_handler(
+            "TorrentFileCompletedEvent", self._on_torrent_completed)
         # listen to TorrentFileRenamedEvent
         # may be error?
         # TorrentFileCompletedEvent?torrent_id
         # TorrentFileCompletedEvent?single file..torrent_id, index
         self.name_cache = {}
+
+    def _on_torrent_completed(self, torrent_id):
+        logging.info("%s downloaded.", torrent_id)
 
     def _on_torrent_file_completed(self, torrent_id, index):
         # get file info...
@@ -182,7 +187,6 @@ class MqService(ConsumerProducerMixin):
 
     def _delive_torrent_parse_success(self, url_hash, data, info):
         # Report
-        logging.info("suc_publish")
         self.producer.publish(
             {'success': True, 'status': 100, 'message': 'OK',
              'hash': url_hash, 'data': data, 'info': info},
@@ -190,7 +194,6 @@ class MqService(ConsumerProducerMixin):
             routing_key="torrent-task.pre_parse",
             retry=True,
         )
-        logging.info("suc_publish_end")
 
     def _try_and_get_content(self, url, file_hash, try_time=10):
         req = requests.get(url, timeout=5)
