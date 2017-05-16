@@ -11,6 +11,7 @@ import threading
 import requests
 import base64
 import magic
+import traceback
 
 
 class MqService(ConsumerProducerMixin):
@@ -42,6 +43,7 @@ class MqService(ConsumerProducerMixin):
         self.name_cache = {}
 
     def _on_torrent_completed(self, torrent_id):
+        logging.info(traceback.format_exc())
         logging.info("%s downloaded.", torrent_id)
 
     def _on_torrent_file_completed(self, torrent_id, index):
