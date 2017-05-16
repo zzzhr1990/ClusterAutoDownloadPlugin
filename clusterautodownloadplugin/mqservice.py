@@ -32,10 +32,6 @@ class MqService(ConsumerProducerMixin):
             "TorrentFileCompletedEvent", self._on_torrent_file_completed)
         deluge_api.eventmanager.register_event_handler(
             "TorrentFinishedEvent", self._on_torrent_completed)
-        try:
-            deluge_api.torrentmanager.on_alert_file_completed('234')
-        except RuntimeError as e:
-            logging.warn(e)
         # listen to TorrentFileRenamedEvent
         # may be error?
         # TorrentFileCompletedEvent?torrent_id
