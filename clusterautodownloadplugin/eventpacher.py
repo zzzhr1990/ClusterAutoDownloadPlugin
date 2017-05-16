@@ -24,6 +24,16 @@ class EventPacher(object):
         self.tmp_events['on_alert_torrent_finished'] = torrent_manager.on_alert_torrent_finished
         torrent_manager.on_alert_torrent_finished = self.on_alert_torrent_finished
 
+        self.tmp_events['on_alert_storage_moved'] = torrent_manager.on_alert_storage_moved
+        torrent_manager.on_alert_storage_moved = self.on_alert_storage_moved
+
+        self.tmp_events['on_alert_torrent_finished'] = torrent_manager.on_alert_torrent_finished
+        torrent_manager.on_alert_torrent_finished = self.on_alert_torrent_finished
+
+        # on_alert_storage_moved_failed
+        self.tmp_events['on_alert_storage_moved_failed'] = torrent_manager.on_alert_storage_moved_failed
+        torrent_manager.on_alert_storage_moved_failed = self.on_alert_storage_moved_failed
+
         logging.info("all events patched.")
 
         # TorrentAddedEvent already have, ignore...
@@ -49,4 +59,17 @@ class EventPacher(object):
         """patch on_alert_torrent_finished"""
         logging.info("oooooooooooooooooooooooooo")
         self.tmp_events['on_alert_torrent_finished'](alert)
+        logging.info("ffffffffffffffffffffffffff")
+
+    def on_alert_torrent_finished(self, alert):
+        """patch on_alert_torrent_finished"""
+        logging.info("oooooooooooooooooooooooooo on_alert_torrent_finished")
+        self.tmp_events['on_alert_torrent_finished'](alert)
+        logging.info("ffffffffffffffffffffffffff")
+
+    def on_alert_storage_moved_failed(self, alert):
+        """patch on_alert_storage_moved_failed"""
+        logging.info(
+            "oooooooooooooooooooooooooo on_alert_storage_moved_failed")
+        self.tmp_events['on_alert_storage_moved_failed'](alert)
         logging.info("ffffffffffffffffffffffffff")
