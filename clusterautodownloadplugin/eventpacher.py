@@ -35,14 +35,14 @@ class EventPacher(object):
         # on_alert_torrent_resumed
         # on_alert_state_changed
         # on_alert_save_resume_data
-        # on_alert_save_resume_data_failed
+        # on_alert_save_resume_data_failedon_alert_file_completed
         # on_alert_fastresume_rejected
         # on_alert_file_renamed TorrentFileRenamedEvent??
         # on_alert_metadata_received
     def on_alert_file_completed(self, alert):
         """path on_alert_file_completed"""
         logging.info("**************************")
-        self.tmp_events['on_alert_file_completed'](alert)
+        # self.tmp_events['on_alert_file_completed'](alert)
         logging.info("@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
     def on_alert_torrent_finished(self, alert):
