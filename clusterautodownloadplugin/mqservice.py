@@ -160,7 +160,7 @@ class MqService(ConsumerProducerMixin):
             self.deluge_api.resume_torrent([torrent_id])
             # Check Every File Progress...
             try:
-                new_file_data = self.deluge_api.torrent_manager[torrent_id].handler.file_progress(
+                new_file_data = self.deluge_api.torrentmanager[torrent_id].handler.file_progress(
                 )
                 logging.info(new_file_data)
             except Exception as sx:
