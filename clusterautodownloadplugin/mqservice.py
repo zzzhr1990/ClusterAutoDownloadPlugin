@@ -2,7 +2,7 @@ from kombu import Consumer as KConsumer
 from kombu.mixins import ConsumerProducerMixin
 from kombu import Connection, Exchange, Queue
 from deluge._libtorrent import lt
-from deluge.common import get_magnet_info
+from tcommon import get_magnet_info
 from util import Util
 from io import BytesIO
 import logging
