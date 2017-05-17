@@ -159,12 +159,13 @@ class MqService(ConsumerProducerMixin):
             self._delive_torrent_parse_success(info["hash"], file_data, info)
             self.deluge_api.resume_torrent([torrent_id])
             # Check Every File Progress...
-            new_file_data = self.deluge_api.get_torrent_status(
-                torrent_id,
-                ["file_progress"])
-            d = new_file_data["file_progress"]
-            for x in d:
-                logging.info(x)
+            try:
+                new_file_data = self.deluge_api.torrent_manager[torrent_id].handler.file_progress(
+                )
+                logging.info(new_file_data)
+            except Exception as sx:
+                logging.error(ex)
+
             # mapped_files
             # Change FileName...
             """
