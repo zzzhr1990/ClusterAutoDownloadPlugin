@@ -22,6 +22,9 @@ class EventPacher(object):
             'torrent_finished_alert', self.on_alert_torrent_finished)
         torrent_manager.alerts.register_handler(
             'file_completed_alert', self.on_alert_file_completed)
+        torrent_manager.alerts.register_handler(
+            'metadata_received_alert', self.on_alert_metadata_received
+        )
         logging.info("all events patched.")
 
         # TorrentAddedEvent already have, ignore...
@@ -46,6 +49,11 @@ class EventPacher(object):
     def on_alert_torrent_finished(self, alert):
         """patch on_alert_torrent_finished"""
         logging.info("ooooooooooooooooooooooooooon_alert_torrent_finished")
+        logging.info("ffffffffffffffffffffffffff")
+
+    def on_alert_metadata_received(self, alert):
+        """patch on_alert_metadata_received"""
+        logging.info("ooooooooooooooooooooooooooon_metadata_received")
         logging.info("ffffffffffffffffffffffffff")
 
     def on_alert_storage_moved(self, alert):

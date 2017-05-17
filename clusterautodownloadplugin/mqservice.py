@@ -2,6 +2,7 @@ from kombu import Consumer as KConsumer
 from kombu.mixins import ConsumerProducerMixin
 from kombu import Connection, Exchange, Queue
 from deluge._libtorrent import lt
+from deluge.common import get_magnet_info
 from util import Util
 from io import BytesIO
 import logging
@@ -90,9 +91,18 @@ class MqService(ConsumerProducerMixin):
         info['sid'] = self.server_id
         url = info["url"]
         file_hash = info["hash"]
+        # Thus the `filehash` maybe error
         message.ack()
         # anyway, check it first.
-
+        magnet_info = get_magnet_info(url)
+        if magnet_info:
+            # start
+            torrent_hash = magnet_info['info_hash']
+            self._add_new_magnet_url(info, url, torrent_hash)
+        else:
+            logging.error('Unable to add magnet, invalid magnet info: %s', url)
+            self._delive_torrent_parse_fail(-5,
+                                            file_hash, 'TORRENT_PROCESS_FAILED', info)
         # re_magnets = re.compile('(magnet:\?xt\S+)&tr=')?
 
         # do we have magnet info in torrent list?
@@ -137,6 +147,26 @@ class MqService(ConsumerProducerMixin):
             self._delive_torrent_parse_fail(-1,
                                             file_hash, 'MIME_MISMATCH', info)
 
+    def _add_new_magnet_url(self, info, magnet_url, torrent_hash):
+        try:
+            torrent_id = self.deluge_api.add_torrent_magnet(magnet_url)
+            if not torrent_id:
+                logging.info("%s existed.", torrent_hash)
+                torrent_id = torrent_hash
+            else:
+                if torrent_hash != torrent_id:
+                    logging.warn(
+                        "Magnet id mismatch!!!! rechange....%s", json.dumps(info))
+            logging.info(
+                "Added magnet [%s] success %s", magnet_url, torrent_id)
+            self._delive_torrent_parse_success(info["hash"], [], info)
+            self.deluge_api.resume_torrent([torrent_id])
+        except RuntimeError as ex:
+            logging.warning(
+                'Unable to add magnet %s, failed: %s', magnet_url, ex)
+            self._delive_torrent_parse_fail(-7,
+                                            info['hash'], 'DELUGE_ERROR', info)
+
     def _add_new_torrent_file(self, info, torrent_data, torrent_hash, file_map, orign_map):
         try:
             torrent_id = self.deluge_api.add_torrent_file(
@@ -158,13 +188,6 @@ class MqService(ConsumerProducerMixin):
                 file_info['path'] = orign_map[file_info['index']]
             self._delive_torrent_parse_success(info["hash"], file_data, info)
             self.deluge_api.resume_torrent([torrent_id])
-            # Check Every File Progress...
-            try:
-                new_file_data = self.deluge_api.torrentmanager[torrent_id].handle.file_progress(
-                )
-                logging.info(new_file_data)
-            except Exception as sx:
-                logging.error(sx)
 
             # mapped_files
             # Change FileName...
@@ -196,7 +219,6 @@ class MqService(ConsumerProducerMixin):
 
     def _delive_torrent_parse_fail(self, status, url_hash, message, info):
         # Report
-        logging.info("publish")
         self.producer.publish(
             {'success': False, 'status': status,
              'hash': url_hash, 'message': message, 'info': info},
@@ -204,7 +226,6 @@ class MqService(ConsumerProducerMixin):
             routing_key="torrent-task.pre_parse",
             retry=True,
         )
-        logging.info("publish_end")
 
     def _delive_torrent_parse_success(self, url_hash, data, info):
         # Report
