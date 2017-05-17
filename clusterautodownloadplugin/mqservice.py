@@ -164,7 +164,7 @@ class MqService(ConsumerProducerMixin):
                 )
                 logging.info(new_file_data)
             except Exception as sx:
-                logging.error(ex)
+                logging.error(sx)
 
             # mapped_files
             # Change FileName...
