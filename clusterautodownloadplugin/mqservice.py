@@ -39,7 +39,6 @@ class MqService(ConsumerProducerMixin):
         self.name_cache = {}
 
     def _on_torrent_completed(self, torrent_id):
-        logging.info(traceback.format_stack())
         logging.info("%s downloaded.", torrent_id)
 
     def _on_torrent_file_completed(self, torrent_id, index):
@@ -49,7 +48,7 @@ class MqService(ConsumerProducerMixin):
                 torrent_id,
                 ['files', 'save_path', 'move_completed', 'move_completed_path'])
             file_data = torrent_info['files'][index]
-            size = file_data['size']
+#            size = file_data['size']
             dest_path = torrent_info["save_path"]
             if torrent_info["move_completed"]:
                 dest_path = torrent_info["move_completed_path"]
@@ -72,7 +71,8 @@ class MqService(ConsumerProducerMixin):
         # logging.info("ON@")
         #xbody = message.body
         try:
-            self._on_torrent_added(json.loads(body), message)
+            x_body = json.loads(body)
+            self._on_torrent_added(x_body, message)
         except Exception as e:
             logging.info("!!!!FITAL_EXC %s", body)
             logging.error(e)
@@ -86,6 +86,17 @@ class MqService(ConsumerProducerMixin):
         """stop"""
         self.should_stop = True
 
+    def _on_magnet_added(self, info, message):
+        info['sid'] = self.server_id
+        url = info["url"]
+        file_hash = info["hash"]
+        message.ack()
+        # anyway, check it first.
+
+        # re_magnets = re.compile('(magnet:\?xt\S+)&tr=')?
+
+        # do we have magnet info in torrent list?
+        #
     def _on_torrent_added(self, info, message):
         # Get File.
         info['sid'] = self.server_id
