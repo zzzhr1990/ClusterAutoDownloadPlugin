@@ -1,4 +1,5 @@
 import logging
+from deluge._libtorrent import lt
 
 
 class EventPacher(object):
@@ -12,11 +13,21 @@ class EventPacher(object):
     def patch_events(self):
         """patch"""
         # get cores...
+        alert_mask = (lt.alert.category_t.error_notification |
+                      lt.alert.category_t.port_mapping_notification |
+                      lt.alert.category_t.storage_notification |
+                      lt.alert.category_t.tracker_notification |
+                      lt.alert.category_t.status_notification |
+                      lt.alert.category_t.ip_block_notification |
+                      lt.alert.category_t.performance_warning |
+                      lt.alert.category_t.progress_notification)
         torrent_manager = self.core.torrentmanager
         if not torrent_manager:
             logging.warn("Cannot patch events, torrent_manager is null.")
             return
         # on_alert_file_completed
+        torrent_manager.alerts.session.apply_settings(
+            {'alert_mask': alert_mask})
         self.torrent_manager = torrent_manager
         torrent_manager.alerts.register_handler(
             'torrent_finished_alert', self.on_alert_torrent_finished)
