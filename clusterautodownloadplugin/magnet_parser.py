@@ -43,7 +43,7 @@ class MagnetParser(object):
         req = self.my_session.get(img_src + "?" + str(random.random()))
         data = req.content
         with open('/tmp/last_capcha.jpeg', 'wb') as fd:
-            for chunk in r.iter_content(chunk_size):
+            for chunk in req.iter_content(1024):
                 fd.write(chunk)
         return self._decode_code(data)
 
