@@ -33,7 +33,8 @@ class MagnetParser(object):
             pseq = self.my_session.post('http://btcache.me/download',
                                         data={'key': key_value, 'code': code})
             cont = pseq.content
-            logging.info(Util.mime_buffer(cont))
+            if Util.mime_buffer(cont) == 'text/html':
+                logging.info(cont)
         else:
             logging.info("Onshit, code desc error")
 
