@@ -113,13 +113,13 @@ class MagnetParser(object):
     def _try_post_json(self, url, data, try_time=3):
         try_time = try_time - 1
         if try_time < 0:
-            logging.warn('request %s failed.', url)
+            logging.warning('request %s failed.', url)
             return None
         try:
             req = self.my_session.post(url=url, data=data)
             if req.status_code < 400:
                 logging.warning("Responsed %d", req.status_code)
-                logging.info('cont %s', req.content)
+                logging.warning('cont %s', req.content)
                 return req.json()
             else:
                 logging.warn('get %s HTTP code %d', url, req.status_code)
