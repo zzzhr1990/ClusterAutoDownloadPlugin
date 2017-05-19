@@ -8,6 +8,8 @@ from util import Util
 
 
 class MagnetParser(object):
+    """Trying to process"""
+
     def __init__(self):
         self.site_url = 'http://btcache.me/torrent/'
         self.my_session = requests.Session()
