@@ -1,6 +1,7 @@
 import requests
 import random
 import logging
+import base64
 import json
 from bs4 import BeautifulSoup
 from util import Util
@@ -46,7 +47,7 @@ class MagnetParser(object):
         req = requests.post(url='http://op.juhe.cn/vercode/index', data={
             'key': '3a1da00cdc6130f56a8868745b33600c',
             'codeType': '1005',
-            'image': image_data
+            'base64Str': base64.encodestring(image_data)
         })
         dat = req.json()
         if dat['error_code'] == 0:
