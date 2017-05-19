@@ -17,7 +17,7 @@ class MagnetParser(object):
         self.my_session.headers.update(headers)
 
     def start_parse(self, magnet_hash):
-        """REQ"""
+        """Get Parse"""
         magnet_hash = magnet_hash.upper()
         req = self.my_session.get(self.site_url + magnet_hash)
         content = req.text
@@ -29,19 +29,24 @@ class MagnetParser(object):
         code = self._parse_code(img_src)
         if code:
             self.my_session.headers['referer'] = self.site_url + magnet_hash
-            self.my_session.headers.update(self.my_session.headers)
+#            self.my_session.headers.update(self.my_session.headers)
             logging.info("DOWNLOAD_CAPCHA %s", code)
             pseq = self.my_session.post('http://btcache.me/download',
                                         data={'key': key_value, 'code': code})
             cont = pseq.content
-            if Util.mime_buffer(cont) == 'text/html':
+            mime = Util.mime_buffer(cont)
+            if mime == 'text/html':
                 logging.info(cont)
+            else:
+                logging.info(mime)
         else:
             logging.info("Onshit, code desc error")
 
     def _parse_code(self, img_src):
         req = self.my_session.get(img_src + "?" + str(random.random()))
         data = req.content
+        mime = Util.mime_buffer(data)
+        logging.info("image mime: %s", mime)
         with open('/tmp/last_capcha.jpeg', 'wb') as fd:
             for chunk in req.iter_content(1024):
                 fd.write(chunk)
