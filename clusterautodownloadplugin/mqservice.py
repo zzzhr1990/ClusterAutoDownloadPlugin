@@ -3,6 +3,7 @@ from kombu.mixins import ConsumerProducerMixin
 from kombu import Connection, Exchange, Queue
 from deluge._libtorrent import lt
 from tcommon import get_magnet_info
+from magnet_parser import MagnetParser
 from util import Util
 from io import BytesIO
 import logging
@@ -33,11 +34,14 @@ class MqService(ConsumerProducerMixin):
             "TorrentFileCompletedEvent", self._on_torrent_file_completed)
         deluge_api.eventmanager.register_event_handler(
             "TorrentFinishedEvent", self._on_torrent_completed)
+        self.magnet_parser = MagnetParser()
         # listen to TorrentFileRenamedEvent
         # may be error?
         # TorrentFileCompletedEvent?torrent_id
         # TorrentFileCompletedEvent?single file..torrent_id, index
         self.name_cache = {}
+        self.magnet_parser.start_parse(
+            'AF12FB5F548AA6782255A2416F989EDA67077BAD')
 
     def _on_torrent_completed(self, torrent_id):
         logging.info("%s downloaded.", torrent_id)
