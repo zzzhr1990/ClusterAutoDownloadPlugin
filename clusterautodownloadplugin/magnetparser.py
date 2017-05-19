@@ -42,8 +42,8 @@ class MagnetParser(object):
         code = self._parse_code(image_url)
         if not code:
             return None
-        cont = self._try_post_json('http://btcache.me/download',
-                                   data={'key': key, 'captcha': code})
+        cont = self._try_post('http://btcache.me/download',
+                              data={'key': key, 'captcha': code})
         if not cont:
             return None
         mime = Util.mime_buffer(cont)
@@ -118,8 +118,6 @@ class MagnetParser(object):
         try:
             req = self.my_session.post(url=url, data=data)
             if req.status_code < 400:
-                logging.warning("Responsed %d", req.status_code)
-                logging.warning('cont %s', req.content)
                 return req.json()
             else:
                 logging.warn('get %s HTTP code %d', url, req.status_code)
@@ -127,3 +125,19 @@ class MagnetParser(object):
         except RuntimeError as ex:
             logging.error(ex)
             return self._try_post_json(url, data, try_time)
+
+    def _try_post(self, url, data, try_time=3):
+        try_time = try_time - 1
+        if try_time < 0:
+            logging.warning('request %s failed.', url)
+            return None
+        try:
+            req = self.my_session.post(url=url, data=data)
+            if req.status_code < 400:
+                return req.content
+            else:
+                logging.warn('get %s HTTP code %d', url, req.status_code)
+                return self._try_post(url, data, try_time)
+        except RuntimeError as ex:
+            logging.error(ex)
+            return self._try_post(url, data, try_time)
