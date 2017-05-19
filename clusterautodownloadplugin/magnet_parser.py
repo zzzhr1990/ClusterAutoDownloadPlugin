@@ -22,7 +22,6 @@ class MagnetParser(object):
         req = self.my_session.get(self.site_url + magnet_hash)
         content = req.text
         soup = BeautifulSoup(content, "html.parser")
-        logging.info(content)
         key_value = soup.form.input.get('value')
         logging.info('value %s', key_value)
         img_src = soup.form.img.get('src')
