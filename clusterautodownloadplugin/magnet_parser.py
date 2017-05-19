@@ -30,6 +30,7 @@ class MagnetParser(object):
         if code:
             self.my_session.headers['referer'] = self.site_url + magnet_hash
             self.my_session.headers.update(self.my_session.headers)
+            logging.info("DOWNLOAD_CAPCHA %s", code)
             pseq = self.my_session.post('http://btcache.me/download',
                                         data={'key': key_value, 'code': code})
             cont = pseq.content
@@ -41,6 +42,9 @@ class MagnetParser(object):
     def _parse_code(self, img_src):
         req = self.my_session.get(img_src + "?" + str(random.random()))
         data = req.content
+        with open('/tmp/last_capcha.jpeg', 'wb') as fd:
+            for chunk in r.iter_content(chunk_size):
+                fd.write(chunk)
         return self._decode_code(data)
 
     def _decode_code(self, image_data):
