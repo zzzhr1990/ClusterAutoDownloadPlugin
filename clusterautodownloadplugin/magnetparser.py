@@ -118,9 +118,8 @@ class MagnetParser(object):
         try:
             req = self.my_session.post(url=url, data=data)
             if req.status_code < 400:
-                logging.warn("Responsed %d", req.status_code)
-                logging.info(req.status_code)
-                logging.info(req.content)
+                logging.warning("Responsed %d", req.status_code)
+                logging.info('cont %s', req.content)
                 return req.json()
             else:
                 logging.warn('get %s HTTP code %d', url, req.status_code)
