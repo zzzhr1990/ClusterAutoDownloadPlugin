@@ -32,7 +32,7 @@ class MagnetParser(object):
 #            self.my_session.headers.update(self.my_session.headers)
             logging.info("DOWNLOAD_CAPCHA %s", code)
             pseq = self.my_session.post('http://btcache.me/download',
-                                        data={'key': key_value, 'code': code})
+                                        data={'key': key_value, 'captcha': code})
             cont = pseq.content
             mime = Util.mime_buffer(cont)
             if mime == 'text/html':
