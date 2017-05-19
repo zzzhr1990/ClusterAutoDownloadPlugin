@@ -85,10 +85,10 @@ class MagnetParser(object):
         try:
             error_text = soup.div.div.p.text
             logging.warn('Cannot get data...%s', error_text)
-            return None
+            return None, None
         except RuntimeError as ex:
             logging.error(ex)
-            return None
+            return None, None
 
     def _parse_code(self, img_src):
         data = self._try_get(img_src + "?" + str(random.random()))
