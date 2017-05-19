@@ -37,7 +37,7 @@ class MagnetParser(object):
     def _try_get_content(self, url, key, image_url, try_time=3):
         try_time = try_time - 1
         if try_time < 0:
-            logging.warn('request %s failed.', url)
+            logging.warning('request %s failed.', url)
             return None
         code = self._parse_code(image_url)
         if not code:
@@ -50,27 +50,27 @@ class MagnetParser(object):
         if mime != 'text/html':
             return cont
         else:
-            logging.warn('%s %s', url, mime)
+            logging.warning('%s %s', url, mime)
             try:
                 soup = BeautifulSoup(cont, "html.parser")
                 error_text = soup.div.div.p.text
-                logging.warn('Cannot get data...%s', error_text)
+                logging.warning('Cannot get data...%s', error_text)
             except RuntimeError as ex:
-                logging.warn(ex)
+                logging.warning(ex)
                 return self._try_get(url, try_time)
         return None
 
     def _try_get(self, url, try_time=3):
         try_time = try_time - 1
         if try_time < 0:
-            logging.warn('request %s failed.', url)
+            logging.warning('request %s failed.', url)
             return None
         try:
             req = self.my_session.get(url)
             if req.status_code < 400:
                 return req.content
             else:
-                logging.warn('get %s HTTP code %d', url, req.status_code)
+                logging.warning('get %s HTTP code %d', url, req.status_code)
                 return self._try_get(url, try_time)
         except RuntimeError as ex:
             logging.error(ex)
@@ -84,7 +84,7 @@ class MagnetParser(object):
                 return (key_value, img_src)
         try:
             error_text = soup.div.div.p.text
-            logging.warn('Cannot get data...%s', error_text)
+            logging.warning('Cannot get data...%s', error_text)
             return None, None
         except RuntimeError as ex:
             logging.error(ex)
@@ -120,7 +120,7 @@ class MagnetParser(object):
             if req.status_code < 400:
                 return req.json()
             else:
-                logging.warn('get %s HTTP code %d', url, req.status_code)
+                logging.warning('get %s HTTP code %d', url, req.status_code)
                 return self._try_post_json(url, data, try_time)
         except RuntimeError as ex:
             logging.error(ex)
@@ -136,7 +136,7 @@ class MagnetParser(object):
             if req.status_code < 400:
                 return req.content
             else:
-                logging.warn('get %s HTTP code %d', url, req.status_code)
+                logging.warning('get %s HTTP code %d', url, req.status_code)
                 return self._try_post(url, data, try_time)
         except RuntimeError as ex:
             logging.error(ex)
