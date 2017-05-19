@@ -55,7 +55,7 @@ class MagnetParser(object):
         })
         dat = req.json()
         if dat['error_code'] == 0:
-            return dat['result']
+            return dat['result'].lower()
         else:
             logging.info("parse error %s", json.dumps(dat))
             return None
