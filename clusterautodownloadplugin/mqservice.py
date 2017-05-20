@@ -3,7 +3,8 @@ from kombu.mixins import ConsumerProducerMixin
 from kombu import Connection, Exchange, Queue
 from deluge._libtorrent import lt
 from tcommon import get_magnet_info
-from magnet_parser import MagnetParser
+from magnetparser import MagnetParser
+from torrentuploader import TorrentUploader
 from util import Util
 from io import BytesIO
 import logging
@@ -14,15 +15,17 @@ import requests
 import base64
 import magic
 import traceback
+import threading
 
 
 class MqService(ConsumerProducerMixin):
     """Mq"""
 
-    def __init__(self, server_id, mq_host, mq_port, mq_user, mq_password, deluge_api):
+    def __init__(self, server_id, mq_host, mq_port, mq_user, mq_password, deluge_api, user_controller):
         self.deluge_api = deluge_api
         self.offline_exchange = Exchange(
             'offline-exchange', 'direct', durable=True)
+        self.user_controller = user_controller
         self.torrent_queue = Queue('torrent-' + server_id,
                                    exchange=self.offline_exchange,
                                    routing_key='torrent-task.add', auto_delete=True)
@@ -53,10 +56,8 @@ class MqService(ConsumerProducerMixin):
             if torrent_info["move_completed"]:
                 dest_path = torrent_info["move_completed_path"]
             file_path = u'/'.join([dest_path, file_data["path"]])
-            logging.info("%s of %d completed in %s.",
-                         torrent_id, index, file_path)
+            # Dispatch to queue.
         except RuntimeError as ex:
-            logging.info("EXXXXXx")
             logging.error(ex)
 
     def _on_torrent_rename(self, torrent_id, index, name):
@@ -73,7 +74,10 @@ class MqService(ConsumerProducerMixin):
         #xbody = message.body
         try:
             x_body = json.loads(body)
-            self._on_torrent_added(x_body, message)
+            if x_body['type'] == 'magnet':
+                self._on_magnet_added(x_body, message)
+            else:
+                self._on_torrent_added(x_body, message)
         except Exception as e:
             logging.info("!!!!FITAL_EXC %s", body)
             logging.error(e)
@@ -98,7 +102,10 @@ class MqService(ConsumerProducerMixin):
         if magnet_info:
             # start
             torrent_hash = magnet_info['info_hash']
-            self._add_new_magnet_url(info, url, torrent_hash)
+            if torrent_hash != info['infoHash']:
+                logging.warning("%s info hash mismatch! remote : %s, %s",
+                                url, magnet_info['info_hash'], torrent_hash)
+            self._add_new_magnet_url(info, file_hash, url, torrent_hash)
         else:
             logging.error('Unable to add magnet, invalid magnet info: %s', url)
             self._delive_torrent_parse_fail(-5,
@@ -118,12 +125,16 @@ class MqService(ConsumerProducerMixin):
             return
         else:
             message.ack()
+        #
+        self._add_torrent_next_step(url, info, file_hash, data)
+
+    def _add_torrent_next_step(self, url, info, file_hash, torrent_dump):
         # Check MIME
-        mime = Util.mime_buffer(data)
+        mime = Util.mime_buffer(torrent_dump)
         torrent_hash = None
         if mime == 'application/x-bittorrent':
             try:
-                torrent_info = lt.torrent_info(lt.bdecode(data))
+                torrent_info = lt.torrent_info(lt.bdecode(torrent_dump))
                 # create file map
                 torrent_hash = unicode(torrent_info.info_hash())
                 files_count = torrent_info.num_files()
@@ -135,7 +146,7 @@ class MqService(ConsumerProducerMixin):
                     orign_map[i] = file_name
                     file_map[i] = torrent_hash + "/" + Util.md5(file_name)
                 self._add_new_torrent_file(
-                    info, data, torrent_hash, file_map, orign_map)
+                    info, torrent_dump, torrent_hash, file_map, orign_map)
             except RuntimeError as ex:
                 logging.warning(
                     'Unable to add torrent, decoding filedump failed: %s', ex)
@@ -147,7 +158,15 @@ class MqService(ConsumerProducerMixin):
             self._delive_torrent_parse_fail(-1,
                                             file_hash, 'MIME_MISMATCH', info)
 
-    def _add_new_magnet_url(self, info, magnet_url, torrent_hash):
+    def _add_new_magnet_url(self, info, file_hash, magnet_url, torrent_hash):
+        # Checking if has torrent -0-
+        parser = MagnetParser()
+        torrent_dump = parser.start_parse(torrent_hash)
+        if torrent_dump:
+            self._process_magnet_to_torrent_files(
+                info, magnet_url, file_hash, torrent_dump)
+            logging.info("%s convered to torrent.", magnet_url)
+            return
         try:
             torrent_id = self.deluge_api.add_torrent_magnet(magnet_url)
             if not torrent_id:
@@ -166,6 +185,20 @@ class MqService(ConsumerProducerMixin):
                 'Unable to add magnet %s, failed: %s', magnet_url, ex)
             self._delive_torrent_parse_fail(-7,
                                             info['hash'], 'DELUGE_ERROR', info)
+
+    def _process_magnet_to_torrent_files(self, info, magnet_url, file_hash, torrent_dump):
+        self._add_torrent_next_step(magnet_url, info, file_hash, torrent_dump)
+        upload_tread = threading.Thread(
+            target=self._upload_magnet_to_torrent_files, args=(file_hash, torrent_dump,))
+        upload_tread.start()
+        # new thread, give a new data...
+
+    def _upload_magnet_to_torrent_files(self, file_hash, torrent_dump):
+        uploader = TorrentUploader(self.user_controller)
+        res = uploader.post_file(-1, file_hash,
+                                 "application/x-bittorrent", torrent_dump)
+        if not res:
+            logging.warning('upload torrent failed...')
 
     def _add_new_torrent_file(self, info, torrent_data, torrent_hash, file_map, orign_map):
         try:

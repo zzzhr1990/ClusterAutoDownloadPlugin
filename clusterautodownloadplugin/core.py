@@ -111,9 +111,14 @@ class Core(CorePluginBase):
             self.controller = self.config["controller"]
         else:
             self.controller = "http://119.29.174.171:8080"
-            log.info("- Use %s default.", self.controller)
+            log.info("Cluster Controller - Use %s default.", self.controller)
+        if "usercontroller" in self.config:
+            self.user_controller = self.config["usercontroller"]
+        else:
+            self.user_controller = "http://tencent2.qiecdn.com:8090"
+            log.info("User Controller - Use %s default.", self.user_controller)
         self.mq_service = MqService(self.sid,
-                                    mq_host, mq_port, mq_user, mq_pass, self.core)
+                                    mq_host, mq_port, mq_user, mq_pass, self.core, self.user_controller)
         self.controller_api = ControllerApi(self.controller)
 
     def _get_config_or_default(self, key, default_value):
