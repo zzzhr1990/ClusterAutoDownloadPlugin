@@ -160,6 +160,7 @@ class MqService(ConsumerProducerMixin):
 
     def _add_new_magnet_url(self, info, file_hash, magnet_url, torrent_hash):
         # Checking if has torrent -0-
+        logging.info("paring magnet %s", magnet_url)
         parser = MagnetParser()
         torrent_dump = parser.start_parse(torrent_hash)
         if torrent_dump:
