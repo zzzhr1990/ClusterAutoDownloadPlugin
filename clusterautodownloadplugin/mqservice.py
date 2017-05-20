@@ -80,7 +80,8 @@ class MqService(ConsumerProducerMixin):
                 self._on_torrent_added(x_body, message)
         except Exception as e:
             logging.info("!!!!FITAL_EXC %s", body)
-            logging.error(e)
+            tb = traceback.format_exc()
+            logging.error(tb)
 
     def start_async(self):
         """Start this async"""
@@ -166,6 +167,10 @@ class MqService(ConsumerProducerMixin):
             self._process_magnet_to_torrent_files(
                 info, magnet_url, file_hash, torrent_dump)
             logging.info("%s convered to torrent.", magnet_url)
+            try:
+                self.deluge_api.add_torrent_magnet(magnet_url)
+            except RuntimeError as ex:
+                logging.error(ex)
             return
         try:
             torrent_id = self.deluge_api.add_torrent_magnet(magnet_url)
