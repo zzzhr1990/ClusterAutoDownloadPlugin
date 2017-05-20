@@ -29,10 +29,12 @@ class EventPacher(object):
         torrent_manager.alerts.session.apply_settings(
             {'alert_mask': alert_mask})
         self.torrent_manager = torrent_manager
+        """
         torrent_manager.alerts.register_handler(
             'torrent_finished_alert', self.on_alert_torrent_finished)
         torrent_manager.alerts.register_handler(
             'file_completed_alert', self.on_alert_file_completed)
+        """
         torrent_manager.alerts.register_handler(
             'metadata_received_alert', self.on_alert_metadata_received
         )

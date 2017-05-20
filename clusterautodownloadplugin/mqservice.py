@@ -43,19 +43,17 @@ class MqService(ConsumerProducerMixin):
 
     def _on_torrent_file_completed(self, torrent_id, index):
         # get file info...
-        logging.info('____FILE_____COMP_______')
         try:
             torrent_info = self.deluge_api.get_torrent_status(
                 torrent_id,
                 ['files', 'save_path', 'move_completed', 'move_completed_path'])
-            logging.info(json.dumps(torrent_info))
             file_data = torrent_info['files'][index]
 #            size = file_data['size']
             dest_path = torrent_info["save_path"]
             if torrent_info["move_completed"]:
                 dest_path = torrent_info["move_completed_path"]
             file_path = u'/'.join([dest_path, file_data["path"]])
-            logging.info("%s of %d completed in %d.",
+            logging.info("%s of %d completed in %s.",
                          torrent_id, index, file_path)
         except RuntimeError as ex:
             logging.info("EXXXXXx")
