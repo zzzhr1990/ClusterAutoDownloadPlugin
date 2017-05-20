@@ -167,12 +167,12 @@ class MqService(ConsumerProducerMixin):
                 info, magnet_url, file_hash, torrent_dump)
             logging.info("%s convered to torrent.", magnet_url)
             try:
-                self.deluge_api.add_torrent_magnet(magnet_url)
+                self.deluge_api.add_torrent_magnet(magnet_url, [])
             except RuntimeError as ex:
                 logging.error(ex)
             return
         try:
-            torrent_id = self.deluge_api.add_torrent_magnet(magnet_url)
+            torrent_id = self.deluge_api.add_torrent_magnet(magnet_url, [])
             if not torrent_id:
                 logging.info("%s existed.", torrent_hash)
                 torrent_id = torrent_hash
