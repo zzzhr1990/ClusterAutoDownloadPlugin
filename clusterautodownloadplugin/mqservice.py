@@ -48,6 +48,7 @@ class MqService(ConsumerProducerMixin):
             torrent_info = self.deluge_api.get_torrent_status(
                 torrent_id,
                 ['files', 'save_path', 'move_completed', 'move_completed_path'])
+            logging.info(json.dumps(torrent_info))
             file_data = torrent_info['files'][index]
 #            size = file_data['size']
             dest_path = torrent_info["save_path"]
