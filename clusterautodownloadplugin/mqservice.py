@@ -34,20 +34,16 @@ class MqService(ConsumerProducerMixin):
             "TorrentFileCompletedEvent", self._on_torrent_file_completed)
         deluge_api.eventmanager.register_event_handler(
             "TorrentFinishedEvent", self._on_torrent_completed)
-        self.magnet_parser = MagnetParser()
-        # listen to TorrentFileRenamedEvent
         # may be error?
         # TorrentFileCompletedEvent?torrent_id
         # TorrentFileCompletedEvent?single file..torrent_id, index
-        self.name_cache = {}
-        self.magnet_parser.start_parse(
-            'AF12FB5F548AA6782255A2416F989EDA67077BAD')
 
     def _on_torrent_completed(self, torrent_id):
         logging.info("%s downloaded.", torrent_id)
 
     def _on_torrent_file_completed(self, torrent_id, index):
         # get file info...
+        logging.info('____FILE_____COMP_______')
         try:
             torrent_info = self.deluge_api.get_torrent_status(
                 torrent_id,
