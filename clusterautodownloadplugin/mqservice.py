@@ -57,6 +57,7 @@ class MqService(ConsumerProducerMixin):
             logging.info("%s of %d completed in %d.",
                          torrent_id, index, file_path)
         except RuntimeError as ex:
+            logging.info("EXXXXXx")
             logging.error(ex)
 
     def _on_torrent_rename(self, torrent_id, index, name):
