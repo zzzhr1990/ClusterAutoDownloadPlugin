@@ -79,9 +79,8 @@ class MqService(ConsumerProducerMixin):
             else:
                 self._on_torrent_added(x_body, message)
         except Exception as e:
-            logging.info("!!!!FITAL_EXC %s", body)
-            tb = traceback.format_exc()
-            logging.error(tb)
+            logging.info("!!%s!!FITAL_EXC %s", type(e), body)
+            logging.error(traceback.format_exc())
 
     def start_async(self):
         """Start this async"""
