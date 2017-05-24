@@ -26,7 +26,7 @@ LT_TORRENT_STATE_MAP = {
 class TorrentProcessor(object):
     """Processing Torrents"""
 
-    def __init__(self, max_child_process, server_name, master):
+    def __init__(self, max_child_process, server_name, core):
         self.max_child_process = max_child_process
         self.server_name = server_name
         self.file_processors = []
@@ -34,7 +34,7 @@ class TorrentProcessor(object):
         self.in_queue = multiprocessing.Queue()
         self.out_queue = multiprocessing.Queue()
         self.disable = False
-        self.master = master
+        self.core = core
         #self.task_looping_thread = threading.Thread(target=self._time_tick)
         #self.task_looping_thread.daemon = True
         #self.out_queue = multiprocessing.Queue()
@@ -75,11 +75,14 @@ class TorrentProcessor(object):
         """Used for update torrent info."""
         torrents_info = core.get_torrents_status({}, {})
         # Checking if finished.
+        """
         downloaded_dict = {}
+        """
         while not self.out_queue.empty():
             try:
                 dat = self.out_queue.get(False)
                 if dat != None:
+                    """
                     torrent_id = dat["torrent_id"]
                     if torrent_id in self.working_dict:
                         work_dict = self.working_dict[torrent_id]
@@ -97,9 +100,24 @@ class TorrentProcessor(object):
                     else:
                         logging.warning("File Process Finished but connot found... %s of %d",
                                         dat["torrent_id"], dat["file_index"])
+                    """
+                    # When file downloaded finished...
+                    torrent_id = dat["torrent_id"]
+                    # Index of torrent id.
+                    file_index = dat["file_index"]
+                    if dat["success"]:
+                        logging.info("%s, %d uploaded.",
+                                     torrent_id, file_index)
+                    else:
+                        logging.info("%s, %d failed at step %s.",
+                                     torrent_id, file_index, dat["step"])
+
+                    # dispatch events to mqservice to announce
+
             except Empty:
                 pass
 
+        """
         if downloaded_dict:
             # Refresh files
             for torrent_id in downloaded_dict:
@@ -107,7 +125,7 @@ class TorrentProcessor(object):
                 if torrent_id in torrents_info:
                     file_prop = torrents_info[torrent_id]["file_priorities"]
                     progress = torrents_info[torrent_id]["progress"]
-                    remote_file_prop = self.master.get_torrent_status(md5_tid)
+                    remote_file_prop = self.core.get_torrent_status(md5_tid)
                     if remote_file_prop:
                         if remote_file_prop["updatedtime"] > 0:
                             if "info" in remote_file_prop:
@@ -140,20 +158,20 @@ class TorrentProcessor(object):
                     if count < 1:
                         logging.info(
                             "Torrent %s downloaded finished...", torrent_id)
-                        # TODO:REMOVE Torrent
+                        # TO/DO:REMOVE Torrent
                         self.working_dict.pop(torrent_id)
                         core.remove_torrent(torrent_id, True)
-                        self.master.change_torrent_status(
+                        self.core.change_torrent_status(
                             md5_tid, {"status": 10})
                     else:
-                        # TODO:CHANGE TORRENT_STATUS
+                        # TO/DO:CHANGE TORRENT_STATUS
                         core.set_torrent_file_priorities(torrent_id, file_prop)
-                        self.master.refresh_torrent_progress(
+                        self.core.refresh_torrent_progress(
                             md5_tid, progress, json.dumps(file_prop))
                 else:
                     logging.warning(
                         "%s cannot be found in torrent list", torrent_id)
-            # TODO:REFRESH TORRENT
+            # TO/DO:REFRESH TORRENT
         # ensure remove all success files.
         for torrent_id in torrents_info:
             work_list = self._process_single_torrent(
@@ -170,6 +188,19 @@ class TorrentProcessor(object):
 #                        logging.info("%d in %s adding to processor.....", file_wait["file_index"], file_wait["torrent_id"])
 #                   else:
 #                        logging.info("%d in %s already exists", file_wait["file_index"], file_wait["torrent_id"])
+        """
+
+    def add_torrent_file(self, file_prop):
+        """Add new file"""
+        """
+        {'torrent_id': torrent_id,
+                         'file_path': file_path, 'file_size': file_data['size'],
+                         'file_index': index, 'success': False}
+        """
+        try:
+            self.in_queue.put(file_prop, False)
+        except Exception as ex:
+            logging.error("Adding upload task fail, %s", ex)
 
     def _process_single_torrent(self, torrent_id, torrent_info):
         #logging.info("Processing %s", torrent_id)
@@ -180,7 +211,7 @@ class TorrentProcessor(object):
         dest_path = torrent_info["save_path"]
         if torrent_info["move_completed"]:
             dest_path = torrent_info["move_completed_path"]
-        remote_file_prop = self.master.get_torrent_status(md5_tid)
+        remote_file_prop = self.core.get_torrent_status(md5_tid)
         file_prop = []
         if remote_file_prop:
             if remote_file_prop["updatedtime"] > 0:

@@ -55,7 +55,6 @@ import deluge.configmanager
 from deluge.core.rpcserver import export
 from torrentprocessor import TorrentProcessor
 from globalconfig import PGlobalConfig
-from masterapi import MasterApi
 from controllerapi import ControllerApi
 from mqservice import MqService
 from eventpacher import EventPacher
@@ -85,12 +84,11 @@ class Core(CorePluginBase):
         super(Core, self).__init__(plugin_name)
         self.looping_thread = threading.Thread(target=self._loop)
         self.looping_thread.daemon = True
-        self.task_looping_thread = threading.Thread(target=self._task_loop)
-        self.task_looping_thread.daemon = True
+ #       self.task_looping_thread = threading.Thread(target=self._task_loop)
+ #       self.task_looping_thread.daemon = True
         self.disabled = True
         self.busy = False
         self.fetching_task = False
-        self.processor = MasterApi(PGlobalConfig.master_api_server_prefix)
         self.torrent_processor = TorrentProcessor(PGlobalConfig.max_process,
                                                   PGlobalConfig.server_name, self.processor)
         mq_host = "localhost"
@@ -134,13 +132,15 @@ class Core(CorePluginBase):
     def enable(self):
         """Call when plugin enabled."""
         self.mq_service.start_async()
+        self.looping_thread.start()
         return
         c_data = self.controller_api.register_server(self.sid, self.name)
         log.info("Register Server %s", json.dumps(c_data))
         self.disabled = False
-        # self.looping_thread.start()
+        #
         # self.task_looping_thread.start()
         log.info("- Plugin %s enabled.", self.plugin_name)
+        # when we start we'd check all downloading files.
 
     def _on_torrent_completed(self, torrent_id):
         log.info("%s downloaded.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", torrent_id)
@@ -158,7 +158,11 @@ class Core(CorePluginBase):
                 dest_path = torrent_info["move_completed_path"]
             file_path = u'/'.join([dest_path, file_data["path"]])
             # Dispatch to queue.
-            log.info("%s downloaded.", file_path)
+            file_prop = {'torrent_id': torrent_id, 'try_time': 0,
+                         'file_path': file_path, 'file_size': file_data['size'],
+                         'file_index': index, 'success': False}
+            self.torrent_processor.add_torrent_file(file_prop)
+
         except RuntimeError as ex:
             log.error(ex)
 
@@ -175,6 +179,7 @@ class Core(CorePluginBase):
         self.record_lock.release()
         log.warn("Trying to shutdown download plugin...success")
 
+    """
     def _task_loop(self):
         while True:
             self.record_lock.acquire()
@@ -196,6 +201,7 @@ class Core(CorePluginBase):
             finally:
                 self.fetching_task = False
             self._sleep_and_wait(5)
+    """
 
     def _loop(self):
         while True:
