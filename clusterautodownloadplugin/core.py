@@ -69,6 +69,8 @@ class Core(CorePluginBase):
     '''Init Function'''
 
     def __init__(self, plugin_name):
+        self.torrent_processor = TorrentProcessor(PGlobalConfig.max_process,
+                                                  PGlobalConfig.server_name, self.core)
         self.core = component.get("Core")
         self.core.eventmanager.register_event_handler(
             "TorrentFileCompletedEvent", self._on_torrent_file_completed)
@@ -89,8 +91,7 @@ class Core(CorePluginBase):
         self.disabled = True
         self.busy = False
         self.fetching_task = False
-        self.torrent_processor = TorrentProcessor(PGlobalConfig.max_process,
-                                                  PGlobalConfig.server_name, self.processor)
+
         mq_host = "localhost"
         if "mqhost" in self.config:
             mq_host = self.config["mqhost"]
