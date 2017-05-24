@@ -71,9 +71,9 @@ class Core(CorePluginBase):
 
     def __init__(self, plugin_name):
         self.core = component.get("Core")
-        core.eventmanager.register_event_handler(
+        self.core.eventmanager.register_event_handler(
             "TorrentFileCompletedEvent", self._on_torrent_file_completed)
-        core.eventmanager.register_event_handler(
+        self.core.eventmanager.register_event_handler(
             "TorrentFinishedEvent", self._on_torrent_completed)
         self.checking_array = []
         self.event_patcher = EventPacher(self.core)
