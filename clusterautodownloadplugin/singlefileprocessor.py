@@ -192,9 +192,12 @@ class SingleFileProcesser(Process):
                 return dat
         """
         #logging.info("Checking file %s on WCS", file_id)
+        dat["file_bucket"] = bucket
+        dat["store_type"] = 0
         file_manager = WcsBucketManager(
             Util.default_wcs_auth(), PGlobalConfig.wcs_mgr_url)
         code, result = file_manager.stat(bucket, file_key)
+
         """
         avinfo = {}
         """
@@ -206,6 +209,16 @@ class SingleFileProcesser(Process):
             if info:
                 avinfo = info
             """
+            remote_file_size = result["fsize"]
+            remote_file_hash = result["hash"]
+            if file_hash != remote_file_hash:
+                logging.warning("file %s file hash mismatch %s:%s",
+                                file_hash, file_hash, remote_file_hash)
+            if dat["file_size"] != remote_file_size:
+                logging.warning("file %s file size mismatch %d:%d",
+                                file_hash, dat["file_size"], remote_file_size)
+            dat["step"] = "WCS_CHECK"
+            dat["success"] = True
             # file exists no need to upload.
             # see Hash
 
@@ -215,13 +228,12 @@ class SingleFileProcesser(Process):
                 dat["step"] = "NEW_UPLOAD"
             else:
                 dat["step"] = "RE_UPLOAD"
-            succ = self._do_wcs_upload(dat, bucket, file_key)
+            succ = False  # self._do_wcs_upload(dat, bucket, file_key)
             if not succ:
                 dat["success"] = False
                 return dat
             else:
                 dat["success"] = True
-        logging.info("CODE: %d", code)
         return dat
         """
         # process avinfo into ext, and post to server.
