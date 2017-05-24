@@ -69,9 +69,9 @@ class Core(CorePluginBase):
     '''Init Function'''
 
     def __init__(self, plugin_name):
+        self.core = component.get("Core")
         self.torrent_processor = TorrentProcessor(PGlobalConfig.max_process,
                                                   PGlobalConfig.server_name, self.core)
-        self.core = component.get("Core")
         self.core.eventmanager.register_event_handler(
             "TorrentFileCompletedEvent", self._on_torrent_file_completed)
         self.core.eventmanager.register_event_handler(
