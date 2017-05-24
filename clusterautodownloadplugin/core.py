@@ -143,7 +143,7 @@ class Core(CorePluginBase):
         log.info("- Plugin %s enabled.", self.plugin_name)
 
     def _on_torrent_completed(self, torrent_id):
-        log.info("%s downloaded.", torrent_id)
+        log.info("%s downloaded.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", torrent_id)
 
     def _on_torrent_file_completed(self, torrent_id, index):
         # get file info...
