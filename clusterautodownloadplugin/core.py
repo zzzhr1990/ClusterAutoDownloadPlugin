@@ -143,7 +143,7 @@ class Core(CorePluginBase):
         log.info("- Plugin %s enabled.", self.plugin_name)
 
     def _on_torrent_completed(self, torrent_id):
-        logging.info("%s downloaded.", torrent_id)
+        log.info("%s downloaded.", torrent_id)
 
     def _on_torrent_file_completed(self, torrent_id, index):
         # get file info...
@@ -158,9 +158,9 @@ class Core(CorePluginBase):
                 dest_path = torrent_info["move_completed_path"]
             file_path = u'/'.join([dest_path, file_data["path"]])
             # Dispatch to queue.
-            logging.info("%s downloaded.", file_path)
+            log.info("%s downloaded.", file_path)
         except RuntimeError as ex:
-            logging.error(ex)
+            log.error(ex)
 
     def disable(self):
         """Call when plugin disabled."""
