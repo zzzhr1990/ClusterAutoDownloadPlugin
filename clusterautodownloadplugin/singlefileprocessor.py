@@ -215,12 +215,13 @@ class SingleFileProcesser(Process):
                 dat["step"] = "NEW_UPLOAD"
             else:
                 dat["step"] = "RE_UPLOAD"
-            succ = self._do_wcs_upload(dat, bucket, file_key)
+            # succ = self._do_wcs_upload(dat, bucket, file_key)
             if not succ:
                 dat["success"] = False
                 return dat
             else:
                 dat["success"] = True
+        logging.info("CODE: %d", code)
         return dat
         """
         # process avinfo into ext, and post to server.
