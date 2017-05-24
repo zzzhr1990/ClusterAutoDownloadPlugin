@@ -122,7 +122,8 @@ class Core(CorePluginBase):
             self.user_controller = "http://tencent2.qiecdn.com:8090"
             log.info("User Controller - Use %s default.", self.user_controller)
         self.mq_service = MqService(self.sid,
-                                    mq_host, mq_port, mq_user, mq_pass, self.core, self.user_controller)
+                                    mq_host, mq_port, mq_user,
+                                    mq_pass, self.core, self.user_controller)
         self.controller_api = ControllerApi(self.controller)
 
     def _get_config_or_default(self, key, default_value):
@@ -227,7 +228,7 @@ class Core(CorePluginBase):
             self._sleep_and_wait(2)
 
     def _checking_torrent_status(self):
-        core = component.get("Core")
+        #core = component.get("Core")
         self.torrent_processor.update_torrent_info(core)
 
     def _sleep_and_wait(self, stime):
