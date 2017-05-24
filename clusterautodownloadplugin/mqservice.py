@@ -33,32 +33,9 @@ class MqService(ConsumerProducerMixin):
             hostname=mq_host, port=mq_port, password=mq_password, userid=mq_user)
         self.torrent_queue(self.connection).declare()
         self.server_id = server_id
-        deluge_api.eventmanager.register_event_handler(
-            "TorrentFileCompletedEvent", self._on_torrent_file_completed)
-        deluge_api.eventmanager.register_event_handler(
-            "TorrentFinishedEvent", self._on_torrent_completed)
         # may be error?
         # TorrentFileCompletedEvent?torrent_id
         # TorrentFileCompletedEvent?single file..torrent_id, index
-
-    def _on_torrent_completed(self, torrent_id):
-        logging.info("%s downloaded.", torrent_id)
-
-    def _on_torrent_file_completed(self, torrent_id, index):
-        # get file info...
-        try:
-            torrent_info = self.deluge_api.get_torrent_status(
-                torrent_id,
-                ['files', 'save_path', 'move_completed', 'move_completed_path'])
-            file_data = torrent_info['files'][index]
-#            size = file_data['size']
-            dest_path = torrent_info["save_path"]
-            if torrent_info["move_completed"]:
-                dest_path = torrent_info["move_completed_path"]
-            file_path = u'/'.join([dest_path, file_data["path"]])
-            # Dispatch to queue.
-        except RuntimeError as ex:
-            logging.error(ex)
 
     def _on_torrent_rename(self, torrent_id, index, name):
         logging.info("changing %s to %s (%d)", torrent_id, name, index)

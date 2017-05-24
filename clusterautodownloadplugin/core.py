@@ -70,6 +70,14 @@ class Core(CorePluginBase):
     '''Init Function'''
 
     def __init__(self, plugin_name):
+        self.core = component.get("Core")
+        core.eventmanager.register_event_handler(
+            "TorrentFileCompletedEvent", self._on_torrent_file_completed)
+        core.eventmanager.register_event_handler(
+            "TorrentFinishedEvent", self._on_torrent_completed)
+        self.checking_array = []
+        self.event_patcher = EventPacher(self.core)
+        self.event_patcher.patch_events()
         self.plugin_name = plugin_name
         self.processing = False
         self.config = deluge.configmanager\
@@ -85,9 +93,6 @@ class Core(CorePluginBase):
         self.processor = MasterApi(PGlobalConfig.master_api_server_prefix)
         self.torrent_processor = TorrentProcessor(PGlobalConfig.max_process,
                                                   PGlobalConfig.server_name, self.processor)
-        self.core = component.get("Core")
-        self.event_patcher = EventPacher(self.core)
-        self.event_patcher.patch_events()
         mq_host = "localhost"
         if "mqhost" in self.config:
             mq_host = self.config["mqhost"]
@@ -136,6 +141,26 @@ class Core(CorePluginBase):
         # self.looping_thread.start()
         # self.task_looping_thread.start()
         log.info("- Plugin %s enabled.", self.plugin_name)
+
+    def _on_torrent_completed(self, torrent_id):
+        logging.info("%s downloaded.", torrent_id)
+
+    def _on_torrent_file_completed(self, torrent_id, index):
+        # get file info...
+        try:
+            torrent_info = self.core.get_torrent_status(
+                torrent_id,
+                ['files', 'save_path', 'move_completed', 'move_completed_path'])
+            file_data = torrent_info['files'][index]
+#            size = file_data['size']
+            dest_path = torrent_info["save_path"]
+            if torrent_info["move_completed"]:
+                dest_path = torrent_info["move_completed_path"]
+            file_path = u'/'.join([dest_path, file_data["path"]])
+            # Dispatch to queue.
+            logging.info("%s downloaded.", file_path)
+        except RuntimeError as ex:
+            logging.error(ex)
 
     def disable(self):
         """Call when plugin disabled."""
