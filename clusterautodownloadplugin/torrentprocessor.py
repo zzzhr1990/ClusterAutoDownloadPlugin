@@ -111,6 +111,12 @@ class TorrentProcessor(object):
                     else:
                         logging.info("%s, %d failed at step %s.",
                                      torrent_id, file_index, dat["step"])
+                        dat["try_time"] = dat["try_time"] + 1
+                        if dat["try_time"] > 5:
+                            logging.error("%s:%d failed upload.",
+                                          torrent_id, file_index)
+                        else:
+                            self.add_torrent_file(dat)
 
                     # dispatch events to mqservice to announce
 
