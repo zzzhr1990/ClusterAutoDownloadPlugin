@@ -168,7 +168,7 @@ class SingleFileProcesser(Process):
         dat["need_fix"] = False
         file_key = u'raw/' + file_hash
         dat["file_key"] = file_key
-        file_id = dat["file_id"]
+        #file_id = dat["file_id"]
         """
         remote_info = self.master.get_file_info(file_id)
         if len(remote_info) > 0:
