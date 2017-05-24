@@ -73,7 +73,7 @@ class TorrentProcessor(object):
 
     def update_torrent_info(self, core):
         """Used for update torrent info."""
-        torrents_info = core.get_torrents_status({}, {})
+        # torrents_info = core.get_torrents_status({}, {})
         # Checking if finished.
         """
         downloaded_dict = {}
