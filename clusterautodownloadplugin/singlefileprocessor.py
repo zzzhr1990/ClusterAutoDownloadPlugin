@@ -215,7 +215,7 @@ class SingleFileProcesser(Process):
                 dat["step"] = "NEW_UPLOAD"
             else:
                 dat["step"] = "RE_UPLOAD"
-            # succ = self._do_wcs_upload(dat, bucket, file_key)
+            succ = self._do_wcs_upload(dat, bucket, file_key)
             if not succ:
                 dat["success"] = False
                 return dat
