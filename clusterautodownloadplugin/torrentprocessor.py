@@ -26,7 +26,7 @@ LT_TORRENT_STATE_MAP = {
 class TorrentProcessor(object):
     """Processing Torrents"""
 
-    def __init__(self, max_child_process, server_name, core):
+    def __init__(self, max_child_process, server_name, core, sid):
         self.max_child_process = max_child_process
         self.server_name = server_name
         self.file_processors = []
@@ -35,6 +35,7 @@ class TorrentProcessor(object):
         self.out_queue = multiprocessing.Queue()
         self.disable = False
         self.core = core
+        self.sid = sid
         #self.task_looping_thread = threading.Thread(target=self._time_tick)
         #self.task_looping_thread.daemon = True
         #self.out_queue = multiprocessing.Queue()
@@ -79,6 +80,7 @@ class TorrentProcessor(object):
         """
         downloaded_dict = {}
         """
+        downloaded = []
         while not self.out_queue.empty():
             try:
                 dat = self.out_queue.get(False)
@@ -111,6 +113,7 @@ class TorrentProcessor(object):
                                      torrent_id, file_index)
                         for (k, v) in dat.items():
                             logging.info("%s - %s", k, type(v))
+                        downloaded.append(dat)
                     else:
                         logging.info("%s, %d failed at step %s.",
                                      torrent_id, file_index, dat["step"])
@@ -123,7 +126,11 @@ class TorrentProcessor(object):
                     # dispatch events to mqservice to announce
             except Empty:
                 pass
-
+            # Check and report status to main server. (USE MQ)
+            torrents_info = self.core.get_torrents_status({}, {})
+            # we'd
+            report_dict = {'downloaded': downloaded}
+            # here we report current status to server.
         """
         if downloaded_dict:
             # Refresh files

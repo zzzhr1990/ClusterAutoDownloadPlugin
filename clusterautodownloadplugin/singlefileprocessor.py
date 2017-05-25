@@ -93,8 +93,8 @@ class SingleFileProcesser(Process):
         dat = self._check_and_upload(dat)
         upload_success = dat["success"]
         if not upload_success:
-            logging.info("Create file info failed!!! step:%s", dat["step"])
-        return dat
+            logging.info("Upload file failed!!! step:%s", dat["step"])
+        return dat["success"]
         """
             # determing avinfo...
             current_status = dat["status"]
@@ -165,7 +165,9 @@ class SingleFileProcesser(Process):
     def _check_and_upload(self, dat):
         bucket = PGlobalConfig.wcs_source_file_bucket
         file_hash = dat["file_hash"]
-        dat["need_fix"] = False
+        """
+        dat["need_fix"] = False # no need any more.
+        """
         file_key = u'raw/' + file_hash
         dat["file_key"] = file_key
         #file_id = dat["file_id"]
@@ -245,6 +247,7 @@ class SingleFileProcesser(Process):
         return dat
         """
 
+    """
     def _create_file_info(self, dat):
         file_path = dat["file_path"]
         file_name = dat["file_name"]
@@ -269,10 +272,12 @@ class SingleFileProcesser(Process):
         if dat["need_fix"]:
             return self.master.update_file_info(fid, post_data)
         return self.master.create_file_info(post_data)
+    """
 
     def _do_wcs_upload(self, dat, bucket, file_key):
         auth = Util.default_wcs_auth()
-        putpolicy = {'scope': 'other-storage:' + file_key, 'deadline': str(int(time.time()) * 1000 + 86400000),
+        putpolicy = {'scope': 'other-storage:' + file_key,
+                     'deadline': str(int(time.time()) * 1000 + 86400000),
                      'overwrite': 1, 'returnBody':
                      'url=$(url)&fsize=$(fsize)&bucket=$(bucket)&key=$(key)&hash=$(hash)&fsize=$(fsize)&mimeType=$(mimeType)&avinfo=$(avinfo)'}
         token = auth.uploadtoken(putpolicy)

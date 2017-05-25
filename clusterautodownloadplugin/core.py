@@ -70,13 +70,11 @@ class Core(CorePluginBase):
 
     def __init__(self, plugin_name):
         self.core = component.get("Core")
-        self.torrent_processor = TorrentProcessor(PGlobalConfig.max_process,
-                                                  PGlobalConfig.server_name, self.core)
+        self.file_waitting_array = []
         self.core.eventmanager.register_event_handler(
             "TorrentFileCompletedEvent", self._on_torrent_file_completed)
         self.core.eventmanager.register_event_handler(
             "TorrentFinishedEvent", self._on_torrent_completed)
-        self.checking_array = []
         self.event_patcher = EventPacher(self.core)
         self.event_patcher.patch_events()
         self.plugin_name = plugin_name
@@ -125,6 +123,8 @@ class Core(CorePluginBase):
                                     mq_host, mq_port, mq_user,
                                     mq_pass, self.core, self.user_controller)
         self.controller_api = ControllerApi(self.controller)
+        self.torrent_processor = TorrentProcessor(PGlobalConfig.max_process,
+                                                  PGlobalConfig.server_name, self.core)
 
     def _get_config_or_default(self, key, default_value):
         if key in self.config:
@@ -136,6 +136,9 @@ class Core(CorePluginBase):
         self.disabled = False
         self.mq_service.start_async()
         self.looping_thread.start()
+        if self.file_waitting_array:
+            for key, val in self.file_waitting_array:
+                self._on_torrent_file_completed(key, val)
         return
         c_data = self.controller_api.register_server(self.sid, self.name)
         log.info("Register Server %s", json.dumps(c_data))
@@ -148,6 +151,9 @@ class Core(CorePluginBase):
         log.info("%s downloaded.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", torrent_id)
 
     def _on_torrent_file_completed(self, torrent_id, index):
+        if self.disabled:
+            self.file_waitting_array.append((torrent_id, index,))
+            return
         # get file info...
         try:
             torrent_info = self.core.get_torrent_status(
