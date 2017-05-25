@@ -17,3 +17,18 @@ class TorrentFileUploadCompletedEvent(DelugeEvent):
         :type file_props: dict
         """
         self._args = [torrent_id, index, file_props]
+
+
+class TorrentBatchFileUploadCompletedEvent(DelugeEvent):
+    """
+    Emitted when files completes.
+    """
+
+    def __init__(self, files):
+        """
+        :param torrent_id: the torrent_id
+        :type torrent_id: string
+        :param files: the files
+        :type files: array
+        """
+        self._args = [files]

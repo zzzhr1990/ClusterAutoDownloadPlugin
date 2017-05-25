@@ -6,8 +6,10 @@ import os
 import time
 import json
 import traceback
+import deluge.component as component
 from singlefileprocessor import SingleFileProcesser
 from multiprocessing.queues import Empty
+from torrentevents import TorrentBatchFileUploadCompletedEvent
 from util import Util
 
 LT_TORRENT_STATE_MAP = {
@@ -109,10 +111,6 @@ class TorrentProcessor(object):
                     # Index of torrent id.
                     file_index = dat["file_index"]
                     if dat["success"]:
-                        logging.info("%s, %d uploaded.",
-                                     torrent_id, file_index)
-                        for (k, v) in dat.items():
-                            logging.info("%s - %s", k, type(v))
                         downloaded.append(dat)
                     else:
                         logging.info("%s, %d failed at step %s.",
@@ -127,9 +125,10 @@ class TorrentProcessor(object):
             except Empty:
                 pass
             # Check and report file to file server
-            logging.info("Checking downloaded files %s",
-                         json.dumps(downloaded))
             # Check and report status to main server. (USE MQ)
+            if downloaded:
+                component.get('EventManager').emit(
+                    TorrentBatchFileUploadCompletedEvent(downloaded))
             torrents_info = self.core.get_torrents_status({}, {})
             # we'd
             #report_dict = {'downloaded': downloaded}
