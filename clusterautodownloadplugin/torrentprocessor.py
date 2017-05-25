@@ -73,7 +73,7 @@ class TorrentProcessor(object):
 
     def update_torrent_info(self):
         """Used for update torrent info."""
-        logging.info("Checking torrent info....")
+        # logging.info("Checking torrent info....")
         # torrents_info = core.get_torrents_status({}, {})
         # Checking if finished.
         """
@@ -109,6 +109,7 @@ class TorrentProcessor(object):
                     if dat["success"]:
                         logging.info("%s, %d uploaded.",
                                      torrent_id, file_index)
+                        logging.info(json.dumps(dat))
                     else:
                         logging.info("%s, %d failed at step %s.",
                                      torrent_id, file_index, dat["step"])
