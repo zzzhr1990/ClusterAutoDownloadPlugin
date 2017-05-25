@@ -109,7 +109,8 @@ class TorrentProcessor(object):
                     if dat["success"]:
                         logging.info("%s, %d uploaded.",
                                      torrent_id, file_index)
-                        logging.info(json.dumps(dat))
+                        for (k, v) in dat.items():
+                            logging.info("%s - %s", k, type(v))
                     else:
                         logging.info("%s, %d failed at step %s.",
                                      torrent_id, file_index, dat["step"])
