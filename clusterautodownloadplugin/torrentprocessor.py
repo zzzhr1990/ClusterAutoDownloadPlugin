@@ -126,10 +126,13 @@ class TorrentProcessor(object):
                     # dispatch events to mqservice to announce
             except Empty:
                 pass
+            # Check and report file to file server
+            logging.info("Checking downloaded files %s",
+                         json.dumps(downloaded))
             # Check and report status to main server. (USE MQ)
             torrents_info = self.core.get_torrents_status({}, {})
             # we'd
-            report_dict = {'downloaded': downloaded}
+            #report_dict = {'downloaded': downloaded}
             # here we report current status to server.
         """
         if downloaded_dict:
