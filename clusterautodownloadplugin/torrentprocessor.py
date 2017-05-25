@@ -71,9 +71,9 @@ class TorrentProcessor(object):
     #            logging.error(e)
     #            logging.error("Exception occored in _time_tick.\r\n%s", traceback.format_exc())
 
-    def update_torrent_info(self, core):
-        logging.info("Checking torrent info....")
+    def update_torrent_info(self):
         """Used for update torrent info."""
+        logging.info("Checking torrent info....")
         # torrents_info = core.get_torrents_status({}, {})
         # Checking if finished.
         """
@@ -118,9 +118,7 @@ class TorrentProcessor(object):
                                           torrent_id, file_index)
                         else:
                             self.add_torrent_file(dat)
-
                     # dispatch events to mqservice to announce
-
             except Empty:
                 pass
 

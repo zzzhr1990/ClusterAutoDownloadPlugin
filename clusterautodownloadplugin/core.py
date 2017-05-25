@@ -135,10 +135,10 @@ class Core(CorePluginBase):
         """Call when plugin enabled."""
         self.mq_service.start_async()
         self.looping_thread.start()
+        self.disabled = False
         return
         c_data = self.controller_api.register_server(self.sid, self.name)
         log.info("Register Server %s", json.dumps(c_data))
-        self.disabled = False
         #
         # self.task_looping_thread.start()
         log.info("- Plugin %s enabled.", self.plugin_name)
@@ -212,13 +212,12 @@ class Core(CorePluginBase):
                 self.record_lock.release()
                 log.info("Ternimate check loop...")
                 return
-            if self.busy:
-                log.warn("Slow query found.")
-                self.record_lock.release()
-                return
-            self.busy = True
             try:
-                self._checking_torrent_status()
+                if self.busy:
+                    log.warn("Slow query found.")
+                else:
+                    self.busy = True
+                    self._checking_torrent_status()
             except Exception as e:
                 log.error("Exception occored in status loop. %s -- \r\n%s",
                           e, traceback.format_exc())
@@ -229,7 +228,7 @@ class Core(CorePluginBase):
 
     def _checking_torrent_status(self):
         #core = component.get("Core")
-        self.torrent_processor.update_torrent_info(core)
+        self.torrent_processor.update_torrent_info()
 
     def _sleep_and_wait(self, stime):
         self.record_lock.acquire()
