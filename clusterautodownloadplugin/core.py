@@ -133,9 +133,9 @@ class Core(CorePluginBase):
 
     def enable(self):
         """Call when plugin enabled."""
+        self.disabled = False
         self.mq_service.start_async()
         self.looping_thread.start()
-        self.disabled = False
         return
         c_data = self.controller_api.register_server(self.sid, self.name)
         log.info("Register Server %s", json.dumps(c_data))
