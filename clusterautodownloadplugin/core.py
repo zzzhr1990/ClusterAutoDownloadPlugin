@@ -124,7 +124,7 @@ class Core(CorePluginBase):
                                     mq_pass, self.core, self.user_controller)
         self.controller_api = ControllerApi(self.controller)
         self.torrent_processor = TorrentProcessor(PGlobalConfig.max_process,
-                                                  PGlobalConfig.server_name, self.core)
+                                                  PGlobalConfig.server_name, self.core, self.sid)
 
     def _get_config_or_default(self, key, default_value):
         if key in self.config:
