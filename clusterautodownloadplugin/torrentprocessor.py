@@ -127,12 +127,12 @@ class TorrentProcessor(object):
             # Check and report file to file server
             # Check and report status to main server. (USE MQ)
 
-            torrents_info = self.core.get_torrents_status({}, {})
-            # we'd
-            report_dict = {'downloaded': downloaded, 'sid': self.sid}
-            component.get('EventManager').emit(
-                TorrentProgressCheckingEvent(report_dict))
-            # here we report current status to server.
+        torrents_info = self.core.get_torrents_status({}, {})
+        # we'd
+        report_dict = {'downloaded': downloaded, 'sid': self.sid}
+        component.get('EventManager').emit(
+            TorrentProgressCheckingEvent(report_dict))
+        # here we report current status to server.
         """
         if downloaded_dict:
             # Refresh files
