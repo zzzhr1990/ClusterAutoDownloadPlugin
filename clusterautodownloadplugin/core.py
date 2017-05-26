@@ -153,7 +153,7 @@ class Core(CorePluginBase):
         log.info("%s downloaded.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", torrent_id)
 
     def _on_torrent_progress_checking(self, data):
-        log.info(json.dumps(data))
+        log.info("CHECKING>......")
 
     def _on_torrent_file_completed(self, torrent_id, index):
         if self.disabled:
@@ -228,6 +228,7 @@ class Core(CorePluginBase):
                     log.warn("Slow query found.")
                 else:
                     self.busy = True
+                    log.info("-------LOOP--------")
                     self._checking_torrent_status()
             except Exception as e:
                 log.error("Exception occored in status loop. %s -- \r\n%s",
