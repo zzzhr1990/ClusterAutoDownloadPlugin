@@ -76,7 +76,7 @@ class Core(CorePluginBase):
         self.core.eventmanager.register_event_handler(
             "TorrentFinishedEvent", self._on_torrent_completed)
         self.core.eventmanager.register_event_handler(
-            "TorrentBatchFileUploadCompletedEvent", self._on_torrent_files_completed)
+            "TorrentProgressCheckingEvent", self._on_torrent_progress_checking)
         self.event_patcher = EventPacher(self.core)
         self.event_patcher.patch_events()
         self.plugin_name = plugin_name
@@ -152,8 +152,8 @@ class Core(CorePluginBase):
     def _on_torrent_completed(self, torrent_id):
         log.info("%s downloaded.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", torrent_id)
 
-    def _on_torrent_files_completed(self, files):
-        log.info(json.dumps(files))
+    def _on_torrent_progress_checking(self, data):
+        log.info(json.dumps(data))
 
     def _on_torrent_file_completed(self, torrent_id, index):
         if self.disabled:

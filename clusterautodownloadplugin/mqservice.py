@@ -202,7 +202,14 @@ class MqService(ConsumerProducerMixin):
             for file_info in file_data['files']:
                 file_info['path'] = orign_map[file_info['index']]
             self._delive_torrent_parse_success(info["hash"], file_data, info)
+            logging.info("add torrent data %s", json.dumps(file_data))
             self.deluge_api.resume_torrent([torrent_id])
+            file_data = self.deluge_api.get_torrent_status(
+                torrent_id,
+                [])
+            for file_info in file_data['files']:
+                file_info['path'] = orign_map[file_info['index']]
+            logging.info("add torrent data finished %s", json.dumps(file_data))
 
             # mapped_files
             # Change FileName...

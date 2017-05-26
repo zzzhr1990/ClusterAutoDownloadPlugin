@@ -9,7 +9,7 @@ import traceback
 import deluge.component as component
 from singlefileprocessor import SingleFileProcesser
 from multiprocessing.queues import Empty
-from torrentevents import TorrentBatchFileUploadCompletedEvent
+from torrentevents import TorrentProgressCheckingEvent
 from util import Util
 
 LT_TORRENT_STATE_MAP = {
@@ -126,12 +126,12 @@ class TorrentProcessor(object):
                 pass
             # Check and report file to file server
             # Check and report status to main server. (USE MQ)
-            if downloaded:
-                component.get('EventManager').emit(
-                    TorrentBatchFileUploadCompletedEvent(downloaded))
+
             torrents_info = self.core.get_torrents_status({}, {})
             # we'd
-            #report_dict = {'downloaded': downloaded}
+            report_dict = {'downloaded': downloaded, 'sid': self.sid}
+            component.get('EventManager').emit(
+                TorrentProgressCheckingEvent(report_dict))
             # here we report current status to server.
         """
         if downloaded_dict:
