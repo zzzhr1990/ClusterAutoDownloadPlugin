@@ -228,7 +228,6 @@ class Core(CorePluginBase):
                     log.warn("Slow query found.")
                 else:
                     self.busy = True
-                    log.info("-------LOOP--------")
                     self._checking_torrent_status()
             except Exception as e:
                 log.error("Exception occored in status loop. %s -- \r\n%s",
