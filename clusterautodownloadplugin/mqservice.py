@@ -249,6 +249,15 @@ class MqService(ConsumerProducerMixin):
             retry=True,
         )
 
+    def delive_torrent_progress(self, info):
+        # Report
+        self.producer.publish(
+            info,
+            exchange='offline-exchange',
+            routing_key="offline.upload.check",
+            retry=True,
+        )
+
     def _delive_torrent_parse_success(self, url_hash, data, info):
         # Report
         self.producer.publish(
